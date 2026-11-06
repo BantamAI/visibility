@@ -104,6 +104,15 @@ jobs:
           # and JS only reads wrong on a host that isn't in UTC.
           TZ: America/Los_Angeles
 
+      # Runs against the database the integration tests just migrated. Every
+      # upstream Elmo table fails it until E53-S13 adds subject_id and policies;
+      # drop continue-on-error then.
+      - name: Tenant catalog check
+        continue-on-error: true
+        run: pnpm -C packages/service check:tenant-catalog
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/elmo_test
+
       # scripts/ is outside the workspace, so turbo does not reach it.
       - name: Release script tests
         run: pnpm test:scripts

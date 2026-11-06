@@ -3,5 +3,11 @@
 	"version": "0.7.8",
 	"private": true,
 	"license": "MIT",
-	"type": "module"
+	"type": "module",
+	"scripts": {
+		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs"
+	},
+	"dependencies": {
+		"pg": "catalog:"
+	}
 }
