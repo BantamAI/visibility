@@ -84,7 +84,31 @@ const PACKAGE_EXCEPTIONS = new Map([
   ["@yuku-analyzer/binding-win32-x64", "Unknown"],
 ]);
 
+// Source-available licenses: no exception may let these in.
+const DENIED_LICENSE = /\b(AGPL|SSPL|BUSL)\b|\bBSL\b(?!-1\.0)/i;
+
+// Directories upstream projects use for code under a commercial license.
+const DENIED_DIRECTORY = /(^|\/)(ee|enterprise)\//;
+
+function checkSourceTree() {
+  const files = execSync("git ls-files --cached --others --exclude-standard", {
+    encoding: "utf-8",
+    maxBuffer: 50 * 1024 * 1024,
+  }).split("\n");
+  const dirs = new Set();
+  for (const file of files) {
+    const match = file.match(DENIED_DIRECTORY);
+    if (match) dirs.add(file.slice(0, match.index + match[0].length));
+  }
+  if (dirs.size === 0) return;
+  console.error("Found commercially licensed directories, which this repo must not contain:\n");
+  for (const dir of dirs) console.error(`  ${dir}`);
+  process.exit(1);
+}
+
 function run() {
+  checkSourceTree();
+
   console.log("Running pnpm licenses list --json ...\n");
 
   let raw;
@@ -125,7 +149,7 @@ function run() {
       }
 
       const exception = PACKAGE_EXCEPTIONS.get(name);
-      if (exception === license) {
+      if (exception === license && !DENIED_LICENSE.test(license)) {
         continue;
       }
 
