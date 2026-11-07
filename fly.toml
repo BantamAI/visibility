@@ -1,0 +1,41 @@
+app = "chatspy-visibility"
+primary_region = "iad"
+# The worker drains jobs for 30s on SIGTERM; stopping sooner wastes a provider call already paid for.
+kill_timeout = 35
+
+[build]
+  dockerfile = "docker/Dockerfile"
+  build-target = "fly"
+
+[deploy]
+  release_command = "sh -c 'cd /app/lib && npx drizzle-kit migrate'"
+
+[env]
+  DEPLOYMENT_MODE = "local"
+  NODE_ENV = "production"
+  PORT = "3000"
+  HOST = "0.0.0.0"
+
+[processes]
+  web = "node /app/web/.output/server/index.mjs"
+  worker = "sh -c 'cd /app/worker && exec npx tsx src/index.ts'"
+
+[http_service]
+  processes = ["web"]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+
+[[vm]]
+  processes = ["web", "worker"]
+  size = "shared-cpu-1x"
+  memory = "1gb"

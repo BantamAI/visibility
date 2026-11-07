@@ -111,3 +111,29 @@ USER worker
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npx", "tsx", "src/index.ts"]
+
+# Fly.io runs one image per app, so this bundles the web, worker and migrate
+# builds together; fly.toml picks one per process group.
+FROM base AS fly
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 chatspy
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+COPY --from=web-build --chown=chatspy:nodejs /app/apps/web/.output ./web/.output
+COPY --from=worker-deploy --chown=chatspy:nodejs /deploy/worker ./worker
+COPY --from=lib-deploy --chown=chatspy:nodejs /deploy/lib ./lib
+
+USER chatspy
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOST="0.0.0.0"
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["node", "/app/web/.output/server/index.mjs"]
