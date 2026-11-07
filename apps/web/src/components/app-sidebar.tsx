@@ -90,13 +90,20 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 		);
 	}
 
+	const brandSettings: NavItem = {
+		title: "Brand",
+		link: { to: "/app/org/$org/brand/$brand/settings/brand", params },
+		icon: IconBuilding,
+	};
 	const groups: NavGroup[] = [{ label: "Dashboard", items: dashboard }];
 
-	if (brand.onboarded) {
+	if (!brand.onboarded) {
+		groups.push({ label: "Settings", items: [brandSettings] });
+	} else {
 		groups.push({
 			label: "Settings",
 			items: [
-				{ title: "Brand", link: { to: "/app/org/$org/brand/$brand/settings/brand", params }, icon: IconBuilding },
+				brandSettings,
 				{
 					title: "Competitors",
 					link: { to: "/app/org/$org/brand/$brand/settings/competitors", params },
