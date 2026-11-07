@@ -14,8 +14,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { useState } from "react";
 import { z } from "zod";
-import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
-import { SalesFooterLinks, SalesPanel } from "@/components/auth/sales-panel";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { buildTitle, getAppName } from "@/lib/route-head";
 
 export const Route = createFileRoute("/auth/reset-password")({
@@ -63,7 +62,6 @@ export function ResetPasswordForm({
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
-	const source = isCloud ? "cloud-signin" : "self-hosted-signin";
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -88,28 +86,20 @@ export function ResetPasswordForm({
 		}
 	}
 
-	const panel = <SalesPanel variant={isCloud ? "cloud" : "self-hosted"} source={source} />;
-	const footer = <SalesFooterLinks source={source} />;
-
 	if (linkError || !token) {
 		return (
-			<AuthSplitLayout
-				title="Reset link invalid or expired"
-				subtitle="Reset links are single-use and time-limited."
-				pitch={panel}
-				footer={footer}
-			>
+			<AuthLayout title="Reset link invalid or expired" subtitle="Reset links are single-use and time-limited.">
 				{/* The only thing to do from here, so it carries the weight the other
 				    pages give their submit button. */}
 				<Link to="/auth/forgot-password" className={buttonVariants({ className: "w-full" })}>
 					Request a new reset link
 				</Link>
-			</AuthSplitLayout>
+			</AuthLayout>
 		);
 	}
 
 	return (
-		<AuthSplitLayout title="Choose a new password" pitch={panel} footer={footer}>
+		<AuthLayout title="Choose a new password">
 			<form onSubmit={handleSubmit} className="space-y-4 w-full">
 				{error && (
 					<Alert variant="destructive">
@@ -147,6 +137,6 @@ export function ResetPasswordForm({
 					{loading ? "Resetting..." : "Reset password"}
 				</Button>
 			</form>
-		</AuthSplitLayout>
+		</AuthLayout>
 	);
 }

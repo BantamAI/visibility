@@ -1,7 +1,7 @@
 /**
  * /auth/login - Login page
  *
- * Local/cloud modes: email/password form beside the sales panel.
+ * Local/cloud modes: email/password form.
  * Demo mode: signs in to the shared account automatically — a demo visitor
  * is already looking, and has nothing to buy.
  * Whitelabel mode: auto-redirects to Auth0 SSO (no form shown).
@@ -20,8 +20,7 @@ import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
-import { SalesFooterLinks, SalesPanel } from "@/components/auth/sales-panel";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import FullPageCard from "@/components/full-page-card";
 import { LegalConsentNotice } from "@/components/legal-consent-notice";
 import { CAPTCHA_FAILED_MESSAGE, CaptchaError, isCaptchaRejection, useTurnstile } from "@/hooks/use-turnstile";
@@ -212,7 +211,6 @@ export function EmailPasswordLogin({
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [lastLoginMethod, setLastLoginMethod] = useState<string | null>(null);
-	const source = isCloud ? "cloud-signin" : "self-hosted-signin";
 	const turnstile = useTurnstile();
 
 	useEffect(() => {
@@ -254,11 +252,9 @@ export function EmailPasswordLogin({
 	}
 
 	return (
-		<AuthSplitLayout
+		<AuthLayout
 			title="Welcome back"
 			subtitle={isCloud ? "Check in on your AI visibility." : "Sign in to your Elmo instance."}
-			pitch={<SalesPanel variant={isCloud ? "cloud" : "self-hosted"} source={source} />}
-			footer={<SalesFooterLinks source={source} />}
 		>
 			{isCloud && (
 				<div className="space-y-4 w-full pb-4">
@@ -336,6 +332,6 @@ export function EmailPasswordLogin({
 					</Link>
 				</p>
 			)}
-		</AuthSplitLayout>
+		</AuthLayout>
 	);
 }

@@ -17,8 +17,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
 import { useState } from "react";
-import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
-import { SalesFooterLinks, SalesPanel } from "@/components/auth/sales-panel";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import FullPageCard from "@/components/full-page-card";
 import { LegalConsentNotice } from "@/components/legal-consent-notice";
 import { CAPTCHA_FAILED_MESSAGE, CaptchaError, isCaptchaRejection, useTurnstile } from "@/hooks/use-turnstile";
@@ -81,7 +80,6 @@ export function RegisterForm({
 	const [loading, setLoading] = useState(false);
 	const [pendingVerification, setPendingVerification] = useState(false);
 	const turnstile = useTurnstile();
-	const source = isCloud ? "cloud-signup" : "self-hosted-signup";
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -123,15 +121,13 @@ export function RegisterForm({
 	}
 
 	return (
-		<AuthSplitLayout
+		<AuthLayout
 			title={isCloud ? "Start tracking your AI visibility" : "Create your admin account"}
 			subtitle={
 				isCloud
 					? `Plans start at $${CLOUD_ENTRY_PRICE_USD}/mo. Cancel any time.`
 					: "This is the owner account for your self-hosted instance."
 			}
-			pitch={<SalesPanel variant={isCloud ? "cloud" : "self-hosted"} source={source} />}
-			footer={<SalesFooterLinks source={source} />}
 		>
 			{isCloud && (
 				<div className="space-y-4 w-full pb-4">
@@ -214,7 +210,7 @@ export function RegisterForm({
 					</Link>
 				</p>
 			)}
-		</AuthSplitLayout>
+		</AuthLayout>
 	);
 }
 
