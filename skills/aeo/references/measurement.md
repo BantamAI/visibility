@@ -155,4 +155,4 @@ date,engine,prompt_id,run,brand_mentioned,brand_cited_url,competitors_mentioned,
 4. Compute rates per engine from the rows and show n beside every number.
 
 Manual sampling is slow and drifts with personalization and location. For anything you'll re-measure,
-set up tracking (`references/elmo.md`).
+set up tracking (`references/chatspy.md`).

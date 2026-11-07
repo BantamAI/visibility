@@ -2,8 +2,6 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as p from "@clack/prompts";
-import { CLOUD_ENTRY_PRICE_USD } from "@workspace/config/plans";
-import { cloudPricingUrl } from "@workspace/config/referrals";
 import { formatScrapeTarget } from "@workspace/config/scrape-targets";
 import { parse as parseDotenv } from "dotenv";
 import pc from "picocolors";
@@ -36,7 +34,6 @@ const DEFAULT_APP_ICON = "/icons/elmo-icon.svg";
 const DEFAULT_APP_PORT = 1515;
 const LOCAL_DATABASE_URL = "postgres://postgres:postgres@postgres:5432/elmo";
 const TELEMETRY_DOC_URL = "https://elmohq.com/docs/developer-guide/telemetry";
-const CLOUD_PRICING_URL = cloudPricingUrl("cli");
 
 /**
  * Guard an existing config from being replaced by accident. Returns the
@@ -350,23 +347,6 @@ async function askAccess(): Promise<{ publicUrl: URL | undefined; port: number }
 export async function runInit(options: InitOptions, version: string): Promise<void> {
 	printBanner();
 	p.intro(pc.bold("Setting up Elmo"));
-
-	// Before any question and the Docker check, so someone who'd rather not
-	// self-host learns of Cloud before opening scraper accounts or installing Docker.
-	p.note(
-		[
-			"Self-hosting Elmo is free, and always will be. But it does mean",
-			"running Postgres and a worker, and opening your own scraper and",
-			"model provider accounts.",
-			"",
-			`Elmo Cloud is the same open-source product, hosted by us, from`,
-			`${pc.bold(`$${CLOUD_ENTRY_PRICE_USD}/month`)} — scraper and model access included, nothing to`,
-			"keep running.",
-			"",
-			`  ${link(pc.cyan(CLOUD_PRICING_URL), CLOUD_PRICING_URL)}`,
-		].join("\n"),
-		"Prefer not to self-host?",
-	);
 
 	assertDockerRunning();
 

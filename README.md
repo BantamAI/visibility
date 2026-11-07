@@ -108,7 +108,7 @@ See how teams in specific industries use Elmo: [AEO by industry](https://www.elm
 
 The recommended setup uses two API keys:
 
-- **[Cloro](https://cloro.dev?fpr=elmo&fp_sid=readme)** scrapes the real ChatGPT, Google AI Mode, Google AI Overviews, Gemini, Perplexity, and Copilot apps.
+- **[Cloro](https://cloro.dev)** scrapes the real ChatGPT, Google AI Mode, Google AI Overviews, Gemini, Perplexity, and Copilot apps.
 - **[OpenRouter](https://openrouter.ai)** runs onboarding, opportunities, and Jev, the model that judges mentions and sentiment.
 
 Then install the CLI, which walks you through configuration, and start the stack with Docker Compose:

@@ -37,7 +37,7 @@ non-deterministic, so visibility is a rate across many runs, never a single scre
 
 "How are we doing?", "why did ChatGPT visibility drop?", "who's beating us?", and "are we tracking
 the right prompts?" aren't audits. When the user already tracks with Elmo, follow the recipes in
-`references/elmo.md` ("Everyday requests"). Answer in a few lines (the number, the change, what it
+`references/chatspy.md` ("Everyday requests"). Answer in a few lines (the number, the change, what it
 means, at most two next steps) and skip the checklist below.
 
 ## Workflow
@@ -49,7 +49,7 @@ reference file that has the detail. Load a reference only when you reach its ste
 AEO progress
 - [ ] 1. Scope: brand, domain, competitors (locked set), markets, engines that matter
 - [ ] 2. Prompt set: built from real demand, tagged by intent        → references/measurement.md
-- [ ] 3. Baseline: repeated runs per engine, rates with n              → references/measurement.md, references/elmo.md
+- [ ] 3. Baseline: repeated runs per engine, rates with n              → references/measurement.md, references/chatspy.md
 - [ ] 4. Diagnose: per-engine gaps, cited sources, fan-out queries, wrong facts
 - [ ] 5. Access: crawlers, rendering, indexing                         → references/technical.md, scripts/check_ai_access.py
 - [ ] 6. Owned content: pages for the queries engines actually run     → references/content.md
@@ -70,7 +70,7 @@ Build prompts from what buyers ask, not what the brand wants to rank for. Most s
 or lost. Keep a few **branded** prompts to check that the engines describe the brand correctly.
 
 Run each prompt on each engine repeatedly. Elmo does this on a schedule and stores every answer,
-citation, and fan-out query. If the user doesn't have Elmo yet, `references/elmo.md` covers the
+citation, and fan-out query. If the user doesn't have Elmo yet, `references/chatspy.md` covers the
 hosted cloud and self-hosting. Without Elmo, use the manual protocol in `references/measurement.md`
 and label the results as small-sample.
 
@@ -177,7 +177,7 @@ End an audit with:
 
 - `references/measurement.md`: building the prompt set, sample sizes, metrics, cited versus
   recommended, before/after comparison, first-party data (Search Console, Bing, analytics, logs), manual fallback
-- `references/elmo.md`: setting up Elmo (cloud or self-hosted, with scraping providers), connecting
+- `references/chatspy.md`: setting up Elmo (cloud or self-hosted, with scraping providers), connecting
   over MCP or REST, mapping questions to tools, recipes for everyday data questions
 - `references/technical.md`: crawler matrix, robots.txt patterns, firewall blocks, JavaScript
   rendering, indexing, snippet controls, where each engine gets its pages, product data, agent
