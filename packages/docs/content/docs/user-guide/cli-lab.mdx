@@ -4,14 +4,14 @@ description: Run ChatSpy's core analysis as one-off commands — generate prompt
 updated: 2026-11-05
 ---
 
-The `elmo lab` commands give you most of ChatSpy's intelligence in a one-off, no-database capacity. They reuse the providers and API keys you already configured with [`elmo init`](/docs/getting-started) (read from `~/.elmo/.env`), so you can generate tracking prompts, evaluate them across models, and get AEO recommendations without standing up the full stack.
+The `chatspy lab` commands give you most of ChatSpy's intelligence in a one-off, no-database capacity. They reuse the providers and API keys you already configured with [`chatspy init`](/docs/getting-started) (read from `~/.elmo/.env`), so you can generate tracking prompts, evaluate them across models, and get AEO recommendations without standing up the full stack.
 
 The three commands are designed to be run in sequence:
 
 ```bash
-elmo lab brainstorm <website>   # 1. discover what to track (prompts + competitors)
-elmo lab eval [prompts]         # 2. run them → responses, citations, mentions, share-of-voice, fan-out
-elmo lab plan <paths...>        # 3. turn your content + results into AEO recommendations
+chatspy lab brainstorm <website>   # 1. discover what to track (prompts + competitors)
+chatspy lab eval [prompts]         # 2. run them → responses, citations, mentions, share-of-voice, fan-out
+chatspy lab plan <paths...>        # 3. turn your content + results into AEO recommendations
 ```
 
 <Callout>
@@ -20,9 +20,9 @@ These commands call real provider APIs and cost money per run, just like schedul
 
 ## Prerequisites
 
-Run [`elmo init`](/docs/getting-started) once to configure providers and write `~/.elmo/.env`. The lab commands read that file for provider keys and your `SCRAPE_TARGETS`. If you keep config elsewhere, point any command at it with `--dir <path>`, or just export the keys (`OPENAI_API_KEY`, `BRIGHTDATA_API_TOKEN`, `SCRAPE_TARGETS`, …) in your shell.
+Run [`chatspy init`](/docs/getting-started) once to configure providers and write `~/.elmo/.env`. The lab commands read that file for provider keys and your `SCRAPE_TARGETS`. If you keep config elsewhere, point any command at it with `--dir <path>`, or just export the keys (`OPENAI_API_KEY`, `BRIGHTDATA_API_TOKEN`, `SCRAPE_TARGETS`, …) in your shell.
 
-`eval` judges brand and competitor mentions with Jev, the same model scheduled tracking uses, so its mention rates and share of voice match what ChatSpy reports. It needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter, whenever you give it a brand. `elmo init` already sets one of these up for the worker.
+`eval` judges brand and competitor mentions with Jev, the same model scheduled tracking uses, so its mention rates and share of voice match what ChatSpy reports. It needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter, whenever you give it a brand. `chatspy init` already sets one of these up for the worker.
 
 ## Selecting a Model and Provider
 
@@ -38,7 +38,7 @@ claude:anthropic-api:claude-sonnet-4-6:online
 - **`eval`** works with any provider. `-m` is **repeatable**, so you can compare several at once. With no `-m`, it falls back to every entry in your `SCRAPE_TARGETS`.
 
 ```bash
-elmo lab eval --brand-file brand.json \
+chatspy lab eval --brand-file brand.json \
   -m chatgpt:brightdata:online \
   -m claude:anthropic-api:claude-sonnet-4-6:online
 ```
@@ -58,7 +58,7 @@ Structured data is written as `--format csv` (default) or `--format jsonl`; mode
 Generate a set of AI tracking prompts (mostly unbranded category/persona queries) and the brand's direct competitors:
 
 ```bash
-elmo lab brainstorm nike.com --count 30 --competitors 10 -o ./nike
+chatspy lab brainstorm nike.com --count 30 --competitors 10 -o ./nike
 ```
 
 Writes `brand.json`, `prompts.csv`, and `competitors.csv` to `./nike`.
@@ -74,7 +74,7 @@ Writes `brand.json`, `prompts.csv`, and `competitors.csv` to `./nike`.
 Run each prompt N times against each target and capture everything:
 
 ```bash
-elmo lab eval --brand-file ./nike/brand.json \
+chatspy lab eval --brand-file ./nike/brand.json \
   -m chatgpt:brightdata:online \
   -m claude:anthropic-api:claude-sonnet-4-6:online \
   --runs 5 -o ./nike-eval
@@ -118,7 +118,7 @@ nike-eval/
 Turn your own content (and, optionally, a prior eval) into a prioritized set of AEO recommendations:
 
 ```bash
-elmo lab plan ./content --website nike.com \
+chatspy lab plan ./content --website nike.com \
   --brand-file ./nike/brand.json \
   --eval-dir ./nike-eval -o ./nike-plan
 ```
@@ -129,7 +129,7 @@ elmo lab plan ./content --website nike.com \
 
 ```bash
 # discover → evaluate → plan
-elmo lab brainstorm nike.com -o ./nike
-elmo lab eval --brand-file ./nike/brand.json -m chatgpt:brightdata:online -o ./nike-eval
-elmo lab plan ./content --brand-file ./nike/brand.json --eval-dir ./nike-eval -o ./nike-plan
+chatspy lab brainstorm nike.com -o ./nike
+chatspy lab eval --brand-file ./nike/brand.json -m chatgpt:brightdata:online -o ./nike-eval
+chatspy lab plan ./content --brand-file ./nike/brand.json --eval-dir ./nike-eval -o ./nike-plan
 ```

@@ -15,10 +15,10 @@ describe("InlineMarkdown", () => {
 	});
 
 	it("keeps emphasis and links", () => {
-		const html = render("*Really* **good**, see [docs](https://elmohq.com).");
+		const html = render("*Really* **good**, see [docs](https://chatspy.example.com).");
 		expect(html).toContain("<em>Really</em>");
 		expect(html).toContain("<strong>good</strong>");
-		expect(html).toContain('href="https://elmohq.com"');
+		expect(html).toContain('href="https://chatspy.example.com"');
 	});
 
 	it("drops images rather than showing broken icons inline", () => {

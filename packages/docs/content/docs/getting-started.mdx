@@ -23,7 +23,7 @@ npm install -g @elmohq/cli
 Run the interactive setup wizard:
 
 ```bash
-elmo init
+chatspy init
 ```
 
 The wizard walks you through:
@@ -46,7 +46,7 @@ Once complete, ChatSpy generates two files in your config directory:
 If you didn't start during init, bring everything up with:
 
 ```bash
-elmo compose up -d
+chatspy compose up -d
 ```
 
 This pulls the Docker images and starts all services. Once they report healthy, open **http://localhost:1515** in your browser.
@@ -74,16 +74,16 @@ Once ChatSpy is running, these commands help you manage it:
 
 ```bash
 # View live logs
-elmo compose logs -f
+chatspy compose logs -f
 
 # View logs for a specific service
-elmo compose logs -f web
+chatspy compose logs -f web
 
 # Check service status
-elmo compose ps
+chatspy compose ps
 
 # Stop all services
-elmo compose down
+chatspy compose down
 ```
 
 ## What's Next

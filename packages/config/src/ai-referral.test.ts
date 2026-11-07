@@ -38,7 +38,7 @@ describe("detectAiAssistant", () => {
 
 	it.each([
 		["https://www.google.com/", ""],
-		["https://elmohq.com/pricing", ""],
+		["https://chatspy.example.com/pricing", ""],
 		["https://notchatgpt.com/", ""],
 		["", "?utm_source=newsletter"],
 		["not a url", ""],

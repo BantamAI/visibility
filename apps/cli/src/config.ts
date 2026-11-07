@@ -19,10 +19,10 @@ export async function resolveConfigDir(explicitDir?: string): Promise<string> {
 	if (!(await fileExists(composePath))) {
 		if (explicitDir) {
 			throw new Error(
-				`Config directory does not contain elmo.yaml: ${resolved}\nRun \`elmo init --dir ${explicitDir}\` to create it.`,
+				`Config directory does not contain elmo.yaml: ${resolved}\nRun \`chatspy init --dir ${explicitDir}\` to create it.`,
 			);
 		}
-		throw new Error(`No config found at ${resolved}. Run \`elmo init\` to create one, or specify --dir.`);
+		throw new Error(`No config found at ${resolved}. Run \`chatspy init\` to create one, or specify --dir.`);
 	}
 	return resolved;
 }

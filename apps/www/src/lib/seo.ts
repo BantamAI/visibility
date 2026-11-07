@@ -1,6 +1,7 @@
+import { DOCS_SITE_URL } from "@workspace/config/constants";
 import { getMarketingOgImage } from "./og";
 
-export const SITE_URL = "https://www.elmohq.com";
+export const SITE_URL = DOCS_SITE_URL;
 export const SITE_NAME = "ChatSpy";
 // Fallback description for pages without their own, and the description on the
 // WebSite/Organization/SoftwareApplication entities. Spells out "answer engine

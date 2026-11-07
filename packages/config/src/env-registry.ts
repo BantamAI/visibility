@@ -35,7 +35,7 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 		scope: "server",
 		requiredBy: ["cloud"],
 		description:
-			"Public base URL of the web app. Required in cloud (used for auth, email links, and Stripe redirects); written by `elmo init` for local.",
+			"Public base URL of the web app. Required in cloud (used for auth, email links, and Stripe redirects); written by `chatspy init` for local.",
 	},
 	{
 		name: "BETTER_AUTH_SECRET",

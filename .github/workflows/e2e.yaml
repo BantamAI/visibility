@@ -1,7 +1,7 @@
 # End-to-End Integration Tests
 #
 # Verifies every deployment mode works end-to-end.
-# Walks through the `elmo init --dev` CLI flow in CI mode, then runs in five
+# Walks through the `chatspy init --dev` CLI flow in CI mode, then runs in five
 # phases against the Dockerized stack:
 #
 #   1. local — worker down, seed data, run the `local` Playwright project
@@ -140,10 +140,10 @@ jobs:
           max_attempts: 3
           command: pnpm -C apps/web exec playwright install chromium
 
-      - name: Build elmo CLI
+      - name: Build the CLI
         run: pnpm -C apps/cli build
 
-      - name: "Run: elmo init --dev (via cli-driver)"
+      - name: "Run: chatspy init --dev (via cli-driver)"
         run: |
           mkdir -p e2e/.elmo
           cd e2e

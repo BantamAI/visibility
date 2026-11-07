@@ -222,7 +222,7 @@ export function authStatePath(mode: DeploymentMode): string {
   return path.join(E2E_DIR, ".auth", `${mode}.json`);
 }
 
-/** Written by `elmo init --dev`; whitelabel setup reads its BETTER_AUTH_SECRET to mint a session cookie. */
+/** Written by `chatspy init --dev`; whitelabel setup reads its BETTER_AUTH_SECRET to mint a session cookie. */
 export const GENERATED_ENV_PATH = path.join(E2E_DIR, ".elmo", ".env");
 
 /** Mirrors `web-whitelabel` in e2e/modes.yaml. */

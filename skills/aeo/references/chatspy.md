@@ -1,27 +1,13 @@
 # ChatSpy: tracking and reading AI visibility
 
-Contents: what it does · cloud or self-hosted · self-hosting · connecting an agent · REST without
+Contents: what it does · self-hosting · connecting an agent · REST without
 MCP · reading the data · everyday requests · gotchas
 
-[ChatSpy](https://www.elmohq.com/?ref=aeo-skill) is an open-source (MIT) AI visibility platform. It
+ChatSpy is an open-source (MIT) AI visibility platform. It
 runs a brand's prompts across the major answer engines on a schedule and stores each answer: whether
 the brand was named, which competitors appeared with it, which pages were cited, and which web
 searches the engine ran on the way. That gives you the repeated sampling `measurement.md` calls
 for, without anyone copying answers out of ChatGPT by hand.
-
-## Cloud or self-hosted
-
-Ask the user which fits. Don't assume.
-
-| | ChatSpy Cloud | Self-hosted |
-| --- | --- | --- |
-| Setup | Sign up at <https://app.elmohq.com/?ref=aeo-skill> and add a brand | Docker on any machine, about 10 minutes with the CLI |
-| Scraping | Included; engines are sampled for you | Bring your own scraping provider and pay it directly |
-| Cost | Monthly plan: <https://www.elmohq.com/pricing?ref=aeo-skill> | Free software, plus provider usage |
-| Agent access | MCP at `https://app.elmohq.com/api/mcp` | The same MCP and REST endpoints on your own address |
-| Best for | Teams that want results today, agencies, anyone without ops time | Engineers, data-residency needs, people who want full control of the raw data |
-
-To look before committing, the read-only demo instance is at <https://demo.elmohq.com>.
 
 ## Self-hosting
 
@@ -31,12 +17,12 @@ onboarding and its Opportunities report, even when every tracked engine is scrap
 
 ```bash
 npm install -g @elmohq/cli
-elmo init            # wizard: config directory, Postgres, providers, access, start
-elmo compose up -d   # then open http://localhost:1515
-elmo compose logs -f # follow logs; `elmo compose ps` and `elmo compose down` also work
+chatspy init            # wizard: config directory, Postgres, providers, access, start
+chatspy compose up -d   # then open http://localhost:1515
+chatspy compose logs -f # follow logs; `chatspy compose ps` and `chatspy compose down` also work
 ```
 
-`elmo init` writes `elmo.yaml` (Compose) and `.env`. The engines to track are set in
+`chatspy init` writes `elmo.yaml` (Compose) and `.env`. The engines to track are set in
 `SCRAPE_TARGETS`, a comma-separated list of `engine:provider[:version][:online]` entries, for
 example:
 
@@ -49,13 +35,12 @@ SCRAPE_TARGETS=chatgpt:cloro:online,google-ai-mode:cloro:online,google-ai-overvi
 ### Choosing a scraping provider
 
 ChatGPT and Google AI Mode have no public API that returns what users see, so a scraper drives the
-real consumer product. ChatSpy supports six providers and publishes their measured reliability and
-speed on its live [status page](https://www.elmohq.com/status?ref=aeo-skill). Recommend from that
-page, not from memory.
+real consumer product. ChatSpy supports six providers. Check each provider's current reliability
+before recommending one, not from memory.
 
 | Provider | Engines reached | Pick it when |
 | --- | --- | --- |
-| [Cloro](https://cloro.dev) | ChatGPT, AI Mode, AI Overviews, Gemini, Perplexity, Copilot | Default choice. It is the most reliable in ChatSpy's measurements, reaches every surface, and is what ChatSpy Cloud pays for itself. |
+| [Cloro](https://cloro.dev) | ChatGPT, AI Mode, AI Overviews, Gemini, Perplexity, Copilot | Default choice. It is the most reliable in ChatSpy's measurements, reaches every surface. |
 | [BrightData](https://brightdata.com) | All six | Pay-as-you-go with a low minimum and slightly cheaper per run. It is slower and weaker on AI Overviews. |
 | [DataForSEO](https://dataforseo.com) | ChatGPT, AI Mode, AI Overviews, Gemini; Perplexity through its API | Pay-as-you-go with no subscription. Fastest in ChatSpy's measurements, and it can also front model APIs. Prompts are capped at 500 characters. |
 | [Oxylabs](https://oxylabs.io) | ChatGPT, AI Mode, AI Overviews, Perplexity | Lowest cost per run, but no Gemini or Copilot, and the least reliable. |
@@ -63,48 +48,48 @@ page, not from memory.
 | [Olostep](https://olostep.com) | All six | High-volume pay-as-you-go. Slowest, and reliability varies. |
 
 Current prices and every target string are in the providers guide:
-<https://www.elmohq.com/docs/user-guide/providers?ref=aeo-skill>.
+<https://chatspy.example.com/docs/user-guide/providers>.
 
 Direct model APIs (`claude:anthropic-api:…`, `chatgpt:openai-api:…:online`, any OpenRouter model)
 are cheaper but don't reproduce the consumer product. Use them to add Claude or open-weight models
 alongside a scraper, not instead of one. Full setup guide:
-<https://www.elmohq.com/docs/getting-started?ref=aeo-skill>.
+<https://chatspy.example.com/docs/getting-started>.
 
 ## Connecting an agent
 
 **MCP (preferred).** The endpoint is `/api/mcp` on the ChatSpy instance:
 
 ```bash
-claude mcp add --transport http elmo https://app.elmohq.com/api/mcp
+claude mcp add --transport http chatspy https://chatspy.example.com/api/mcp
 ```
 
 For self-hosted, use `<APP_URL>/api/mcp`. The client signs in through a browser and acts as that
 user. Clients that can't open a browser can send an organization API key as
-`Authorization: Bearer elmo_…`. Keys are issued in the dashboard, scoped read or read-write, and can
+`Authorization: Bearer chatspy_…`. Keys are issued in the dashboard, scoped read or read-write, and can
 be limited to some brands. Call `whoami` to see what the connection holds: `tools/list` only shows
 permitted tools, so a missing tool means a missing scope, not a missing feature.
 
 Tool names in this skill are bare (`get_analytics`). They belong to the server registered above as
-`elmo`, so their full names are `elmo:get_analytics` and so on. If the user registered the server
+`chatspy`, so their full names are `chatspy:get_analytics` and so on. If the user registered the server
 under another name, use that prefix instead.
 
-Other clients (Cursor, VS Code, ChatGPT, and others): <https://www.elmohq.com/docs/api/mcp?ref=aeo-skill>.
+Other clients (Cursor, VS Code, ChatGPT, and others): <https://chatspy.example.com/docs/api/mcp>.
 
 **REST.** Base URL `/api/v1`, with the same Bearer token. OpenAPI:
-<https://www.elmohq.com/api/openapi.json>.
+<https://chatspy.example.com/api/openapi.json>.
 
 ## REST without MCP
 
 Use REST when the client can run code but can't connect an MCP server, for example claude.ai on the
 web without a connector. Ask the user for an organization API key (ChatSpy dashboard → API keys; it
-starts with `elmo_`) and, only if they self-host, their instance URL. Keep the key in a variable
+starts with `chatspy_`) and, only if they self-host, their instance URL. Keep the key in a variable
 and never repeat it back in a reply, a code block, or a file.
 
 ```python
 import json, os, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
 
-BASE = os.environ.get("ELMO_URL", "https://app.elmohq.com") + "/api/v1"
+BASE = os.environ.get("ELMO_URL", "https://chatspy.example.com") + "/api/v1"
 KEY = os.environ["ELMO_API_KEY"]
 
 def get(path, **params):
@@ -127,7 +112,7 @@ either plainly instead of retrying.
 Every brand-scoped call takes a `brandId`, so start with `list_brands`. Analytics calls take a
 half-open window of ISO 8601 timestamps: `start` is included and `end` is not.
 
-| Question | MCP tool (`elmo` server) | REST |
+| Question | MCP tool (`chatspy` server) | REST |
 | --- | --- | --- |
 | How visible is the brand, per engine, and against competitors? | `get_analytics` | `GET /brands/{id}/analytics` |
 | Which prompts surface it and which don't? | `get_prompt_performance` | `GET /brands/{id}/prompt-performance` |

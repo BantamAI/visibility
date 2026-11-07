@@ -2,9 +2,9 @@
 name: aeo
 description: Answer engine optimization (AEO, also called GEO or AI SEO) based on published evidence. Measures and improves how ChatGPT, Google AI Overviews and AI Mode, Perplexity, Claude, Gemini, and Copilot mention, cite, and describe a brand. Use for AI visibility audits, getting cited or recommended in AI answers, AI share of voice, prompt tracking, LLM SEO, citation source analysis, AI crawler access (robots.txt for GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended), whether llms.txt or schema markup helps, off-site work on Reddit, review sites, listicles, YouTube, and Wikipedia, correcting wrong AI answers about a company, and setting up or reading ChatSpy, the open-source AI visibility tracker (cloud or self-hosted, over MCP or REST).
 license: MIT
-compatibility: Measurement needs an ChatSpy instance (cloud or self-hosted) reached over MCP or REST, or manual sampling as a fallback. The access audit script needs Python 3 and network access.
+compatibility: Measurement needs a ChatSpy instance reached over MCP or REST, or manual sampling as a fallback. The access audit script needs Python 3 and network access.
 metadata:
-  author: elmohq
+  author: ChatSpy
   version: "1.0"
 ---
 
@@ -70,8 +70,8 @@ Build prompts from what buyers ask, not what the brand wants to rank for. Most s
 or lost. Keep a few **branded** prompts to check that the engines describe the brand correctly.
 
 Run each prompt on each engine repeatedly. ChatSpy does this on a schedule and stores every answer,
-citation, and fan-out query. If the user doesn't have ChatSpy yet, `references/chatspy.md` covers the
-hosted cloud and self-hosting. Without ChatSpy, use the manual protocol in `references/measurement.md`
+citation, and fan-out query. If the user doesn't have ChatSpy yet, `references/chatspy.md` covers
+self-hosting. Without ChatSpy, use the manual protocol in `references/measurement.md`
 and label the results as small-sample.
 
 ### 4. Diagnose
@@ -177,7 +177,7 @@ End an audit with:
 
 - `references/measurement.md`: building the prompt set, sample sizes, metrics, cited versus
   recommended, before/after comparison, first-party data (Search Console, Bing, analytics, logs), manual fallback
-- `references/chatspy.md`: setting up ChatSpy (cloud or self-hosted, with scraping providers), connecting
+- `references/chatspy.md`: setting up ChatSpy (self-hosted, with scraping providers), connecting
   over MCP or REST, mapping questions to tools, recipes for everyday data questions
 - `references/technical.md`: crawler matrix, robots.txt patterns, firewall blocks, JavaScript
   rendering, indexing, snippet controls, where each engine gets its pages, product data, agent

@@ -140,7 +140,7 @@ pnpm --filter @workspace/web storybook:build
 
 ```bash
 # Run CLI directly from source
-pnpm elmo <command>
+pnpm chatspy <command>
 
 # Build and link CLI globally for testing
 pnpm cli:link
@@ -153,20 +153,20 @@ pnpm cli:unlink
 
 ```bash
 # Build Docker images locally
-elmo compose build
+chatspy compose build
 
 # Build without cache
-elmo compose build --no-cache
+chatspy compose build --no-cache
 
 # Build only web or worker
-elmo compose build web
-elmo compose build worker
+chatspy compose build web
+chatspy compose build worker
 
 # Run other docker compose commands
-elmo compose up -d
-elmo compose ps
-elmo compose logs -f web
-elmo compose down
+chatspy compose up -d
+chatspy compose ps
+chatspy compose logs -f web
+chatspy compose down
 ```
 
 ## Versioning

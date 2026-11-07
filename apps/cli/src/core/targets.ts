@@ -23,7 +23,7 @@ export function resolveTargets(models: string[] | undefined): ResolvedTarget[] {
 	const raw = models && models.length > 0 ? models.join(",") : process.env.SCRAPE_TARGETS;
 	if (!raw?.trim()) {
 		throw new Error(
-			"No model targets. Pass one or more with -m (e.g. -m chatgpt:brightdata:online) or set SCRAPE_TARGETS via `elmo init`.",
+			"No model targets. Pass one or more with -m (e.g. -m chatgpt:brightdata:online) or set SCRAPE_TARGETS via `chatspy init`.",
 		);
 	}
 
@@ -39,7 +39,7 @@ export function resolveTargets(models: string[] | undefined): ResolvedTarget[] {
 		const provider = getProvider(config.provider);
 		if (!provider.isConfigured()) {
 			throw new Error(
-				`Target "${label}" uses provider "${config.provider}", which is not configured (its API key is missing). Add it with \`elmo edit env\` or export it before running.`,
+				`Target "${label}" uses provider "${config.provider}", which is not configured (its API key is missing). Add it with \`chatspy edit env\` or export it before running.`,
 			);
 		}
 		const validationError = provider.validateTarget?.(config);

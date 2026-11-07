@@ -1,5 +1,5 @@
 /**
- * Answers the `elmo init --dev` wizard through a real PTY. script(1) provides
+ * Answers the `chatspy init --dev` wizard through a real PTY. script(1) provides
  * the PTY because it ships with Ubuntu and macOS, so no native addon is needed.
  *
  * The CLI writes to `~/.elmo`, so HOME is pointed at the parent of

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { htmlToMarkdown as convert } from "@/lib/html-to-markdown";
 
-const PAGE_URL = "https://www.elmohq.com/pricing";
+const PAGE_URL = "https://chatspy.example.com/pricing";
 
 function htmlToMarkdown(html: string, url: string): string {
 	return convert(html, url).replace(/^---\n[\s\S]*?\n---\n\n/, "");
@@ -58,12 +58,12 @@ describe("htmlToMarkdown", () => {
 
 	it("rewrites site-relative links and images to absolute URLs", () => {
 		const markdown = htmlToMarkdown(
-			page(`<main><a href="/docs">Docs</a> <a href="https://github.com/elmohq/elmo">Source</a></main>`),
+			page(`<main><a href="/docs">Docs</a> <a href="https://github.com/example/project">Source</a></main>`),
 			PAGE_URL,
 		);
 
-		expect(markdown).toContain("[Docs](https://www.elmohq.com/docs)");
-		expect(markdown).toContain("[Source](https://github.com/elmohq/elmo)");
+		expect(markdown).toContain("[Docs](https://chatspy.example.com/docs)");
+		expect(markdown).toContain("[Source](https://github.com/example/project)");
 	});
 
 	it("leaves protocol-relative URLs alone", () => {
@@ -86,13 +86,13 @@ describe("htmlToMarkdown", () => {
 		const markdown = convert(
 			page(
 				"<main><h1>Pricing</h1></main>",
-				'<title>Pricing: Plans · ChatSpy</title><meta name="description" content="Plans and prices."><link rel="canonical" href="https://www.elmohq.com/pricing"><meta property="article:modified_time" content="2026-10-01">',
+				'<title>Pricing: Plans · ChatSpy</title><meta name="description" content="Plans and prices."><link rel="canonical" href="https://chatspy.example.com/pricing"><meta property="article:modified_time" content="2026-10-01">',
 			),
 			PAGE_URL,
 		);
 
 		expect(markdown).toMatch(
-			/^---\ntitle: "Pricing: Plans · ChatSpy"\ndescription: Plans and prices.\ncanonical: https:\/\/www.elmohq.com\/pricing\nupdated: "2026-10-01"\n---\n\n# Pricing/,
+			/^---\ntitle: "Pricing: Plans · ChatSpy"\ndescription: Plans and prices.\ncanonical: https:\/\/chatspy.example.com\/pricing\nupdated: "2026-10-01"\n---\n\n# Pricing/,
 		);
 	});
 

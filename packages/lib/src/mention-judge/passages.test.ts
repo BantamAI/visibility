@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { matcher, mentionOffsets, quoteOptions, sentences } from "./passages";
 
-const elmo = { name: "ChatSpy", aliases: [], domains: ["https://www.elmohq.com"] };
+const elmo = { name: "ChatSpy", aliases: [], domains: ["https://chatspy.example.com"] };
 const peec = { name: "Peec", aliases: ["Peec AI"], domains: ["peec.ai"] };
 
 describe("matcher", () => {

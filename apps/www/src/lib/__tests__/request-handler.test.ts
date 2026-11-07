@@ -36,7 +36,7 @@ function fakeApp() {
 }
 
 function get(path: string, accept?: string, method = "GET") {
-	return new Request(`https://www.elmohq.com${path}`, {
+	return new Request(`https://chatspy.example.com${path}`, {
 		method,
 		headers: accept === undefined ? {} : { Accept: accept },
 	});
@@ -53,7 +53,7 @@ describe("markdown for pages without an MDX source", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("Content-Type")).toBe(MARKDOWN);
 		expect(response.headers.get("Vary")).toBe("Accept");
-		expect(await response.text()).toMatch(/\n---\n\n# Pricing\n\n\[Docs\]\(https:\/\/www.elmohq.com\/docs\)$/);
+		expect(await response.text()).toMatch(/\n---\n\n# Pricing\n\n\[Docs\]\(https:\/\/chatspy.example.com\/docs\)$/);
 	});
 
 	it("serves the same markdown under a .md suffix, ignoring Accept", async () => {
@@ -115,10 +115,10 @@ describe("markdown for pages without an MDX source", () => {
 	});
 
 	it.each([
-		["/pricing.md", "https://www.elmohq.com/pricing"],
-		["/index.md", "https://www.elmohq.com/"],
-		["/docs/getting-started.md", "https://www.elmohq.com/docs/getting-started"],
-		["/docs/getting-started.mdx", "https://www.elmohq.com/docs/getting-started"],
+		["/pricing.md", "https://chatspy.example.com/pricing"],
+		["/index.md", "https://chatspy.example.com/"],
+		["/docs/getting-started.md", "https://chatspy.example.com/docs/getting-started"],
+		["/docs/getting-started.mdx", "https://chatspy.example.com/docs/getting-started"],
 	])("points search engines from %s to the HTML page", async (path, canonical) => {
 		const { handle } = fakeApp();
 		const response = await handle(get(path));
@@ -167,7 +167,7 @@ describe("not-found pages", () => {
 		expect(response.headers.get("Content-Type")).toBe(MARKDOWN);
 		const body = await response.text();
 		expect(body).toMatch(/^# Page not found/);
-		expect(body).toContain("https://www.elmohq.com/llms.txt");
+		expect(body).toContain("https://chatspy.example.com/llms.txt");
 	});
 
 	it("keeps the HTML 404 for browsers, varying on Accept, with no markdown alternate", async () => {

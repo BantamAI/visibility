@@ -33,5 +33,5 @@ export async function runEdit(target: string, options: DirOption): Promise<void>
 		child.on("error", (err) => reject(err));
 	});
 
-	log.info("Restart the stack with `elmo compose up -d` to apply changes.");
+	log.info("Restart the stack with `chatspy compose up -d` to apply changes.");
 }

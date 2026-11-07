@@ -59,7 +59,7 @@ async function confirmEnvOverwrite(configDir: string): Promise<string | undefine
 	if (!overwrite) {
 		p.cancel(
 			isElmoEnv
-				? "Setup cancelled. Use `elmo edit env` to change individual values."
+				? "Setup cancelled. Use `chatspy edit env` to change individual values."
 				: "Setup cancelled. Choose a different directory with --dir.",
 		);
 		process.exit(0);
@@ -126,7 +126,7 @@ function toPublicUrl(value: string): URL | undefined {
 function validatePublicUrl(value: string | undefined): string | undefined {
 	if (!value) return "Required";
 	const url = toPublicUrl(value.trim());
-	if (!url?.hostname.includes(".")) return "Enter a domain, e.g. elmo.example.com";
+	if (!url?.hostname.includes(".")) return "Enter a domain, e.g. chatspy.example.com";
 	// Auth trusts only this origin, so ChatSpy can't be served from a subpath.
 	if (url.pathname !== "/") return "Must not include a path";
 	return undefined;
@@ -267,10 +267,10 @@ async function doStart(configDir: string): Promise<void> {
 	}
 
 	log.info("Examples:");
-	console.log(`  ${pc.bold("elmo compose logs -f")}`);
-	console.log(`  ${pc.bold("elmo compose logs -f web")}`);
-	console.log(`  ${pc.bold("elmo compose ps")}`);
-	console.log(`  ${pc.bold("elmo compose down")}`);
+	console.log(`  ${pc.bold("chatspy compose logs -f")}`);
+	console.log(`  ${pc.bold("chatspy compose logs -f web")}`);
+	console.log(`  ${pc.bold("chatspy compose ps")}`);
+	console.log(`  ${pc.bold("chatspy compose down")}`);
 }
 
 async function askAccess(): Promise<{ publicUrl: URL | undefined; port: number }> {
@@ -288,7 +288,7 @@ async function askAccess(): Promise<{ publicUrl: URL | undefined; port: number }
 	if (access === "public") {
 		const domain = await p.text({
 			message: "Domain",
-			placeholder: "elmo.example.com",
+			placeholder: "chatspy.example.com",
 			validate: validatePublicUrl,
 		});
 		assertNotCancelled(domain);
@@ -389,7 +389,7 @@ export async function runInit(options: InitOptions, version: string): Promise<vo
 	p.log.warn("Your generated .env file contains secrets — do not commit it to version control.");
 
 	if (options.dev) {
-		p.log.info("Dev mode enabled. Run `elmo compose build` before starting.");
+		p.log.info("Dev mode enabled. Run `chatspy compose build` before starting.");
 	}
 
 	const shouldStart = await p.confirm({
@@ -401,7 +401,7 @@ export async function runInit(options: InitOptions, version: string): Promise<vo
 	if (shouldStart) {
 		await doStart(configDir);
 	} else {
-		p.log.info("You can start later with `elmo compose up -d`.");
+		p.log.info("You can start later with `chatspy compose up -d`.");
 	}
 
 	p.outro(pc.green("Setup complete!"));

@@ -49,7 +49,7 @@ function getBetterAuthSecret(): string {
   } catch {
     throw new Error(
       `Cannot read BETTER_AUTH_SECRET: ${GENERATED_ENV_PATH} is missing. ` +
-        `Run the elmo init step first, or set BETTER_AUTH_SECRET.`,
+        `Run the chatspy init step first, or set BETTER_AUTH_SECRET.`,
     );
   }
 

@@ -72,7 +72,7 @@ async function runBrainstorm(website: string, options: BrainstormOptions): Promi
 		log.success(
 			`Wrote brand.json, prompts.${format}, competitors.${format} to ${dir} (${promptRows.length} prompts, ${competitorRows.length} competitors).`,
 		);
-		log.info(`Pipe it into eval: elmo lab eval --brand-file ${dir.replace(/\/$/, "")}/brand.json -m <target>`);
+		log.info(`Pipe it into eval: chatspy lab eval --brand-file ${dir.replace(/\/$/, "")}/brand.json -m <target>`);
 	}
 }
 

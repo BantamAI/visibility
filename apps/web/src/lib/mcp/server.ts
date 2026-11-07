@@ -9,7 +9,7 @@ import type { Principal } from "@/lib/auth/api-auth";
 import { type McpTool, toolsFor } from "./tools";
 
 export const MCP_SERVER_INFO = {
-	name: "elmo",
+	name: "chatspy",
 	title: "ChatSpy AI visibility",
 	version: __APP_VERSION__,
 } as const;

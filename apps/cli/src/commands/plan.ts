@@ -73,7 +73,7 @@ export function registerPlan(lab: Command): void {
 		.option("-m, --model <target>", "research provider, model:provider[:version] (direct API only)")
 		.option("--website <url>", "also pull a short excerpt from this site for context")
 		.option("--brand-file <path>", "brand pack JSON for brand/competitor context (augmented on output)")
-		.option("--eval-dir <path>", "an `elmo lab eval` output directory to ground recommendations in")
+		.option("--eval-dir <path>", "an `chatspy lab eval` output directory to ground recommendations in")
 		.option("--max-bytes <n>", "cap on context bytes read from files", String(DEFAULT_MAX_BYTES))
 		.option("-o, --output <dir>", "directory to write artifacts to", ".")
 		.option("--format <csv|jsonl>", "structured output format", "csv")

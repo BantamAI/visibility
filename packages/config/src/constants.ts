@@ -3,12 +3,14 @@ export const DEFAULT_APP_NAME = "ChatSpy";
 export const DEFAULT_APP_ICON = "/icons/chatspy-icon.svg";
 export const DEFAULT_APP_URL = "http://localhost:3000/";
 
-/** Per-provider anchors are appended, so this must stay the page itself, not the docs index. */
-export const PROVIDERS_DOCS_URL = "https://www.elmohq.com/docs/user-guide/providers";
+/** Where apps/www, the docs site, is served. A placeholder until it has a domain. */
+export const DOCS_SITE_URL = "https://chatspy.example.com";
 
-/** The public docs, for the hosted product. In the app itself the API and MCP
- * pages document the deployment the viewer is signed in to. */
-export const API_DOCS_URL = "https://www.elmohq.com/docs/api";
+/** Per-provider anchors are appended, so this must stay the page itself, not the docs index. */
+export const PROVIDERS_DOCS_URL = `${DOCS_SITE_URL}/docs/user-guide/providers`;
+
+/** In the app itself the API and MCP pages document the deployment the viewer is signed in to. */
+export const API_DOCS_URL = `${DOCS_SITE_URL}/docs/api`;
 
 export const ELMO_BRAND_COLOR = "#7c3aed"; // violet-600
 export const ELMO_BRAND_FONT = "Titan One";

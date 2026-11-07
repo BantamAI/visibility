@@ -28,7 +28,7 @@ The ChatSpy repository maintainers are responsible for enforcing this Code of Co
 
 ## Reporting
 
-If you experience or witness behavior that violates this Code of Conduct, please report it by emailing [conduct@elmohq.com](mailto:conduct@elmohq.com).
+If you experience or witness behavior that violates this Code of Conduct, please report it privately to the repository maintainers.
 
 ## Attribution
 

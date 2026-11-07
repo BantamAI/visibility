@@ -113,8 +113,8 @@ test.describe("Local features", () => {
 
     // The ChatSpy wordmark, not a whitelabel icon + name.
     await expect(page.getByText("chatspy", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
-    // Self-hosters get the version and project links a whitelabel build hides.
-    await expect(page.locator('a[href="https://github.com/elmohq/elmo"]')).toBeVisible();
+    // Self-hosters get the version label a whitelabel build hides.
+    await expect(page.getByText(/^v\d+\.\d+\.\d+/).first()).toBeVisible();
   });
 
   test("the web manifest carries the ChatSpy icons", async ({ request }) => {

@@ -36,7 +36,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
 const BRAND_COLOR = "#7c3aed";
-const SITE_URL = "https://www.elmohq.com";
+const SITE_URL = "https://chatspy.example.com";
 const OUTPUT_ZIP = resolve(__dirname, "../chatspy-brand-kit.zip");
 
 function loadFont(path: string): Buffer {

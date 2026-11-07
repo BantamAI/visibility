@@ -3,7 +3,7 @@
 export function renderedByHeader(version: string): string {
 	return [
 		`# Rendered by elmo ${version} on ${new Date().toISOString()}`,
-		"# Run `elmo upgrade` after upgrading the CLI to refresh this file.",
+		"# Run `chatspy upgrade` after upgrading the CLI to refresh this file.",
 	].join("\n");
 }
 

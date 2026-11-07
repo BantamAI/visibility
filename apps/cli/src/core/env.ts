@@ -10,7 +10,7 @@ export interface LoadedEnv {
 }
 
 /**
- * Load the provider keys + SCRAPE_TARGETS that `elmo init` wrote, so the `lab`
+ * Load the provider keys + SCRAPE_TARGETS that `chatspy init` wrote, so the `lab`
  * commands can reach the same providers the deployment uses. Values are merged
  * into `process.env` **without** clobbering anything already exported in the
  * shell (ambient env wins; the file fills the gaps), because provider
@@ -30,7 +30,7 @@ export async function loadElmoEnv(explicitDir?: string): Promise<LoadedEnv> {
 	if (!(await fileExists(envPath))) {
 		if (explicitDir) {
 			throw new Error(
-				`No .env found at ${envPath}. Run \`elmo init --dir ${explicitDir}\` first, or export the provider keys yourself.`,
+				`No .env found at ${envPath}. Run \`chatspy init --dir ${explicitDir}\` first, or export the provider keys yourself.`,
 			);
 		}
 		log.warn(`No ChatSpy config found at ${envPath}; using the current environment for provider keys.`);

@@ -53,7 +53,7 @@ test-results/
 test-results-*/
 blob-report/
 
-# e2e generated config (created by `elmo init --dev --defaults`)
+# e2e generated config (created by `chatspy init --dev --defaults`)
 e2e/.elmo/
 e2e/.auth/
 

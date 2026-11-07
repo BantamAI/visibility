@@ -77,7 +77,7 @@ export function registerEval(lab: Command): void {
 		.option("-n, --runs <count>", "replications per prompt per target", String(getRunsPerPrompt()))
 		.option("--prompt <text>", "a prompt to evaluate (repeatable)", collect)
 		.option("--prompts-file <path>", "file with one prompt per line ('-' for stdin)")
-		.option("--brand-file <path>", "brand pack JSON (from `elmo lab brainstorm`) for prompts + mention context")
+		.option("--brand-file <path>", "brand pack JSON (from `chatspy lab brainstorm`) for prompts + mention context")
 		.option("--brand <name>", "brand name for mention detection")
 		.option("--brand-domain <domain>", "brand website/domain for mention detection")
 		.option("--alias <name>", "brand alias for mention detection (repeatable)", collect)

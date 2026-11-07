@@ -1,3 +1,4 @@
+import { DOCS_SITE_URL } from "@workspace/config/constants";
 import { getCredential } from "../../secrets";
 import { type Citation, normalizeCitationTitle } from "../../text-extraction";
 import { API_PROVIDER_MAX_OUTPUT_TOKENS, configuredWhen, reportedWebQueries, warnIfOutputCapped } from "../config";
@@ -20,7 +21,7 @@ function openrouterHeaders(): Record<string, string> {
 	return {
 		Authorization: `Bearer ${getCredential("OPENROUTER_API_KEY")}`,
 		"Content-Type": "application/json",
-		"HTTP-Referer": process.env.APP_URL ?? "https://github.com/elmohq/elmo",
+		"HTTP-Referer": process.env.APP_URL ?? DOCS_SITE_URL,
 		"X-Title": "ChatSpy AEO",
 	};
 }

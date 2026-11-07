@@ -5,7 +5,7 @@ export * from "./planner.js";
 export * from "./types.js";
 
 // Only releases that change config or env on disk need an entry; images roll on
-// `elmo upgrade` regardless. Each runs once, for upgrades through its `from` version.
+// `chatspy upgrade` regardless. Each runs once, for upgrades through its `from` version.
 export const MIGRATIONS: readonly Migration[] = [
 	{
 		// The last version without the key, so every existing install picks it up.

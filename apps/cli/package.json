@@ -20,7 +20,7 @@
 		"ai-visibility"
 	],
 	"bin": {
-		"elmo": "dist/index.js"
+		"chatspy": "dist/index.js"
 	},
 	"files": [
 		"dist",

@@ -4,12 +4,12 @@ description: Check how well AI agents and crawlers can reach, read, and understa
 updated: 2026-11-05
 ---
 
-`elmo lab audit` checks a website the way AI crawlers and agents see it, then lists what to fix. It runs
+`chatspy lab audit` checks a website the way AI crawlers and agents see it, then lists what to fix. It runs
 on its own: you don't need an ChatSpy instance or Docker.
 
 ```bash
 npm install -g @elmohq/cli
-elmo lab audit example.com
+chatspy lab audit example.com
 ```
 
 ## Alternate Domains
@@ -17,7 +17,7 @@ elmo lab audit example.com
 Pass every other domain your brand uses with `--domain`:
 
 ```bash
-elmo lab audit example.com --domain example.co --domain docs.example.com
+chatspy lab audit example.com --domain example.co --domain docs.example.com
 ```
 
 Each domain is resolved first, then handled by where it lands:

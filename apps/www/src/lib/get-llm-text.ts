@@ -33,7 +33,7 @@ export const MARKDOWN_CONTENT_TYPE = "text/markdown; charset=utf-8";
 
 const NOT_FOUND_MARKDOWN = `# Page not found
 
-There is no page at this URL on elmohq.com. It may have moved, or it may never have existed.
+There is no page at this URL. It may have moved, or it may never have existed.
 
 - [llms.txt](${canonicalUrl("/llms.txt")}): an index of the site, written for agents
 - [Documentation](${canonicalUrl("/docs.md")})

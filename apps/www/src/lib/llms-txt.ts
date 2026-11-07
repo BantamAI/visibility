@@ -6,11 +6,11 @@ export const llmsTxt = `# ChatSpy
 
 ## Documentation
 
-- [Documentation](https://www.elmohq.com/docs.md): Introduction to ChatSpy, the open source AI visibility platform.
-- [Quick Start](https://www.elmohq.com/docs/getting-started.md): Get ChatSpy running on your own infrastructure using the CLI.
-- [User Guide](https://www.elmohq.com/docs/user-guide.md): A complete walkthrough, from first login to daily visibility tracking, prompts, citations, competitors, and reports.
-- [Developer Guide](https://www.elmohq.com/docs/developer-guide.md): Run, configure, integrate with, and contribute to ChatSpy, including architecture and self-hosting setup.
-- [API Reference](https://www.elmohq.com/docs/api.md): Complete REST API documentation for ChatSpy's administrative API.
-- [MCP Server](https://www.elmohq.com/docs/api/mcp.md): Connect Claude Code, OpenCode, or another AI client to ChatSpy over the Model Context Protocol.
-- [llms-full.txt](https://www.elmohq.com/llms-full.txt): The full text of all ChatSpy documentation in a single file.
+- [Documentation](https://chatspy.example.com/docs.md): Introduction to ChatSpy, the open source AI visibility platform.
+- [Quick Start](https://chatspy.example.com/docs/getting-started.md): Get ChatSpy running on your own infrastructure using the CLI.
+- [User Guide](https://chatspy.example.com/docs/user-guide.md): A complete walkthrough, from first login to daily visibility tracking, prompts, citations, competitors, and reports.
+- [Developer Guide](https://chatspy.example.com/docs/developer-guide.md): Run, configure, integrate with, and contribute to ChatSpy, including architecture and self-hosting setup.
+- [API Reference](https://chatspy.example.com/docs/api.md): Complete REST API documentation for ChatSpy's administrative API.
+- [MCP Server](https://chatspy.example.com/docs/api/mcp.md): Connect Claude Code, OpenCode, or another AI client to ChatSpy over the Model Context Protocol.
+- [llms-full.txt](https://chatspy.example.com/llms-full.txt): The full text of all ChatSpy documentation in a single file.
 `;

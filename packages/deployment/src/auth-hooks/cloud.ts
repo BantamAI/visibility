@@ -10,7 +10,7 @@ import { invitationEmail, passwordResetEmail, verificationEmail } from "../email
 
 /**
  * Entries are an exact address ("alice@partner.com"), a whole domain
- * ("@elmohq.com", never a lookalike like "evil-elmohq.com"), or "*" for everyone.
+ * ("@example.com", never a lookalike like "evil-example.com"), or "*" for everyone.
  * Case-insensitive. An empty allowlist denies everyone, so cloud fails closed.
  */
 function evaluateSignupAllowed(email: string, allowlist: readonly string[]): "allow" | "deny" {

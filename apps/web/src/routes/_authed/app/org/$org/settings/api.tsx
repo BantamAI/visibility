@@ -6,13 +6,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DEFAULT_APP_NAME } from "@workspace/config/constants";
 import { Card } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { lazy, Suspense, useEffect, useState } from "react";
-import { CodeBlock } from "@/components/code-block";
 import { CopyField } from "@/components/copy-button";
 import { DemoModeAlert } from "@/components/demo-mode-alert";
 import { useAppOrigin } from "@/hooks/use-app-origin";
-import { useBranding, useDeploymentMode } from "@/hooks/use-deployment-features";
+import { useBranding } from "@/hooks/use-deployment-features";
 import { pageHead } from "@/lib/route-head";
 
 const OPENAPI_PATH = "/api/v1/openapi.json";
@@ -27,7 +25,6 @@ export const Route = createFileRoute("/_authed/app/org/$org/settings/api")({
 
 function ApiSettingsPage() {
 	const appName = useBranding()?.name || DEFAULT_APP_NAME;
-	const mode = useDeploymentMode();
 	const origin = useAppOrigin();
 	const baseUrl = `${origin}/api/v1`;
 
@@ -45,75 +42,10 @@ function ApiSettingsPage() {
 				<CopyField value={baseUrl} label="Base URL" />
 			</div>
 
-			{/* The SDKs are published under ChatSpy's name, so a whitelabel deployment doesn't advertise them. */}
-			{mode && mode !== "whitelabel" && <SdkSection baseUrl={baseUrl} />}
-
 			<Card className="overflow-hidden p-0">
 				<ApiReferenceEmbed />
 			</Card>
 		</div>
-	);
-}
-
-function sdkDocs(baseUrl: string) {
-	const env = `export ELMO_API_KEY=YOUR_API_KEY\nexport ELMO_BASE_URL=${baseUrl}`;
-	return [
-		{
-			value: "typescript",
-			label: "TypeScript",
-			install: "npm install @elmohq/sdk",
-			env,
-			usage: `import { Elmo } from "@elmohq/sdk";
-
-const elmo = new Elmo();
-
-for await (const brand of elmo.brands.list()) {
-  console.log(brand.name);
-}`,
-		},
-		{
-			value: "python",
-			label: "Python",
-			install: "pip install elmo-sdk",
-			env,
-			usage: `from elmo_sdk import Elmo
-
-elmo = Elmo()
-
-for brand in elmo.brands.list():
-    print(brand.name)`,
-		},
-	];
-}
-
-function SdkSection({ baseUrl }: { baseUrl: string }) {
-	const sdks = sdkDocs(baseUrl);
-
-	return (
-		<section className="max-w-4xl space-y-3">
-			<div className="space-y-1">
-				<h2 className="text-lg font-semibold">SDKs</h2>
-				<p className="text-sm text-muted-foreground">
-					Typed clients for this API. Set the base URL — the SDKs can't know which deployment to call.
-				</p>
-			</div>
-			<Tabs defaultValue={sdks[0].value}>
-				<TabsList>
-					{sdks.map((sdk) => (
-						<TabsTrigger key={sdk.value} value={sdk.value}>
-							{sdk.label}
-						</TabsTrigger>
-					))}
-				</TabsList>
-				{sdks.map((sdk) => (
-					<TabsContent key={sdk.value} value={sdk.value} className="space-y-3 pt-2">
-						<CodeBlock code={sdk.install} />
-						<CodeBlock code={sdk.env} />
-						<CodeBlock code={sdk.usage} />
-					</TabsContent>
-				))}
-			</Tabs>
-		</section>
 	);
 }
 

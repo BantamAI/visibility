@@ -33,7 +33,7 @@ test.describe("MCP", () => {
   test("the official client can connect, list tools, and read a brand's numbers", async ({ baseURL, request }) => {
     const client = await connect(baseURL!, API_KEYS.orgFull.token);
 
-    expect(client.getServerVersion()).toMatchObject({ name: "elmo" });
+    expect(client.getServerVersion()).toMatchObject({ name: "chatspy" });
     expect(client.getInstructions()).toContain("list_brands");
 
     const { tools } = await client.listTools();

@@ -18,7 +18,7 @@ async function main() {
 	const program = new Command();
 
 	program
-		.name("elmo")
+		.name("chatspy")
 		.version(version)
 		.option("--dir <path>", "Config directory")
 		.configureHelp({ showGlobalOptions: true })

@@ -1,5 +1,5 @@
-// Publishes every skill in skills/ at /.well-known/agent-skills, so `npx skills add elmohq.com`
-// installs the same files as `npx skills add elmohq/elmo`. Entries are sorted and owners and
+// Publishes every skill in skills/ at /.well-known/agent-skills, so `npx skills add <docs site>`
+// installs the same files as the repository's skills/ directory. Entries are sorted and owners and
 // timestamps zeroed, so an archive's digest only changes when one of its files does.
 import { createHash } from "node:crypto";
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";

@@ -9,7 +9,8 @@ you are running an older version, please upgrade before reporting an issue.
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Email [security@elmohq.com](mailto:security@elmohq.com) with:
+Report it privately to the repository maintainers through GitHub's private
+vulnerability reporting, with:
 
 - A description of the issue and its impact
 - Steps to reproduce (proof-of-concept code is helpful)
