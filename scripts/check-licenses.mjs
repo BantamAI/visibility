@@ -109,11 +109,11 @@ function checkSourceTree() {
 function run() {
   checkSourceTree();
 
-  console.log("Running pnpm licenses list --json ...\n");
+  console.log("Running pnpm licenses list --json -r ...\n");
 
   let raw;
   try {
-    raw = execSync("pnpm licenses list --json", {
+    raw = execSync("pnpm licenses list --json -r", {
       encoding: "utf-8",
       maxBuffer: 50 * 1024 * 1024,
     });
