@@ -263,9 +263,6 @@ catalogs:
     posthog-js:
       specifier: ^1.444.0
       version: 1.444.0
-    posthog-node:
-      specifier: ^5.61.1
-      version: 5.61.1
     react:
       specifier: ^19.3.1
       version: 19.3.1
@@ -396,9 +393,6 @@ importers:
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
-      posthog-node:
-        specifier: 'catalog:'
-        version: 5.61.1(@opentelemetry/api@1.9.1)
       robots-parser:
         specifier: 'catalog:'
         version: 3.0.1
@@ -653,9 +647,6 @@ importers:
       pg-boss:
         specifier: 'catalog:'
         version: 12.38.0(@opentelemetry/api@1.9.1)
-      posthog-node:
-        specifier: 'catalog:'
-        version: 5.61.1(@opentelemetry/api@1.9.1)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -8522,18 +8513,6 @@ packages:
       '@types/react':
         optional: true
       react:
-        optional: true
-
-  posthog-node@5.61.1:
-    resolution: {integrity: sha512-Az2H3hHyxxZ5PQpQAQEoJfa9FrLsM4OnuyIQwzi9hei5mtN0/mepw1yvLtAmPAbEkC6+muWXiBShBnVMKeBSXw==}
-    engines: {node: ^20.20.0 || >=22.22.0}
-    peerDependencies:
-      '@opentelemetry/api': ^1.2.0
-      rxjs: ^7.0.0
-    peerDependenciesMeta:
-      '@opentelemetry/api':
-        optional: true
-      rxjs:
         optional: true
 
   powershell-utils@0.1.0:
@@ -18485,12 +18464,6 @@ snapshots:
       react: 19.3.1
     transitivePeerDependencies:
       - preact-render-to-string
-
-  posthog-node@5.61.1(@opentelemetry/api@1.9.1):
-    dependencies:
-      '@posthog/core': 1.62.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.1
 
   powershell-utils@0.1.0: {}
 

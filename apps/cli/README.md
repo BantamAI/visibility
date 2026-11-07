@@ -55,12 +55,12 @@ For the full self-hosting walkthrough, see the [ChatSpy docs](https://www.elmohq
 
 ## Commands
 
-| Command                    | Description                                                                                                                                                                  |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Command                    | Description                                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `elmo init`                | Interactive wizard to set up a local ChatSpy instance                                                                                                                           |
 | `elmo compose <args...>`   | Run any `docker compose` command against your ChatSpy project (e.g. `elmo compose up -d`, `elmo compose down`, `elmo compose logs -f`, `elmo compose build`, `elmo compose ps`) |
-| `elmo edit <env\|compose>` | Change API keys, scrape targets, or the Docker Compose YAML                                                                                                                  |
-| `elmo upgrade`             | Move your deployment to this CLI's version — runs migrations, re-pins image tags, and restarts the stack                                                                     |
+| `elmo edit <env\|compose>` | Change API keys, scrape targets, or the Docker Compose YAML                                                                                                                     |
+| `elmo upgrade`             | Move your deployment to this CLI's version — runs migrations, re-pins image tags, and restarts the stack                                                                        |
 
 Run `elmo --help` or `elmo <command> --help` for the full list of flags.
 
@@ -68,17 +68,6 @@ Run `elmo --help` or `elmo <command> --help` for the full list of flags.
 
 - `--dir <path>` — point any command at a specific config directory (defaults to `~/.elmo`).
 - `elmo init --dev` — build images from a local checkout of the repo instead of pulling from the registry.
-
-## Telemetry
-
-The CLI sends anonymous install and command events so we can understand which flows people use and where setup breaks. To opt out, either export `DISABLE_TELEMETRY=1` in your shell, or add it to your `.env`:
-
-```bash
-elmo edit env       # add DISABLE_TELEMETRY=1
-elmo compose up -d  # restart so the deployment picks it up
-```
-
-See [the telemetry docs](https://www.elmohq.com/docs/developer-guide/telemetry) for details on what is collected.
 
 ## Star, contribute, and chat
 

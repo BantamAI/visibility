@@ -24,7 +24,6 @@ import { estimateRunCostUsd } from "@workspace/lib/usage";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
 import { getBoss } from "../boss";
-import { trackWorkerEvent } from "../telemetry";
 import { DERIVE_PRIORITY, sendDeriveRuns } from "./derive-runs";
 
 export interface ProcessPromptData {
@@ -348,15 +347,6 @@ async function runCycle(
 
 	const succeeded = runPromises.length - failures.length;
 	console.log(`Completed prompt ${prompt.id}: ${succeeded}/${runPromises.length} successful runs`);
-	trackWorkerEvent("prompt_processed", {
-		brand_id: brand.id,
-		models: [...new Set(targets.map((t) => t.config.model))],
-		providers: [...new Set(targets.map((t) => t.config.provider))],
-		total_runs: runPromises.length,
-		successful_runs: succeeded,
-		failed_runs: failures.length,
-	});
-
 	return { attempted: runPromises.length, succeeded };
 }
 

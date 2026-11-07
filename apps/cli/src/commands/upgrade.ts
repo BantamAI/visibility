@@ -15,7 +15,6 @@ import {
 } from "../docker.js";
 import { collectJudgeKey } from "../judge.js";
 import { MIGRATIONS, type MigrationContext, planMigrations, runMigrations } from "../migrations/index.js";
-import { trackCliEvent } from "../telemetry.js";
 import { assertNotCancelled, log, printBanner } from "../util.js";
 import { fetchLatestCliVersion } from "../version.js";
 
@@ -179,14 +178,6 @@ export async function runUpgrade(options: UpgradeOptions, cliVersion: string): P
 	}
 
 	await restartAfterUpgrade(configDir, wasRunning);
-
-	await trackCliEvent(configDir, "cli_upgrade", {
-		from_version: fromVersion,
-		to_version: cliVersion,
-		migrations_run: plan.length,
-		was_running: wasRunning,
-		dev_mode: isDev,
-	});
 
 	p.outro(pc.green(`Upgraded to ${cliVersion}.`));
 }

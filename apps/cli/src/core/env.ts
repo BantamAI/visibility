@@ -6,12 +6,6 @@ import { CONFIG_HOME, fileExists } from "../config.js";
 import { log } from "./ui.js";
 
 export interface LoadedEnv {
-	/**
-	 * Directory the `.env` was loaded from (used for telemetry). Undefined when
-	 * no ChatSpy `.env` was found and we're running purely off the ambient
-	 * environment.
-	 */
-	configDir?: string;
 	loaded: boolean;
 }
 
@@ -50,5 +44,5 @@ export async function loadElmoEnv(explicitDir?: string): Promise<LoadedEnv> {
 			process.env[key] = value;
 		}
 	}
-	return { configDir: dir, loaded: true };
+	return { loaded: true };
 }

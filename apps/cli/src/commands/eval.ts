@@ -46,7 +46,6 @@ import {
 } from "../core/report-html.js";
 import { type ResolvedTarget, resolveTargets } from "../core/targets.js";
 import { log, routeLibraryLogsToStderr } from "../core/ui.js";
-import { trackCliEvent } from "../telemetry.js";
 
 interface EvalOptions {
 	model?: string[];
@@ -105,7 +104,7 @@ async function runEval(positionalPrompts: string[], options: EvalOptions): Promi
 	const runsPerTarget = parsePositiveInt(options.runs, "runs");
 	const concurrency = parsePositiveInt(options.concurrency, "concurrency");
 
-	const loaded = await loadElmoEnv(options.dir);
+	await loadElmoEnv(options.dir);
 	const targets = resolveTargets(options.model);
 
 	const { prompts, brand } = await gatherInputs(positionalPrompts, options);
@@ -195,18 +194,6 @@ async function runEval(positionalPrompts: string[], options: EvalOptions): Promi
 			`Wrote responses/, citations/mentions/share-of-voice/fan-out.${format}, summary.md and index.html to ${options.output}`,
 		);
 		log.info(`Open the report: ${path.join(options.output, "index.html")}`);
-	}
-
-	if (loaded.configDir) {
-		await trackCliEvent(loaded.configDir, "cli_lab_eval", {
-			prompt_count: prompts.length,
-			target_count: targets.length,
-			runs_per_target: runsPerTarget,
-			has_brand: Boolean(judge),
-			competitor_count: brand.competitors.length,
-			to_stdout: Boolean(options.stdout),
-			format,
-		});
 	}
 }
 

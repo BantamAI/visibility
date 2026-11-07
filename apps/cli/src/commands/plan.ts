@@ -11,7 +11,6 @@ import { parseFormat, printStdout, type Row, writeJson, writeStructured, writeTe
 import { isWithin, reachedThroughSymlink } from "../core/paths.js";
 import { applyResearchTarget } from "../core/targets.js";
 import { log, routeLibraryLogsToStderr } from "../core/ui.js";
-import { trackCliEvent } from "../telemetry.js";
 
 interface PlanOptions {
 	model?: string;
@@ -90,7 +89,7 @@ async function runPlan(paths: string[], options: PlanOptions): Promise<void> {
 	const format = parseFormat(options.format);
 	const maxBytes = Number(options.maxBytes) || DEFAULT_MAX_BYTES;
 
-	const loaded = await loadElmoEnv(options.dir);
+	await loadElmoEnv(options.dir);
 	applyResearchTarget(options.model);
 
 	const pack = options.brandFile ? await readBrandPack(options.brandFile) : undefined;
@@ -133,17 +132,6 @@ async function runPlan(paths: string[], options: PlanOptions): Promise<void> {
 		await writeStructured(dir, "competitors", competitorRows, ["name", "domains", "aliases"], format);
 		await writeJson(dir, "brand.json", augmentBrandPack(pack, result, options));
 		log.success(`Wrote plan.md, suggestions.${format}, competitors.${format}, brand.json to ${dir}.`);
-	}
-
-	if (loaded.configDir) {
-		await trackCliEvent(loaded.configDir, "cli_lab_plan", {
-			suggestion_count: result.suggestions.length,
-			competitor_count: result.competitors.length,
-			has_model: Boolean(options.model),
-			has_eval: Boolean(options.evalDir),
-			to_stdout: Boolean(options.stdout),
-			format,
-		});
 	}
 }
 

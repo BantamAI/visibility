@@ -5,7 +5,6 @@ import { loadElmoEnv } from "../core/env.js";
 import { parseFormat, printCsv, type Row, writeJson, writeStructured } from "../core/output.js";
 import { applyResearchTarget } from "../core/targets.js";
 import { log, routeLibraryLogsToStderr } from "../core/ui.js";
-import { trackCliEvent } from "../telemetry.js";
 
 interface BrainstormOptions {
 	count: string;
@@ -43,7 +42,7 @@ async function runBrainstorm(website: string, options: BrainstormOptions): Promi
 	const maxPrompts = parseCount(options.count, "count");
 	const maxCompetitors = parseCount(options.competitors, "competitors");
 
-	const loaded = await loadElmoEnv(options.dir);
+	await loadElmoEnv(options.dir);
 	applyResearchTarget(options.model);
 
 	log.step(`Analyzing ${website} (up to ${maxPrompts} prompts, ${maxCompetitors} competitors)…`);
@@ -74,16 +73,6 @@ async function runBrainstorm(website: string, options: BrainstormOptions): Promi
 			`Wrote brand.json, prompts.${format}, competitors.${format} to ${dir} (${promptRows.length} prompts, ${competitorRows.length} competitors).`,
 		);
 		log.info(`Pipe it into eval: elmo lab eval --brand-file ${dir.replace(/\/$/, "")}/brand.json -m <target>`);
-	}
-
-	if (loaded.configDir) {
-		await trackCliEvent(loaded.configDir, "cli_lab_brainstorm", {
-			prompt_count: promptRows.length,
-			competitor_count: competitorRows.length,
-			has_model: Boolean(options.model),
-			to_stdout: Boolean(options.stdout),
-			format,
-		});
 	}
 }
 
