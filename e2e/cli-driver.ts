@@ -1,5 +1,5 @@
 /**
- * Answers the `elmo init --dev` wizard through a real PTY. script(1) provides
+ * Answers the `chatspy init --dev` wizard through a real PTY. script(1) provides
  * the PTY because it ships with Ubuntu and macOS, so no native addon is needed.
  *
  * The CLI writes to `~/.elmo`, so HOME is pointed at the parent of
@@ -183,12 +183,10 @@ async function main(): Promise<void> {
 	await confirm("Edit SCRAPE_TARGETS before saving?", false, { defaultAnswer: false });
 
 	// The stub judges locally, so the e2e stack calls no one.
-	await acceptDefault("How should Elmo call Jev?");
+	await acceptDefault("How should ChatSpy call Jev?");
 	await answer("TypeSafe API key", "stub");
 
-	await confirm("Share telemetry?", false, { defaultAnswer: true });
-	await acceptDefault("email to receive product updates");
-	await acceptDefault("How will you access Elmo?");
+	await acceptDefault("How will you access ChatSpy?");
 	await acceptDefault("Web app port");
 	await confirm("Start the stack now?", false, { defaultAnswer: true });
 

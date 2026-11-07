@@ -2,14 +2,15 @@
 
 ## Supported Versions
 
-We apply security fixes only to the **latest released version** of Elmo. If
+We apply security fixes only to the **latest released version** of ChatSpy. If
 you are running an older version, please upgrade before reporting an issue.
 
 ## Reporting a Vulnerability
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Email [security@elmohq.com](mailto:security@elmohq.com) with:
+Report it privately to the repository maintainers through GitHub's private
+vulnerability reporting, with:
 
 - A description of the issue and its impact
 - Steps to reproduce (proof-of-concept code is helpful)

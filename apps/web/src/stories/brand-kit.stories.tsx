@@ -4,7 +4,7 @@ import { Logo } from "@/components/logo";
 import { type ClientConfig, setMockClientConfig } from "./_mocks/config-client";
 import { setMockRouteContext } from "./_mocks/tanstack-router";
 
-const BRAND_COLOR = "#2563eb";
+const BRAND_COLOR = "#7c3aed";
 
 const elmoConfig: ClientConfig = {
 	mode: "local",
@@ -14,7 +14,7 @@ const elmoConfig: ClientConfig = {
 		canCreateBrands: true,
 	},
 	branding: {
-		name: "Elmo",
+		name: "ChatSpy",
 		chartColors: DEFAULT_CHART_COLORS.map((c) => c),
 	},
 	analytics: {},
@@ -68,7 +68,7 @@ export const ElmoBrandKit = () => {
 
 	return (
 		<div className="p-8 max-w-4xl mx-auto space-y-2">
-			<h1 className="text-2xl font-bold text-foreground mb-8">Elmo Brand Kit</h1>
+			<h1 className="text-2xl font-bold text-foreground mb-8">ChatSpy Brand Kit</h1>
 
 			<Section title="Logo">
 				<div className="flex items-center gap-8">
@@ -99,8 +99,8 @@ export const ElmoBrandKit = () => {
 										style={{ minWidth: Math.max(size + 16, 48), minHeight: Math.max(size + 16, 48) }}
 									>
 										<img
-											src="/icons/elmo-icon.svg"
-											alt={`Elmo icon ${size}px`}
+											src="/icons/chatspy-icon.svg"
+											alt={`ChatSpy icon ${size}px`}
 											width={size}
 											height={size}
 											style={{ width: size, height: size }}
@@ -123,8 +123,8 @@ export const ElmoBrandKit = () => {
 										style={{ minWidth: Math.max(size + 16, 48), minHeight: Math.max(size + 16, 48) }}
 									>
 										<img
-											src="/icons/elmo-icon.svg"
-											alt={`Elmo icon ${size}px on dark`}
+											src="/icons/chatspy-icon.svg"
+											alt={`ChatSpy icon ${size}px on dark`}
 											width={size}
 											height={size}
 											style={{ width: size, height: size }}
@@ -146,8 +146,8 @@ export const ElmoBrandKit = () => {
 						<div key={size} className="flex flex-col items-center gap-2">
 							<div className="border rounded-lg overflow-hidden flex items-center justify-center">
 								<img
-									src="/icons/elmo-icon-maskable.svg"
-									alt={`Elmo maskable icon ${size}px`}
+									src="/icons/chatspy-icon-maskable.svg"
+									alt={`ChatSpy maskable icon ${size}px`}
 									width={size}
 									height={size}
 									style={{ width: size, height: size }}
@@ -164,8 +164,8 @@ export const ElmoBrandKit = () => {
 							style={{ width: 128, height: 128 }}
 						>
 							<img
-								src="/icons/elmo-icon-maskable.svg"
-								alt="Elmo maskable icon circular crop"
+								src="/icons/chatspy-icon-maskable.svg"
+								alt="ChatSpy maskable icon circular crop"
 								width={128}
 								height={128}
 								style={{ width: 128, height: 128 }}
@@ -178,7 +178,7 @@ export const ElmoBrandKit = () => {
 
 			<Section title="Brand Colors">
 				<div className="flex gap-6 flex-wrap">
-					<ColorSwatch color="#2563eb" label="Royal Blue" />
+					<ColorSwatch color="#7c3aed" label="Violet" />
 					<ColorSwatch color="#faf0ca" label="Lemon Chiffon" />
 					<ColorSwatch color="#f4d35e" label="Royal Gold" />
 					<ColorSwatch color="#ee964b" label="Sandy Brown" />

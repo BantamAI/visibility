@@ -1,17 +1,16 @@
 /**
- * The Elmo Cloud plan catalog: billing, write-time enforcement, the run policy
+ * The ChatSpy Cloud plan catalog: billing, write-time enforcement, the run policy
  * and the pricing UI all read it. Stripe prices are found by lookup key, which
  * packages/deployment/scripts/bootstrap-stripe.ts provisions in any account.
  */
 
 import { getModelMeta } from "./models";
-import { CLOUD_APP_URL } from "./referrals";
 
 export type PlanKey = "starter" | "basic" | "pro" | "business";
 
 export type BillingInterval = "monthly" | "annual";
 
-/** Whether Elmo Cloud reaches a platform by scraping its product or calling an API. */
+/** Whether ChatSpy Cloud reaches a platform by scraping its product or calling an API. */
 export type ProviderAccessKind = "scraped" | "api";
 
 export interface CloudPlatform {
@@ -27,7 +26,7 @@ export interface CloudPlatform {
 }
 
 /**
- * What Elmo Cloud sells, not what Elmo can track; an entry is only offered when
+ * What ChatSpy Cloud sells, not what ChatSpy can track; an entry is only offered when
  * SCRAPE_TARGETS configures a matching target.
  *
  * Order matters: defaultPlatformPicks takes a new brand's picks off the front, so
@@ -369,7 +368,5 @@ export function summarizeSubscriptionCost(input: {
 		totalUsd: lines.reduce((sum, line) => sum + line.amountUsd, 0),
 	};
 }
-
-export const CLOUD_SIGNUP_URL = `${CLOUD_APP_URL}/auth/register`;
 
 export const CLOUD_ENTRY_PRICE_USD = Math.min(...PLAN_KEYS.map((key) => PLANS[key].monthlyPriceUsd));

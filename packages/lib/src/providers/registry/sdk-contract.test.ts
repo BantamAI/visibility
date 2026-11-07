@@ -56,7 +56,7 @@ describe("installed ai SDK contract: openai-api run()", () => {
 			doGenerate: async () =>
 				generated({
 					content: [
-						{ type: "text", text: "Elmo tracks AI visibility." },
+						{ type: "text", text: "ChatSpy tracks AI visibility." },
 						{
 							type: "source",
 							sourceType: "url",
@@ -83,7 +83,7 @@ describe("installed ai SDK contract: openai-api run()", () => {
 
 		const res = await openaiApi.run("chatgpt", "prompt", { webSearch: true, version: "gpt-5-mini" });
 
-		expect(extractRun(res.rawOutput, "openai-api").textContent).toBe("Elmo tracks AI visibility.");
+		expect(extractRun(res.rawOutput, "openai-api").textContent).toBe("ChatSpy tracks AI visibility.");
 		expect(extractRun(res.rawOutput, "openai-api").citations).toEqual([
 			{ url: "https://example.com/a", title: "Example A", domain: "example.com", citationIndex: 0 },
 		]);
@@ -94,7 +94,7 @@ describe("installed ai SDK contract: openai-api run()", () => {
 describe("installed ai SDK contract: Output.object", () => {
 	it("populates result.output with the parsed, schema-validated object", async () => {
 		const schema = z.object({ brand: z.string(), competitors: z.array(z.string()) });
-		const payload = { brand: "Elmo", competitors: ["a", "b"] };
+		const payload = { brand: "ChatSpy", competitors: ["a", "b"] };
 
 		model.current = new MockLanguageModelV4({
 			doGenerate: async () => generated({ content: [{ type: "text", text: JSON.stringify(payload) }] }),
@@ -148,7 +148,7 @@ const anthropicResponse: Anthropic.Messages.Message = {
 		},
 		{
 			type: "text",
-			text: "Elmo tracks AI visibility.",
+			text: "ChatSpy tracks AI visibility.",
 			citations: [
 				{
 					type: "web_search_result_location",
@@ -168,7 +168,7 @@ describe("installed @anthropic-ai/sdk contract: anthropic-api run()", () => {
 
 		const res = await anthropicApi.run("claude", "prompt", { webSearch: true, version: "claude-sonnet-5" });
 
-		expect(extractRun(res.rawOutput, "anthropic-api").textContent).toBe("Elmo tracks AI visibility.");
+		expect(extractRun(res.rawOutput, "anthropic-api").textContent).toBe("ChatSpy tracks AI visibility.");
 		expect(res.webQueries).toEqual(["elmo aeo"]);
 		expect(extractRun(res.rawOutput, "anthropic-api").citations.map((c) => c.url)).toEqual([
 			"https://example.com/b",
@@ -189,7 +189,7 @@ describe("installed @anthropic-ai/sdk contract: anthropic-api run()", () => {
 		anthropicClient.create.mockResolvedValue(anthropicResponse);
 		const res = await anthropicApi.run("claude", "prompt", { webSearch: true, version: "claude-sonnet-5" });
 
-		expect(extractTextFromAnthropic(res.rawOutput)).toBe("Elmo tracks AI visibility.");
+		expect(extractTextFromAnthropic(res.rawOutput)).toBe("ChatSpy tracks AI visibility.");
 		expect(extractCitationsFromAnthropic(res.rawOutput).map((c) => c.url)).toEqual([
 			"https://example.com/b",
 			"https://example.com/a",
@@ -201,11 +201,11 @@ describe("installed ai SDK contract: anthropic Output.object", () => {
 	it("populates result.output with the parsed object", async () => {
 		const schema = z.object({ brand: z.string() });
 		model.current = new MockLanguageModelV4({
-			doGenerate: async () => generated({ content: [{ type: "text", text: JSON.stringify({ brand: "Elmo" }) }] }),
+			doGenerate: async () => generated({ content: [{ type: "text", text: JSON.stringify({ brand: "ChatSpy" }) }] }),
 		});
 
 		const res = await anthropicApi.runStructuredResearch!({ prompt: "p", schema, webSearch: false });
-		expect(res.object).toEqual({ brand: "Elmo" });
+		expect(res.object).toEqual({ brand: "ChatSpy" });
 	});
 });
 

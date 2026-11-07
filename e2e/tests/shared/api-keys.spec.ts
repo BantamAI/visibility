@@ -49,7 +49,7 @@ test.describe("API keys", () => {
     const issued = page.locator("[data-slot=card]").filter({ hasText: "Key Created" });
     await expect(issued).toBeVisible({ timeout: 30_000 });
     const key = await issued.getByRole("textbox", { name: "API Key" }).inputValue();
-    expect(key).toMatch(/^elmo_[A-Za-z]+$/);
+    expect(key).toMatch(/^chatspy_[A-Za-z]+$/);
     await expect(page.getByText(name)).toBeVisible();
 
     const auth = { Authorization: `Bearer ${key}` };

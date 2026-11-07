@@ -12,7 +12,7 @@ import {
 
 const request: JevRequest = {
 	model: JEV_MODEL,
-	state: { answer: "Elmo is great." },
+	state: { answer: "ChatSpy is great." },
 	questions: { brand__verdict: { type: "choice", instructions: "How?", criteria: { positive: "+", neutral: "0" } } },
 };
 

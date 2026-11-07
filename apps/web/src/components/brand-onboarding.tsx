@@ -9,7 +9,6 @@ import { PlatformSelectionStep } from "@/components/platform-selection-step";
 import { WriteErrorMessage } from "@/components/write-error-message";
 import { useOrganizationsChanged } from "@/hooks/use-organizations";
 import { validateWebsiteUrl } from "@/lib/brand-website";
-import { trackEvent } from "@/lib/posthog";
 import { useWriteErrorMessage } from "@/lib/write-errors";
 import { createBrandFn } from "@/server/brands";
 import type { OnboardingPlatformState } from "@/server/platform-picks";
@@ -46,7 +45,6 @@ export default function BrandOnboarding({ organizationSlug, brandId, brandName, 
 					...(enabledModels && enabledModels.length > 0 && { enabledModels }),
 				},
 			});
-			trackEvent("brand_created", { has_website: Boolean(website) });
 
 			await organizationsChanged(() =>
 				navigate({

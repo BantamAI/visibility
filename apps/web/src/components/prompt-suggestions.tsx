@@ -7,7 +7,6 @@ import { type Ref, type RefObject, useEffect, useRef, useState } from "react";
 import { type EditablePrompt, newPromptEntry } from "@/components/prompts-list-editor";
 import { WriteErrorMessage } from "@/components/write-error-message";
 import { usePolledBrandJob } from "@/hooks/use-polled-brand-job";
-import { trackEvent } from "@/lib/posthog";
 import {
 	cancelPromptSuggestionsFn,
 	getPromptSuggestionsStatusFn,
@@ -76,7 +75,6 @@ export function usePromptSuggestions({
 		start: () => {
 			setError(null);
 			setNothingNew(false);
-			trackEvent("prompt_suggestions_requested");
 			job.run();
 		},
 		cancel: job.cancel,

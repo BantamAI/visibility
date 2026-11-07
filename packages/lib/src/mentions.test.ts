@@ -7,14 +7,14 @@ describe("wholeWordPattern", () => {
 
 	it("matches a term only as a whole word", () => {
 		expect(names("ace", "place")).toBe(false);
-		expect(names("Elmo", "Elmos")).toBe(false);
+		expect(names("ChatSpy", "Elmos")).toBe(false);
 		expect(names("Nike", "Nike's best")).toBe(true);
 	});
 
 	it("matches in text written without spaces between words, or with particles attached", () => {
-		expect(names("Elmo", "Elmo是开源的")).toBe(true);
-		expect(names("Elmo", "Elmoは無料です")).toBe(true);
-		expect(names("Elmo", "Elmo는 무료입니다")).toBe(true);
+		expect(names("ChatSpy", "ChatSpy是开源的")).toBe(true);
+		expect(names("ChatSpy", "ChatSpyは無料です")).toBe(true);
+		expect(names("ChatSpy", "ChatSpy는 무료입니다")).toBe(true);
 	});
 });
 

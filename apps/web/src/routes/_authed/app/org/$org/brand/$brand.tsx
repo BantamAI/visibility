@@ -1,7 +1,7 @@
 import { createFileRoute, notFound, Outlet, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { brandSegment, canonicalBrandHref, resolveSegment } from "@workspace/lib/app-urls";
-import { type BrandTrackingState, brandTrackingState, needsPlan } from "@workspace/lib/brand-state";
+import { type BrandTrackingState, brandTrackingState } from "@workspace/lib/brand-state";
 import { db } from "@workspace/lib/db/db";
 import type { BrandWithPrompts } from "@workspace/lib/db/schema";
 import { brands, competitors, prompts } from "@workspace/lib/db/schema";
@@ -81,10 +81,6 @@ export const Route = createFileRoute("/_authed/app/org/$org/brand/$brand")({
 			data: { organizationId: context.organization.id, brandId: context.brandId },
 		});
 		if (!result) throw notFound();
-
-		if (needsPlan(result.trackingState)) {
-			throw redirect({ to: "/choose-plan", search: { org: result.organizationId } });
-		}
 
 		return result;
 	},

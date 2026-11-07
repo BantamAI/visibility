@@ -18,7 +18,7 @@ async function main() {
 	const program = new Command();
 
 	program
-		.name("elmo")
+		.name("chatspy")
 		.version(version)
 		.option("--dir <path>", "Config directory")
 		.configureHelp({ showGlobalOptions: true })
@@ -29,7 +29,7 @@ async function main() {
 
 	program
 		.command("init")
-		.description("set up local Elmo instance")
+		.description("set up local ChatSpy instance")
 		.option("--dev", "Use local build context (repo only)")
 		.option("--docker-dir <path>", "Path to Docker build context (dev mode)")
 		.action(async (_opts: object, cmd: Command) => {
@@ -38,7 +38,7 @@ async function main() {
 
 	program
 		.command("compose")
-		.description("run Docker Compose commands using your Elmo config")
+		.description("run Docker Compose commands using your ChatSpy config")
 		.allowUnknownOption(true)
 		.argument("[args...]", "Arguments passed to Docker Compose")
 		.action(async (args: string[], _opts: object, cmd: Command) => {
@@ -55,13 +55,13 @@ async function main() {
 
 	program
 		.command("upgrade")
-		.description("upgrade your Elmo deployment to this CLI's version")
+		.description("upgrade your ChatSpy deployment to this CLI's version")
 		.option("--yes", "skip confirmation prompts")
 		.action(async (_opts: object, cmd: Command) => {
 			await runUpgrade(cmd.optsWithGlobals<UpgradeOptions>(), version);
 		});
 
-	const lab = program.command("lab").description("one-off AEO tools that don't need a running Elmo instance");
+	const lab = program.command("lab").description("one-off AEO tools that don't need a running ChatSpy instance");
 	registerBrainstorm(lab);
 	registerEval(lab);
 	registerPlan(lab);

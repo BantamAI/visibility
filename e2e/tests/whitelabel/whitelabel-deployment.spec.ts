@@ -72,7 +72,7 @@ test.describe("Whitelabel sign-in is SSO only", () => {
 });
 
 test.describe("Whitelabel branding", () => {
-  test("the partner name and icon replace the Elmo wordmark", async ({ page }) => {
+  test("the partner name and icon replace the ChatSpy wordmark", async ({ page }) => {
     await page.goto(`${brandUrl()}`);
 
     await expect(page.getByText(WHITELABEL.appName).first()).toBeVisible({ timeout: 30_000 });
@@ -80,16 +80,15 @@ test.describe("Whitelabel branding", () => {
       "src",
       WHITELABEL.appIcon,
     );
-    await expect(page.getByText("elmo", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("chatspy", { exact: true })).toHaveCount(0);
   });
 
-  test("Elmo's version and project links are hidden", async ({ page }) => {
+  test("ChatSpy's version label is hidden", async ({ page }) => {
     await page.goto(`${brandUrl()}`);
     await expect(page.locator(`a[href="${brandUrl()}"][data-sidebar="menu-button"]`)).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.locator('a[href="https://github.com/elmohq/elmo"]')).toHaveCount(0);
-    await expect(page.locator('a[href="https://www.elmohq.com/"]')).toHaveCount(0);
+    await expect(page.getByText(/^v\d+\.\d+\.\d+/)).toHaveCount(0);
   });
 
   test("the web manifest carries the partner icon", async ({ request }) => {

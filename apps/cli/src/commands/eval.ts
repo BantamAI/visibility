@@ -46,7 +46,6 @@ import {
 } from "../core/report-html.js";
 import { type ResolvedTarget, resolveTargets } from "../core/targets.js";
 import { log, routeLibraryLogsToStderr } from "../core/ui.js";
-import { trackCliEvent } from "../telemetry.js";
 
 interface EvalOptions {
 	model?: string[];
@@ -78,7 +77,7 @@ export function registerEval(lab: Command): void {
 		.option("-n, --runs <count>", "replications per prompt per target", String(getRunsPerPrompt()))
 		.option("--prompt <text>", "a prompt to evaluate (repeatable)", collect)
 		.option("--prompts-file <path>", "file with one prompt per line ('-' for stdin)")
-		.option("--brand-file <path>", "brand pack JSON (from `elmo lab brainstorm`) for prompts + mention context")
+		.option("--brand-file <path>", "brand pack JSON (from `chatspy lab brainstorm`) for prompts + mention context")
 		.option("--brand <name>", "brand name for mention detection")
 		.option("--brand-domain <domain>", "brand website/domain for mention detection")
 		.option("--alias <name>", "brand alias for mention detection (repeatable)", collect)
@@ -105,7 +104,7 @@ async function runEval(positionalPrompts: string[], options: EvalOptions): Promi
 	const runsPerTarget = parsePositiveInt(options.runs, "runs");
 	const concurrency = parsePositiveInt(options.concurrency, "concurrency");
 
-	const loaded = await loadElmoEnv(options.dir);
+	await loadElmoEnv(options.dir);
 	const targets = resolveTargets(options.model);
 
 	const { prompts, brand } = await gatherInputs(positionalPrompts, options);
@@ -195,18 +194,6 @@ async function runEval(positionalPrompts: string[], options: EvalOptions): Promi
 			`Wrote responses/, citations/mentions/share-of-voice/fan-out.${format}, summary.md and index.html to ${options.output}`,
 		);
 		log.info(`Open the report: ${path.join(options.output, "index.html")}`);
-	}
-
-	if (loaded.configDir) {
-		await trackCliEvent(loaded.configDir, "cli_lab_eval", {
-			prompt_count: prompts.length,
-			target_count: targets.length,
-			runs_per_target: runsPerTarget,
-			has_brand: Boolean(judge),
-			competitor_count: brand.competitors.length,
-			to_stdout: Boolean(options.stdout),
-			format,
-		});
 	}
 }
 
@@ -507,7 +494,7 @@ function buildSummaryMarkdown(
 	contentGaps: { promptValue: string; competitorsMentioned: string[] }[],
 ): string {
 	const lines: string[] = [];
-	lines.push(`# Elmo eval${report.brandName ? ` — ${report.brandName}` : ""}`, "");
+	lines.push(`# ChatSpy eval${report.brandName ? ` — ${report.brandName}` : ""}`, "");
 	lines.push(`Generated ${report.generatedAt}`, "");
 	lines.push(
 		`- Prompts: ${report.totals.prompts}`,

@@ -1,7 +1,4 @@
-import { CLOUD_APP_URL } from "@workspace/config/referrals";
-import { AD_TAG_CSP } from "@workspace/ui/lib/ad-tags";
 import { isMarkdownPreferred, rewritePath } from "fumadocs-core/negotiation";
-import { CAL_EMBED_CSP } from "@/lib/cal-embed";
 import { withFrontmatter } from "@/lib/frontmatter";
 import { MARKDOWN_CONTENT_TYPE, markdownNotFound } from "@/lib/get-llm-text";
 import { htmlToMarkdown } from "@/lib/html-to-markdown";
@@ -12,15 +9,11 @@ import { canonicalUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 const SECURITY_HEADERS: Record<string, string> = {
 	"Content-Security-Policy": [
 		"default-src 'self'",
-		`script-src 'self' 'unsafe-inline' https://var.elmohq.com https://*.crisp.chat ${CAL_EMBED_CSP} ${AD_TAG_CSP.script}`,
-		`style-src 'self' 'unsafe-inline' https://*.crisp.chat ${AD_TAG_CSP.style}`,
+		"script-src 'self' 'unsafe-inline'",
+		"style-src 'self' 'unsafe-inline'",
 		"img-src 'self' data: https:",
-		`font-src 'self' data: https://*.crisp.chat ${AD_TAG_CSP.font}`,
-		`connect-src 'self' https://var.elmohq.com https://*.mux.com https://*.litix.io https://*.crisp.chat wss://*.relay.crisp.chat wss://*.relay.rescue.crisp.chat ${AD_TAG_CSP.connect}`,
-		"media-src 'self' blob: https://*.mux.com https://*.crisp.chat",
-		"worker-src 'self' blob: https://*.crisp.chat",
-		// YouTube embeds in blog posts (privacy-enhanced youtube-nocookie host).
-		`frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://*.crisp.chat ${CAL_EMBED_CSP} ${AD_TAG_CSP.frame}`,
+		"font-src 'self' data:",
+		"connect-src 'self'",
 		"object-src 'none'",
 		"frame-ancestors 'none'",
 		"base-uri 'self'",
@@ -40,15 +33,10 @@ function addSecurityHeaders(response: Response): Response {
 }
 
 const DISCOVERY_LINKS = [
-	`</.well-known/agent-skills/index.json>; rel="agent-skills"`,
-	`</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"`,
-	`</.well-known/ard.json>; rel="ard"`,
 	`</api/openapi.json>; rel="service-desc"`,
 	`</docs>; rel="service-doc"; type="text/html"`,
 	`</llms.txt>; rel="describedby"; type="text/plain"`,
 	`</sitemap.xml>; rel="sitemap"; type="application/xml"`,
-	`<https://status.elmohq.com/>; rel="status"; type="text/html"`,
-	`<https://github.com/elmohq/elmo/blob/main/LICENSE.md>; rel="license"`,
 ].join(", ");
 
 const FILE_LIKE = /\.[^/]+$/;
@@ -66,10 +54,7 @@ function addDiscoveryLinks(response: Response, path: string, markdownCopyOf?: st
 	response.headers.set("Link", links.join(", "));
 }
 
-const MARKDOWN_SOURCES = [
-	{ base: "/docs", indexIsPage: true },
-	{ base: "/blog", indexIsPage: false },
-].map(({ base, indexIsPage }) => ({
+const MARKDOWN_SOURCES = [{ base: "/docs", indexIsPage: true }].map(({ base, indexIsPage }) => ({
 	base,
 	indexIsPage,
 	stripMd: rewritePath(`${base}{/*path}.md`, `/llms.mdx${base}{/*path}`).rewrite,
@@ -103,46 +88,12 @@ function pageBehindMarkdownSuffix(path: string): string | undefined {
 // Keep permanent redirects server-side so backlinks and ranking signals reach
 // the canonical replacement rather than a client-rendered not-found page.
 const PERMANENT_REDIRECTS: Record<string, string> = {
-	"/blog/aeo-agent-skill": "/blog/aeo-skill",
-	"/blog/ai-search-engines": "/blog/best-ai-search-engine",
-	"/blog/ai-search-glossary": "/glossary",
-	"/blog/answer-engine-optimization": "/answer-engine-optimization",
-	"/blog/best-open-source-aeo-tools": "/ai-visibility-tools/category/open-source",
-	"/blog/generative-ai-for-marketing": "/blog/ai-for-seo",
-	"/blog/generative-ai-seo": "/generative-engine-optimization",
-	"/blog/generative-engine-optimization": "/generative-engine-optimization",
-	"/blog/geo-vs-seo": "/blog/aeo-vs-seo",
-	"/blog/google-ai-overviews": "/ai-search/google-ai-overviews",
-	"/blog/how-long-does-it-take-to-get-cited-by-ai": "/blog/how-long-to-get-cited-by-ai",
-	"/blog/how-to-appear-in-chatgpt": "/ai-search/chatgpt",
-	"/blog/how-to-appear-in-google-gemini": "/ai-search/gemini",
-	"/blog/how-to-rank-in-perplexity": "/ai-search/perplexity",
-	"/blog/iab-ai-visibility-framework": "/blog/iab-ai-visibility-metrics",
-	"/blog/llm-optimization": "/glossary/llmo",
-	"/blog/llm-seo": "/glossary/llmo",
-	"/blog/track-brand-ai-search": "/answer-engine-optimization",
-	"/blog/what-is-generative-seo": "/generative-engine-optimization",
 	"/docs/mcp": "/docs/api/mcp",
-	// The URLs people (and ad platforms, and app stores) guess for these.
-	"/terms": "/legal/terms",
-	"/privacy": "/legal/privacy",
-	"/cookies": "/legal/cookies",
-	"/subprocessors": "/legal/subprocessors",
-	"/acceptable-use": "/legal/acceptable-use",
-};
-
-// The issuer is the app, so agents that start from the brand domain are sent
-// there rather than served a copy whose issuer would not match.
-const DISCOVERY_REDIRECTS: Record<string, string> = {
-	"/.well-known/oauth-authorization-server": `${CLOUD_APP_URL}/.well-known/oauth-authorization-server`,
 };
 
 function redirectFor(url: URL): Response | undefined {
 	const movedTo = PERMANENT_REDIRECTS[url.pathname.replace(/\/+$/, "") || "/"];
 	if (movedTo) return new Response(null, { status: 308, headers: { Location: `${movedTo}${url.search}` } });
-
-	const servedElsewhere = DISCOVERY_REDIRECTS[url.pathname];
-	if (servedElsewhere) return new Response(null, { status: 307, headers: { Location: servedElsewhere } });
 }
 
 const MARKDOWN_MEDIA_TYPES = ["text/markdown", "text/x-markdown"];

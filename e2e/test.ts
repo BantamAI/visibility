@@ -3,15 +3,8 @@ import { type ConsoleMessage, type Page, expect, test as base } from "@playwrigh
 
 export type ConsoleErrorPattern = string | RegExp;
 
-/**
- * Blocked, because Crisp's CDN serves some localhost ports and refuses others.
- * support-chat.spec.ts asserts on Elmo's loader, which is in the DOM either way.
- */
-export const CRISP_HOSTS = "**://*.crisp.chat/**";
-
 const ALWAYS_ALLOWED: ConsoleErrorPattern[] = [
 	/\/api\/site-icon\?/,
-	/Failed to load resource: net::ERR_FAILED.*crisp\.chat/,
 ];
 
 export const failedResource = (status: number, from: string): RegExp =>
@@ -91,9 +84,6 @@ export const test = base.extend<
 
 	// Here rather than in the auto fixture, so a spec that only takes `request` builds no browser context.
 	context: async ({ context, _consoleErrorLog }, use) => {
-		// A page route still wins over this one (see support-chat.spec.ts).
-		await context.route(CRISP_HOSTS, (route) => route.abort());
-
 		const watch = (page: Page) => {
 			page.on("console", (message) => {
 				if (message.type() === "error") _consoleErrorLog.recorded.push(describeConsoleError(message));

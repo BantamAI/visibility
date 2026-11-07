@@ -35,7 +35,7 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 		scope: "server",
 		requiredBy: ["cloud"],
 		description:
-			"Public base URL of the web app. Required in cloud (used for auth, email links, and Stripe redirects); written by `elmo init` for local.",
+			"Public base URL of the web app. Required in cloud (used for auth, email links, and Stripe redirects); written by `chatspy init` for local.",
 	},
 	{
 		name: "BETTER_AUTH_SECRET",
@@ -381,22 +381,10 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 		description: "Sentry DSN for browser error reporting.",
 	},
 	{
-		name: "VITE_POSTHOG_KEY",
-		scope: "client",
-		requiredBy: "optional",
-		description: "PostHog project API key override.",
-	},
-	{
 		name: "VITE_CHART_COLORS",
 		scope: "client",
 		requiredBy: "optional",
 		description: "Comma-separated chart color palette override.",
-	},
-	{
-		name: "DISABLE_TELEMETRY",
-		scope: "server",
-		requiredBy: "optional",
-		description: "Set to any value to disable telemetry.",
 	},
 	// Required so a cloud deployment fails startup validation without its Stripe
 	// and Resend credentials.
@@ -435,7 +423,7 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 		scope: "server",
 		requiredBy: ["cloud"],
 		description:
-			"Sender address for transactional email, in the form: Elmo <notifications@updates.example.com>. The domain must be verified in Resend.",
+			"Sender address for transactional email, in the form: ChatSpy <notifications@updates.example.com>. The domain must be verified in Resend.",
 	},
 	{
 		name: "TURNSTILE_SECRET_KEY",

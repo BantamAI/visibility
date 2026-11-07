@@ -20,7 +20,7 @@
 		"ai-visibility"
 	],
 	"bin": {
-		"elmo": "dist/index.js"
+		"chatspy": "dist/index.js"
 	},
 	"files": [
 		"dist",
@@ -46,7 +46,6 @@
 		"marked": "^14.1.4",
 		"olostep": "catalog:",
 		"picocolors": "^1.1.1",
-		"posthog-node": "catalog:",
 		"robots-parser": "catalog:",
 		"semver": "^7.8.5",
 		"zod": "catalog:"

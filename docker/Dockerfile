@@ -1,4 +1,4 @@
-# Elmo 
+# ChatSpy 
 # Supports: web app (Nitro server) and worker
 
 # Base stage with Node.js
@@ -20,6 +20,7 @@ COPY packages/lib/package.json ./packages/lib/
 COPY packages/deployment/package.json ./packages/deployment/
 COPY packages/og/package.json ./packages/og/
 COPY packages/api-spec/package.json ./packages/api-spec/
+COPY packages/service/package.json ./packages/service/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -37,6 +38,7 @@ COPY --from=deps /app/packages/config/node_modules ./packages/config/node_module
 COPY --from=deps /app/packages/lib/node_modules ./packages/lib/node_modules
 COPY --from=deps /app/packages/deployment/node_modules ./packages/deployment/node_modules
 COPY --from=deps /app/packages/og/node_modules ./packages/og/node_modules
+COPY --from=deps /app/packages/service/node_modules ./packages/service/node_modules
 
 # Copy source code
 COPY . .
@@ -111,3 +113,29 @@ USER worker
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["npx", "tsx", "src/index.ts"]
+
+# Fly.io runs one image per app, so this bundles the web, worker and migrate
+# builds together; fly.toml picks one per process group.
+FROM base AS fly
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 chatspy
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+COPY --from=web-build --chown=chatspy:nodejs /app/apps/web/.output ./web/.output
+COPY --from=worker-deploy --chown=chatspy:nodejs /deploy/worker ./worker
+COPY --from=lib-deploy --chown=chatspy:nodejs /deploy/lib ./lib
+
+USER chatspy
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOST="0.0.0.0"
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["node", "/app/web/.output/server/index.mjs"]

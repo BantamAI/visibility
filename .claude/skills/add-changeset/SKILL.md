@@ -34,6 +34,6 @@ List only the packages affected. Default to `patch` unless the user asks for a d
 - Plain text — no headers, bold, italics, or newlines inside the description. Inline `code` with single backticks and links are fine when genuinely useful.
 - End every sentence with a full stop.
 - Past tense for what the PR did: "Added", "Fixed", "Changed".
-- Present tense for Elmo's behavior: "Elmo now supports…", "{feature} now…".
+- Present tense for ChatSpy's behavior: "ChatSpy now supports…", "{feature} now…".
 
 Check existing files in `.changeset/` or recent `CHANGELOG.md` entries for examples.

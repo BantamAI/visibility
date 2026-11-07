@@ -1,4 +1,4 @@
-// Mirrors the campaign params and click IDs posthog-js records on a landing pageview, plus our own `ref`.
+// Campaign params and ad click IDs from a landing pageview, plus our own `ref`.
 export const ATTRIBUTION_PARAMS = [
 	"ref",
 	"utm_source",

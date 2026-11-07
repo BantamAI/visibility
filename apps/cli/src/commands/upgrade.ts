@@ -15,7 +15,6 @@ import {
 } from "../docker.js";
 import { collectJudgeKey } from "../judge.js";
 import { MIGRATIONS, type MigrationContext, planMigrations, runMigrations } from "../migrations/index.js";
-import { trackCliEvent } from "../telemetry.js";
 import { assertNotCancelled, log, printBanner } from "../util.js";
 import { fetchLatestCliVersion } from "../version.js";
 
@@ -39,7 +38,7 @@ async function confirmStaleCli(cliVersion: string, assumeYes: boolean | undefine
 			});
 	assertNotCancelled(proceed);
 	if (!proceed) {
-		p.cancel("Upgrade cancelled. Upgrade the CLI and rerun `elmo upgrade`.");
+		p.cancel("Upgrade cancelled. Upgrade the CLI and rerun `chatspy upgrade`.");
 		process.exit(0);
 	}
 }
@@ -93,9 +92,9 @@ async function applyUpgradeMigrations(
 		await runMigrations(plan, ctx);
 	} catch (error) {
 		log.error(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
-		log.info("Your config version was left unchanged. Fix the issue and rerun `elmo upgrade`.");
+		log.info("Your config version was left unchanged. Fix the issue and rerun `chatspy upgrade`.");
 		if (wasRunning) {
-			log.info("The stack was stopped for the upgrade. Restart with `elmo compose up -d` after fixing.");
+			log.info("The stack was stopped for the upgrade. Restart with `chatspy compose up -d` after fixing.");
 		}
 		process.exit(1);
 	}
@@ -103,7 +102,7 @@ async function applyUpgradeMigrations(
 
 async function restartAfterUpgrade(configDir: string, wasRunning: boolean): Promise<void> {
 	if (!wasRunning) {
-		log.info("Stack was stopped before upgrade — leaving it stopped. Start with `elmo compose up -d`.");
+		log.info("Stack was stopped before upgrade — leaving it stopped. Start with `chatspy compose up -d`.");
 		return;
 	}
 	log.step("Starting services...");
@@ -120,7 +119,7 @@ async function restartAfterUpgrade(configDir: string, wasRunning: boolean): Prom
 
 export async function runUpgrade(options: UpgradeOptions, cliVersion: string): Promise<void> {
 	printBanner();
-	p.intro(pc.bold("Upgrading Elmo"));
+	p.intro(pc.bold("Upgrading ChatSpy"));
 
 	await confirmStaleCli(cliVersion, options.yes);
 
@@ -172,7 +171,7 @@ export async function runUpgrade(options: UpgradeOptions, cliVersion: string): P
 	log.success(`Pinned config to ${cliVersion}.`);
 
 	if (isDev) {
-		log.info("Dev mode detected — rebuild with `elmo compose build` to apply the new version.");
+		log.info("Dev mode detected — rebuild with `chatspy compose build` to apply the new version.");
 	} else {
 		log.step("Pulling images...");
 		await runDockerCompose(configDir, ["pull"]);
@@ -180,21 +179,13 @@ export async function runUpgrade(options: UpgradeOptions, cliVersion: string): P
 
 	await restartAfterUpgrade(configDir, wasRunning);
 
-	await trackCliEvent(configDir, "cli_upgrade", {
-		from_version: fromVersion,
-		to_version: cliVersion,
-		migrations_run: plan.length,
-		was_running: wasRunning,
-		dev_mode: isDev,
-	});
-
 	p.outro(pc.green(`Upgraded to ${cliVersion}.`));
 }
 
 /** The first version to judge with Jev; a deployment from before it hasn't chosen how to call Jev. */
 const FIRST_JEV_VERSION = "0.7.0";
 
-/** Elmo can't judge answers without a Jev key, so an upgrade that lacks one asks for it before stopping anything. */
+/** ChatSpy can't judge answers without a Jev key, so an upgrade that lacks one asks for it before stopping anything. */
 async function ensureJudgeKey(
 	configDir: string,
 	context: MigrationContext,
@@ -204,7 +195,7 @@ async function ensureJudgeKey(
 	// Without this, an unreadable .env would be replaced by one holding only the key.
 	if (!(await fs.stat(path.join(configDir, ".env")).catch(() => null))) {
 		log.error(
-			`Couldn't find ${path.join(configDir, ".env")}; run \`elmo init\` or restore it, then rerun the upgrade.`,
+			`Couldn't find ${path.join(configDir, ".env")}; run \`chatspy init\` or restore it, then rerun the upgrade.`,
 		);
 		process.exit(1);
 	}
@@ -213,7 +204,7 @@ async function ensureJudgeKey(
 	const hasOpenRouter = Boolean(env.OPENROUTER_API_KEY?.trim());
 	if (hasOpenRouter && (judgedBefore || nonInteractive)) {
 		log.info(
-			"Judging mentions and sentiment with Jev through OpenRouter, billed to OPENROUTER_API_KEY. To call TypeSafe directly instead, add TYPESAFE_API_KEY with `elmo edit env`.",
+			"Judging mentions and sentiment with Jev through OpenRouter, billed to OPENROUTER_API_KEY. To call TypeSafe directly instead, add TYPESAFE_API_KEY with `chatspy edit env`.",
 		);
 		if (!judgedBefore)
 			log.warn(
@@ -222,17 +213,17 @@ async function ensureJudgeKey(
 		return;
 	}
 	if (nonInteractive) {
-		// A key saved only in Elmo's settings lives in the database, which the CLI can't read.
+		// A key saved only in ChatSpy's settings lives in the database, which the CLI can't read.
 		log.error(
 			"This version judges mentions and sentiment with Jev, and needs TYPESAFE_API_KEY (https://console.typesafe.ai) or OPENROUTER_API_KEY in .env to call it.",
 		);
-		log.info("Add one with `elmo edit env`, then rerun the upgrade.");
+		log.info("Add one with `chatspy edit env`, then rerun the upgrade.");
 		process.exit(1);
 	}
 	await collectJudgeKey(env);
 	await context.writeEnv(env);
 	log.success(
-		`Saved .env: Elmo will call Jev ${env.TYPESAFE_API_KEY ? "directly from TypeSafe" : "through OpenRouter"}.`,
+		`Saved .env: ChatSpy will call Jev ${env.TYPESAFE_API_KEY ? "directly from TypeSafe" : "through OpenRouter"}.`,
 	);
 }
 

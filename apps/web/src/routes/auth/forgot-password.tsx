@@ -17,8 +17,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { useState } from "react";
-import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
-import { SalesFooterLinks, SalesPanel } from "@/components/auth/sales-panel";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { CAPTCHA_FAILED_MESSAGE, CaptchaError, isCaptchaRejection, useTurnstile } from "@/hooks/use-turnstile";
 import { buildTitle, getAppName } from "@/lib/route-head";
 
@@ -52,7 +51,6 @@ export function ForgotPasswordForm({ isCloud, submitted: initiallySubmitted = fa
 	const [submitted, setSubmitted] = useState(initiallySubmitted);
 	const [error, setError] = useState<string | null>(null);
 	const turnstile = useTurnstile();
-	const source = isCloud ? "cloud-signin" : "self-hosted-signin";
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -81,30 +79,21 @@ export function ForgotPasswordForm({ isCloud, submitted: initiallySubmitted = fa
 		setLoading(false);
 	}
 
-	const panel = <SalesPanel variant={isCloud ? "cloud" : "self-hosted"} source={source} />;
-
 	if (submitted) {
 		return (
-			<AuthSplitLayout
+			<AuthLayout
 				title="Check your email"
 				subtitle={
 					email ? `If an account exists for ${email}, a reset link is on its way.` : "A reset link is on its way."
 				}
-				pitch={panel}
-				footer={<SalesFooterLinks source={source} />}
 			>
 				<BackToSignIn />
-			</AuthSplitLayout>
+			</AuthLayout>
 		);
 	}
 
 	return (
-		<AuthSplitLayout
-			title="Reset your password"
-			subtitle="Enter your email and we'll send you a reset link."
-			pitch={panel}
-			footer={<SalesFooterLinks source={source} />}
-		>
+		<AuthLayout title="Reset your password" subtitle="Enter your email and we'll send you a reset link.">
 			<form onSubmit={handleSubmit} className="space-y-4 w-full">
 				{error && (
 					<Alert variant="destructive">
@@ -132,7 +121,7 @@ export function ForgotPasswordForm({ isCloud, submitted: initiallySubmitted = fa
 			<div className="pt-4">
 				<BackToSignIn />
 			</div>
-		</AuthSplitLayout>
+		</AuthLayout>
 	);
 }
 

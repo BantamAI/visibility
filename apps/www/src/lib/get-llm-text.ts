@@ -1,11 +1,10 @@
 import type { InferPageType } from "fumadocs-core/source";
-import type { blogSource } from "@/lib/blog";
 import { withFrontmatter } from "@/lib/frontmatter";
 import { pageLastUpdated } from "@/lib/page-dates";
 import { canonicalUrl } from "@/lib/seo";
 import type { source } from "@/lib/source";
 
-type MarkdownPage = InferPageType<typeof source> | InferPageType<typeof blogSource>;
+type MarkdownPage = InferPageType<typeof source>;
 
 export async function getLLMText(page: MarkdownPage) {
 	if (page.type === "openapi") {
@@ -34,7 +33,7 @@ export const MARKDOWN_CONTENT_TYPE = "text/markdown; charset=utf-8";
 
 const NOT_FOUND_MARKDOWN = `# Page not found
 
-There is no page at this URL on elmohq.com. It may have moved, or it may never have existed.
+There is no page at this URL. It may have moved, or it may never have existed.
 
 - [llms.txt](${canonicalUrl("/llms.txt")}): an index of the site, written for agents
 - [Documentation](${canonicalUrl("/docs.md")})

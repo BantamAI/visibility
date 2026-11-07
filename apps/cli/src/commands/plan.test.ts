@@ -91,8 +91,8 @@ describe("reading context for a plan", () => {
 
 	it("reads a real eval summary", async () => {
 		const evalDir = await fs.mkdtemp(path.join(os.tmpdir(), "elmo-eval-"));
-		await fs.writeFile(path.join(evalDir, "summary.md"), "# Elmo eval");
+		await fs.writeFile(path.join(evalDir, "summary.md"), "# ChatSpy eval");
 
-		expect(await readEvalContext(evalDir)).toBe("# Elmo eval");
+		expect(await readEvalContext(evalDir)).toBe("# ChatSpy eval");
 	});
 });

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Shows what upstream Elmo changed since our last sync, and which of those files
+# we changed too. Read-only: it fetches but never merges.
+set -euo pipefail
+
+url="https://github.com/elmohq/elmo.git"
+branch="${1:-main}"
+
+if ! git remote get-url upstream >/dev/null 2>&1; then
+  git remote add upstream "$url"
+fi
+git fetch --quiet upstream "$branch"
+
+base="$(git merge-base HEAD "upstream/$branch")"
+echo "Last sync: $(git log -1 --format='%h %s (%cs)' "$base")"
+echo
+
+echo "Upstream commits since then:"
+git log --oneline "$base..upstream/$branch"
+echo
+
+echo "Upstream changes:"
+git diff --stat "$base" "upstream/$branch"
+echo
+
+overlap="$(comm -12 \
+  <(git diff --name-only "$base" "upstream/$branch" | sort) \
+  <(git diff --name-only "$base" HEAD | sort))"
+if [[ -n "$overlap" ]]; then
+  echo "Changed on both sides (resolve these by hand):"
+  echo "$overlap"
+else
+  echo "No files changed on both sides."
+fi

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-/** Fails when a dependency's license would conflict with distributing Elmo under MIT. */
+/** Fails when a dependency's license would conflict with distributing ChatSpy under MIT. */
 
 import { execSync } from "node:child_process";
 
 // MPL-2.0 is file-level copyleft, so as an unmodified dependency it puts no
-// obligations on Elmo's code. GPL, LGPL and AGPL stay out: they conflict with MIT.
+// obligations on ChatSpy's code. GPL, LGPL and AGPL stay out: they conflict with MIT.
 const ALLOWED_LICENSES = new Set([
   "MIT",
   "MIT-0",
@@ -37,7 +37,7 @@ const ALLOWED_LICENSES = new Set([
 
 // Each one needs its reason beside it.
 const PACKAGE_EXCEPTIONS = new Map([
-  // Sentry CLI – build-time tooling only, never distributed with Elmo.
+  // Sentry CLI – build-time tooling only, never distributed with ChatSpy.
   // FSL-1.1-MIT converts to MIT after two years.
   ["@sentry/cli", "FSL-1.1-MIT"],
   ["@sentry/cli-darwin", "FSL-1.1-MIT"],
@@ -84,12 +84,36 @@ const PACKAGE_EXCEPTIONS = new Map([
   ["@yuku-analyzer/binding-win32-x64", "Unknown"],
 ]);
 
+// Source-available licenses: no exception may let these in.
+const DENIED_LICENSE = /\b(AGPL|SSPL|BUSL)\b|\bBSL\b(?!-1\.0)/i;
+
+// Directories upstream projects use for code under a commercial license.
+const DENIED_DIRECTORY = /(^|\/)(ee|enterprise)\//;
+
+function checkSourceTree() {
+  const files = execSync("git ls-files --cached --others --exclude-standard", {
+    encoding: "utf-8",
+    maxBuffer: 50 * 1024 * 1024,
+  }).split("\n");
+  const dirs = new Set();
+  for (const file of files) {
+    const match = file.match(DENIED_DIRECTORY);
+    if (match) dirs.add(file.slice(0, match.index + match[0].length));
+  }
+  if (dirs.size === 0) return;
+  console.error("Found commercially licensed directories, which this repo must not contain:\n");
+  for (const dir of dirs) console.error(`  ${dir}`);
+  process.exit(1);
+}
+
 function run() {
-  console.log("Running pnpm licenses list --json ...\n");
+  checkSourceTree();
+
+  console.log("Running pnpm licenses list --json -r ...\n");
 
   let raw;
   try {
-    raw = execSync("pnpm licenses list --json", {
+    raw = execSync("pnpm licenses list --json -r", {
       encoding: "utf-8",
       maxBuffer: 50 * 1024 * 1024,
     });
@@ -125,7 +149,7 @@ function run() {
       }
 
       const exception = PACKAGE_EXCEPTIONS.get(name);
-      if (exception === license) {
+      if (exception === license && !DENIED_LICENSE.test(license)) {
         continue;
       }
 

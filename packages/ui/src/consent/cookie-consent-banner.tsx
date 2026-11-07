@@ -72,8 +72,8 @@ export function CookieConsentBanner({ consentRequired, policyHref }: { consentRe
 		>
 			<div className="rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg">
 				<p className="text-[13px] leading-relaxed">
-					We'd like to set analytics and advertising cookies to see how people find Elmo. Essential cookies are always
-					on.{" "}
+					We'd like to set analytics and advertising cookies to see how people find ChatSpy. Essential cookies are
+					always on.{" "}
 					<a href={policyHref} className="underline underline-offset-2 hover:text-primary">
 						Cookie Policy
 					</a>

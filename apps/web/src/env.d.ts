@@ -20,7 +20,6 @@ interface ImportMetaEnv {
 
 	readonly VITE_PLAUSIBLE_DOMAIN?: string;
 	readonly VITE_CLARITY_PROJECT_ID?: string;
-	readonly VITE_POSTHOG_KEY?: string;
 	readonly VITE_TURNSTILE_SITE_KEY?: string;
 	readonly VITE_SENTRY_DSN?: string;
 }
@@ -72,7 +71,6 @@ declare global {
 			readonly SENTRY_ORG?: string;
 			readonly SENTRY_PROJECT?: string;
 			readonly SENTRY_AUTH_TOKEN?: string;
-			readonly DISABLE_TELEMETRY?: string;
 			readonly STRIPE_SECRET_KEY?: string;
 			readonly STRIPE_WEBHOOK_SECRET?: string;
 			readonly RESEND_API_KEY?: string;

@@ -2,7 +2,7 @@ export type DeploymentMode = "whitelabel" | "local" | "demo" | "cloud";
 
 export interface FeaturesConfig {
 	readOnly: boolean;
-	/** Elmo's hosted demo, not a self-hosted install made read-only with READ_ONLY=true. */
+	/** ChatSpy's hosted demo, not a self-hosted install made read-only with READ_ONLY=true. */
 	promotesCloud: boolean;
 	showOptimizeButton: boolean;
 	/** Off in whitelabel, whose brands come from the admin API, and in demo. */
@@ -27,9 +27,6 @@ export interface FeaturesConfig {
 export interface AnalyticsConfig {
 	plausibleDomain?: string;
 	clarityProjectId?: string;
-	posthogKey?: string;
-	/** Only set on deployments we operate (cloud and demo). */
-	crispWebsiteId?: string;
 }
 
 export interface BrandingConfig {

@@ -18,6 +18,11 @@ export default defineConfig({
 	define: {
 		__APP_VERSION__: JSON.stringify(pkg.version),
 	},
+	// Server-only. The dep scanner reaches it through server functions, and its
+	// `@acemir/cssom` import resolves to that package's browser build, which has no ESM exports.
+	optimizeDeps: {
+		exclude: ["linkedom"],
+	},
 	resolve: {
 		tsconfigPaths: true,
 		alias: {

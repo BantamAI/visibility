@@ -2,7 +2,7 @@
 
 ## What this is
 
-Elmo is an open-source AI visibility platform (Answer Engine Optimization): it tracks how AI answer engines like ChatGPT, Claude, Perplexity, Gemini, and Google AI Overviews mention, cite, and describe brands. It is a **pnpm + Turborepo monorepo** on **Node.js 24** (enforced via `engines`), **TypeScript**, and **PostgreSQL**.
+ChatSpy is an open-source AI visibility platform (Answer Engine Optimization): it tracks how AI answer engines like ChatGPT, Claude, Perplexity, Gemini, and Google AI Overviews mention, cite, and describe brands. It is a **pnpm + Turborepo monorepo** on **Node.js 24** (enforced via `engines`), **TypeScript**, and **PostgreSQL**.
 
 - `apps/web` — product dashboard (TanStack Start + Vite, port 3000)
 - `apps/worker` — pg-boss background jobs (AI evaluations, citation tracking, reports)
@@ -48,7 +48,7 @@ Before handing work back or opening a PR, run `pnpm lint` and get it passing; CI
 
 ## Environment
 
-`.env` must exist at **both** the repo root and `apps/web/.env` (Vite reads its project root; the worker reads `apps/web/.env` via `--env-file`). Minimum for local mode: `DATABASE_URL`, `DEPLOYMENT_MODE=local`, `BETTER_AUTH_SECRET`, `ELMO_ENCRYPTION_KEY` (`openssl rand -base64 32`), `APP_URL`/`VITE_APP_URL`, `DISABLE_TELEMETRY=1`, and `SCRAPE_TARGETS` plus the keys of the providers it names. Env validation also requires one direct LLM key (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, or `MISTRAL_API_KEY`) for onboarding and the Opportunities report, and the worker needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter (Jev judges mentions and sentiment). For UI-only work, `SCRAPE_TARGETS=stub:stub`, `ONBOARDING_LLM_TARGET=stub:stub` and `TYPESAFE_API_KEY=stub` need no keys at all.
+`.env` must exist at **both** the repo root and `apps/web/.env` (Vite reads its project root; the worker reads `apps/web/.env` via `--env-file`). Minimum for local mode: `DATABASE_URL`, `DEPLOYMENT_MODE=local`, `BETTER_AUTH_SECRET`, `ELMO_ENCRYPTION_KEY` (`openssl rand -base64 32`), `APP_URL`/`VITE_APP_URL`, and `SCRAPE_TARGETS` plus the keys of the providers it names. Env validation also requires one direct LLM key (`OPENAI_API_KEY`, `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY`, or `MISTRAL_API_KEY`) for onboarding and the Opportunities report, and the worker needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter (Jev judges mentions and sentiment). For UI-only work, `SCRAPE_TARGETS=stub:stub`, `ONBOARDING_LLM_TARGET=stub:stub` and `TYPESAFE_API_KEY=stub` need no keys at all.
 
 ## Git workflow
 
@@ -62,7 +62,7 @@ Before handing work back or opening a PR, run `pnpm lint` and get it passing; CI
 
 - Unless explicitly authorized, never put identifying information or non-public stats into a PR description, commit message, issue or PR comment, or any committed text (code, comments, tests, fixtures, docs, changesets). This covers anything you get from MCP servers, databases, or APIs you've been given access to, including the GitHub API.
 - That includes conversion rates, customer or user names, emails, and domains, revenue and billing figures, cloud usage amounts, traffic numbers, names of private repositories, internal projects, services, or infrastructure, and any other non-public information. Describe the change in general terms or use made-up placeholder data instead.
-- This repo is public. Before running `gh pr create`, `gh pr edit`, `gh pr comment`, `gh issue`, or `git commit`, reread the text against this list and strip anything you learned while investigating that isn't already public. Notes from your investigation are the usual source of leaks.
+- Treat this repo as public. Before running `gh pr create`, `gh pr edit`, `gh pr comment`, `gh issue`, or `git commit`, reread the text against this list and strip anything you learned while investigating that isn't already public. Notes from your investigation are the usual source of leaks.
 
 ## Comments and docs
 
@@ -75,7 +75,7 @@ Before handing work back or opening a PR, run `pnpm lint` and get it passing; CI
 
 - Use APA Style title case for all non-prose text: titles, headings, buttons, links used as actions, nav items, tabs, form labels, table headers, and chart titles.
 - Sentences and prose stay in sentence case.
-- Elmo has no dark mode. Never design or implement anything for one.
+- ChatSpy has no dark mode. Never design or implement anything for one.
 
 ## Changesets
 

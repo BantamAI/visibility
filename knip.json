@@ -40,7 +40,8 @@
       ],
       "ignoreDependencies": [
         "shiki",
-        "@takumi-rs/core"
+        "@takumi-rs/core",
+        "@base-ui/react"
       ]
     },
     "apps/cli": {

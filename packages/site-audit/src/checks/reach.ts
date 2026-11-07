@@ -156,7 +156,7 @@ function botReachability(site: SiteArtifacts): CheckResult {
 	if (checked.length === 0) return notFetched(BOT_REACHABILITY, site.botProbes[0]?.fetched, "bot reachability");
 	const blocked = checked.filter((outcome) => outcome.state === "blocked");
 	const note =
-		" Sent with each bot's user agent from Elmo's address, so sites that verify bots by IP may treat the real bots differently.";
+		" Sent with each bot's user agent from ChatSpy's address, so sites that verify bots by IP may treat the real bots differently.";
 	if (blocked.length === 0) {
 		return result(BOT_REACHABILITY, "pass", `The homepage loads for ${list(checked.map((o) => o.bot))}.${note}`);
 	}

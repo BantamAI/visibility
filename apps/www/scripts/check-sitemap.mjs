@@ -11,9 +11,6 @@ import { fileURLToPath } from "node:url";
 
 const SERVER = fileURLToPath(new URL("../.output/server/index.mjs", import.meta.url));
 
-// Dated from GitHub releases when served, which a build can't reach.
-const EXEMPT = new Set(["/changelog"]);
-
 function freePort() {
 	return new Promise((resolve, reject) => {
 		const probe = createServer().listen(0, () => {
@@ -55,16 +52,14 @@ try {
 		path: new URL(block.match(/<loc>(.*?)<\/loc>/)?.[1] ?? "").pathname,
 		lastmod: block.match(/<lastmod>(.*?)<\/lastmod>/)?.[1],
 	}));
-	const undated = entries.filter(
-		(entry) => !EXEMPT.has(entry.path) && !/^\d{4}-\d{2}-\d{2}$/.test(entry.lastmod ?? ""),
-	);
+	const undated = entries.filter((entry) => !/^\d{4}-\d{2}-\d{2}$/.test(entry.lastmod ?? ""));
 	if (entries.length === 0) throw new Error("The sitemap has no URLs.");
 	if (undated.length > 0) {
 		console.error(`check-sitemap: ${undated.length} of ${entries.length} sitemap URLs have no YYYY-MM-DD <lastmod>:`);
 		for (const entry of undated) console.error(`  ${entry.path}${entry.lastmod ? ` (${entry.lastmod})` : ""}`);
 		process.exitCode = 1;
 	} else {
-		console.log(`check-sitemap: all ${entries.length - EXEMPT.size} dated sitemap URLs have a <lastmod>.`);
+		console.log(`check-sitemap: all ${entries.length} dated sitemap URLs have a <lastmod>.`);
 	}
 } catch (error) {
 	console.error(`check-sitemap: ${error.message}`);

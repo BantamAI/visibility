@@ -1,7 +1,7 @@
 # End-to-End Integration Tests
 #
 # Verifies every deployment mode works end-to-end.
-# Walks through the `elmo init --dev` CLI flow in CI mode, then runs in five
+# Walks through the `chatspy init --dev` CLI flow in CI mode, then runs in five
 # phases against the Dockerized stack:
 #
 #   1. local — worker down, seed data, run the `local` Playwright project
@@ -140,10 +140,10 @@ jobs:
           max_attempts: 3
           command: pnpm -C apps/web exec playwright install chromium
 
-      - name: Build elmo CLI
+      - name: Build the CLI
         run: pnpm -C apps/cli build
 
-      - name: "Run: elmo init --dev (via cli-driver)"
+      - name: "Run: chatspy init --dev (via cli-driver)"
         run: |
           mkdir -p e2e/.elmo
           cd e2e
@@ -331,7 +331,6 @@ jobs:
       DATABASE_URL: postgres://elmo:elmo@localhost:5432/elmo
       BETTER_AUTH_SECRET: scheduling-policy-ci-secret-0123456789
       APP_URL: http://localhost:3000
-      DISABLE_TELEMETRY: 1
 
     steps:
       - name: Checkout
@@ -376,7 +375,7 @@ jobs:
           STRIPE_SECRET_KEY: sk_test_ci
           STRIPE_WEBHOOK_SECRET: whsec_ci
           RESEND_API_KEY: re_ci
-          RESEND_FROM_EMAIL: Elmo <ci@example.com>
+          RESEND_FROM_EMAIL: ChatSpy <ci@example.com>
           GOOGLE_CLIENT_ID: ci
           GOOGLE_CLIENT_SECRET: ci
         run: |

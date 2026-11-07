@@ -1,0 +1,18 @@
+{
+	"name": "@workspace/service",
+	"version": "0.7.8",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs"
+	},
+	"exports": {
+		"./local/delete-brand": "./src/local/delete-brand.ts"
+	},
+	"dependencies": {
+		"@workspace/lib": "workspace:*",
+		"drizzle-orm": "catalog:",
+		"pg": "catalog:"
+	}
+}

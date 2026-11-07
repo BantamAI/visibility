@@ -5,8 +5,8 @@ const clean = (answer: string) => cleanAnswer(answer).text;
 
 describe("cleanAnswer", () => {
 	it("keeps the site a citation chip cites, so a brand cited only that way still reads as named", () => {
-		expect(clean("![](https://www.google.com/s2/favicons?domain=https://www.elmohq.com&sz=32) Elmo +2")).toBe(
-			"(elmohq.com) Elmo +2",
+		expect(clean("![](https://www.google.com/s2/favicons?domain=https://chatspy.example.com&sz=32) ChatSpy +2")).toBe(
+			"(chatspy.example.com) ChatSpy +2",
 		);
 		expect(clean("Great boots ([rei.com](https://www.rei.com/p/1?utm_source=chatgpt.com)).")).toBe(
 			"Great boots (rei.com).",
@@ -21,8 +21,8 @@ describe("cleanAnswer", () => {
 	});
 
 	it("keeps a link's text and the site it points to, but not a relative link's target", () => {
-		expect(clean("See [Elmo](https://www.elmohq.com/docs) or [the shop](/search?q=x).")).toBe(
-			"See Elmo (elmohq.com) or the shop.",
+		expect(clean("See [ChatSpy](https://chatspy.example.com/docs) or [the shop](/search?q=x).")).toBe(
+			"See ChatSpy (chatspy.example.com) or the shop.",
 		);
 	});
 
@@ -93,9 +93,9 @@ describe("originalSpan", () => {
 	};
 
 	it("maps a passage of the cleaned answer back to the original, markup and all", () => {
-		const answer = "Intro.\n\n1. **Elmo** is best · [MIT](https://github.com/elmohq/elmo) licensed.\n";
-		expect(span(answer, "Elmo** is best · MIT (github.com) licensed.")).toBe(
-			"Elmo** is best · [MIT](https://github.com/elmohq/elmo) licensed.",
+		const answer = "Intro.\n\n1. **ChatSpy** is best · [MIT](https://github.com/example/project) licensed.\n";
+		expect(span(answer, "ChatSpy** is best · MIT (github.com) licensed.")).toBe(
+			"ChatSpy** is best · [MIT](https://github.com/example/project) licensed.",
 		);
 	});
 
@@ -107,7 +107,7 @@ describe("originalSpan", () => {
 	});
 
 	it("keeps offsets right after text whose lowercase form is a different length", () => {
-		const answer = "İstanbul has shops. Elmo is great value there.";
-		expect(span(answer, "Elmo is great value there.")).toBe("Elmo is great value there.");
+		const answer = "İstanbul has shops. ChatSpy is great value there.";
+		expect(span(answer, "ChatSpy is great value there.")).toBe("ChatSpy is great value there.");
 	});
 });

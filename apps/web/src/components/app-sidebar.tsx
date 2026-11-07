@@ -5,7 +5,6 @@ import {
 	IconChartBar,
 	IconCode,
 	IconCpu,
-	IconCreditCard,
 	IconDashboard,
 	IconKey,
 	IconLink,
@@ -13,14 +12,13 @@ import {
 	IconMessages,
 	IconMoodSmile,
 	IconPlugConnected,
-	IconSchool,
 	IconSitemap,
 	IconSpeakerphone,
 	IconTarget,
 	IconUsers,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
-import type { DeploymentMode, FeaturesConfig } from "@workspace/config/types";
+import type { FeaturesConfig } from "@workspace/config/types";
 import { brandLinkParams, orgLinkParams } from "@workspace/lib/app-urls";
 import type { BrandWithPrompts } from "@workspace/lib/db/schema";
 
@@ -34,24 +32,19 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { DemoModePill } from "@/components/demo-mode-pill";
 import { Logo } from "@/components/logo";
 import { NavAppInfo } from "@/components/nav-app-info";
 import { type NavGroup, type NavItem, NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { useDeploymentFeatures } from "@/hooks/use-deployment-features";
-import { useLooseRouteContext, useViewer } from "@/hooks/use-route-context";
+import { useViewer } from "@/hooks/use-route-context";
 import { adminNavItems } from "@/lib/admin-nav";
 import type { OrganizationSummary } from "@/lib/organizations/types";
 import type { ShellScope } from "@/lib/shell-scope";
 
 export type AppSidebarProps = ShellScope;
 
-function organizationGroups(
-	organization: OrganizationSummary,
-	features?: FeaturesConfig,
-	mode?: DeploymentMode,
-): NavGroup[] {
+function organizationGroups(organization: OrganizationSummary, features?: FeaturesConfig): NavGroup[] {
 	const params = orgLinkParams(organization);
 	const items: NavItem[] = [
 		{ title: "Organization", link: { to: "/app/org/$org/settings", params }, icon: IconBriefcase, exact: true },
@@ -62,21 +55,12 @@ function organizationGroups(
 		items.push({ title: "Team", link: { to: "/app/org/$org/settings/members", params }, icon: IconUsers });
 	}
 
-	if (features?.billing) {
-		items.push({ title: "Billing", link: { to: "/app/org/$org/settings/billing", params }, icon: IconCreditCard });
-	}
-
 	items.push({ title: "API Keys", link: { to: "/app/org/$org/settings/api-keys", params }, icon: IconKey });
 
 	const docs: NavItem[] = [
 		{ title: "API", link: { to: "/app/org/$org/settings/api", params }, icon: IconCode },
 		{ title: "MCP", link: { to: "/app/org/$org/settings/mcp", params }, icon: IconPlugConnected },
 	];
-
-	// The skill is Elmo's, and whitelabel deployments never point users at Elmo.
-	if (mode !== "whitelabel") {
-		docs.push({ title: "Skill", link: { to: "/app/org/$org/settings/skill", params }, icon: IconSchool });
-	}
 
 	return [
 		{ label: "Organization Settings", items },
@@ -106,13 +90,20 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 		);
 	}
 
+	const brandSettings: NavItem = {
+		title: "Brand",
+		link: { to: "/app/org/$org/brand/$brand/settings/brand", params },
+		icon: IconBuilding,
+	};
 	const groups: NavGroup[] = [{ label: "Dashboard", items: dashboard }];
 
-	if (brand.onboarded) {
+	if (!brand.onboarded) {
+		groups.push({ label: "Settings", items: [brandSettings] });
+	} else {
 		groups.push({
 			label: "Settings",
 			items: [
-				{ title: "Brand", link: { to: "/app/org/$org/brand/$brand/settings/brand", params }, icon: IconBuilding },
+				brandSettings,
 				{
 					title: "Competitors",
 					link: { to: "/app/org/$org/brand/$brand/settings/competitors", params },
@@ -135,7 +126,6 @@ export function AppSidebar({ section, organization, brand }: AppSidebarProps) {
 	const { setOpenMobile } = useSidebar();
 	const { isAdmin, hasReportAccess } = useViewer();
 	const features = useDeploymentFeatures();
-	const mode = useLooseRouteContext().clientConfig?.mode;
 	// Reports are disabled entirely in cloud; hide the nav entry there.
 	const reportsEnabled = features?.reportGeneration ?? true;
 
@@ -145,15 +135,12 @@ export function AppSidebar({ section, organization, brand }: AppSidebarProps) {
 
 	const groups: NavGroup[] = [
 		...(section === "brand" && organization && brand ? brandGroups(organization, brand) : []),
-		...(section === "organization" && organization ? organizationGroups(organization, features, mode) : []),
+		...(section === "organization" && organization ? organizationGroups(organization, features) : []),
 		...(section === "admin" && adminItems.length > 0 ? [{ label: "Admin", items: adminItems }] : []),
 	];
 	const brandmark = (
 		<>
 			<Logo iconClassName="!size-5" />
-			<div className="ml-auto group-data-[collapsible=icon]:hidden">
-				<DemoModePill />
-			</div>
 		</>
 	);
 

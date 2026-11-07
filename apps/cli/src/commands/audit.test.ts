@@ -9,7 +9,7 @@ function report(evidence: string): SiteAuditReport {
 	return {
 		schemaVersion: 1,
 		auditedAt: "2026-01-01T00:00:00.000Z",
-		userAgent: "ElmoBot/1.0",
+		userAgent: "ChatSpyBot/1.0",
 		hosts: [{ host: `bad${ESC}[31m.example`, outcome: "unreachable", hops: [], error: `refused${ESC}[2K` }],
 		sites: [
 			{

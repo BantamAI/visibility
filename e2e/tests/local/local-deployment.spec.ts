@@ -108,22 +108,22 @@ test.describe("Local features", () => {
     await page.waitForURL(/\/app$/, { timeout: 30_000 });
   });
 
-  test("stock Elmo branding is used", async ({ page }) => {
+  test("stock ChatSpy branding is used", async ({ page }) => {
     await page.goto(`${brandUrl()}`);
 
-    // The Elmo wordmark, not a whitelabel icon + name.
-    await expect(page.getByText("elmo", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
-    // Self-hosters get the version and project links a whitelabel build hides.
-    await expect(page.locator('a[href="https://github.com/elmohq/elmo"]')).toBeVisible();
+    // The ChatSpy wordmark, not a whitelabel icon + name.
+    await expect(page.getByText("chatspy", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
+    // Self-hosters get the version label a whitelabel build hides.
+    await expect(page.getByText(/^v\d+\.\d+\.\d+/).first()).toBeVisible();
   });
 
-  test("the web manifest carries the Elmo icons", async ({ request }) => {
+  test("the web manifest carries the ChatSpy icons", async ({ request }) => {
     const response = await request.get("/api/manifest");
     expect(response.status()).toBe(200);
 
     const manifest = (await response.json()) as { short_name: string; icons: { src: string }[] };
-    expect(manifest.short_name).toBe("Elmo");
-    expect(manifest.icons.some((icon) => icon.src.startsWith("/icons/elmo-icon"))).toBe(true);
+    expect(manifest.short_name).toBe("ChatSpy");
+    expect(manifest.icons.some((icon) => icon.src.startsWith("/icons/chatspy-icon"))).toBe(true);
   });
 
   test("an installed app launches at the app root, not the manifest's own directory", async ({ request }) => {

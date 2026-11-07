@@ -8,7 +8,6 @@
 
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { createFileRoute, Link, useNavigate, useRouteContext } from "@tanstack/react-router";
-import { CLOUD_ENTRY_PRICE_USD } from "@workspace/config/plans";
 import type { ClientConfig } from "@workspace/config/types";
 import { authClient } from "@workspace/lib/auth/client";
 import { Alert, AlertDescription } from "@workspace/ui/components/alert";
@@ -17,10 +16,8 @@ import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Separator } from "@workspace/ui/components/separator";
 import { useState } from "react";
-import { AuthSplitLayout } from "@/components/auth/auth-split-layout";
-import { SalesFooterLinks, SalesPanel } from "@/components/auth/sales-panel";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import FullPageCard from "@/components/full-page-card";
-import { LegalConsentNotice } from "@/components/legal-consent-notice";
 import { CAPTCHA_FAILED_MESSAGE, CaptchaError, isCaptchaRejection, useTurnstile } from "@/hooks/use-turnstile";
 import { type AttributionParams, attributionParams } from "@/lib/attribution";
 import { safeReturnTo } from "@/lib/return-to";
@@ -81,7 +78,6 @@ export function RegisterForm({
 	const [loading, setLoading] = useState(false);
 	const [pendingVerification, setPendingVerification] = useState(false);
 	const turnstile = useTurnstile();
-	const source = isCloud ? "cloud-signup" : "self-hosted-signup";
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -123,15 +119,11 @@ export function RegisterForm({
 	}
 
 	return (
-		<AuthSplitLayout
+		<AuthLayout
 			title={isCloud ? "Start tracking your AI visibility" : "Create your admin account"}
 			subtitle={
-				isCloud
-					? `Plans start at $${CLOUD_ENTRY_PRICE_USD}/mo. Cancel any time.`
-					: "This is the owner account for your self-hosted instance."
+				isCloud ? "Create an account to start tracking." : "This is the owner account for your self-hosted instance."
 			}
-			pitch={<SalesPanel variant={isCloud ? "cloud" : "self-hosted"} source={source} />}
-			footer={<SalesFooterLinks source={source} />}
 		>
 			{isCloud && (
 				<div className="space-y-4 w-full pb-4">
@@ -144,7 +136,6 @@ export function RegisterForm({
 						<IconBrandGoogle className="size-4" />
 						Continue with Google
 					</Button>
-					<LegalConsentNotice action="continuing with Google" />
 					<div className="flex items-center gap-3">
 						<Separator className="flex-1" />
 						<span className="text-xs text-muted-foreground">or</span>
@@ -200,7 +191,6 @@ export function RegisterForm({
 				<Button type="submit" className="w-full" disabled={loading}>
 					{loading ? "Creating account..." : "Create account"}
 				</Button>
-				<LegalConsentNotice action="creating an account" />
 			</form>
 			{hasUsers && (
 				<p className="text-sm text-muted-foreground pt-4">
@@ -214,7 +204,7 @@ export function RegisterForm({
 					</Link>
 				</p>
 			)}
-		</AuthSplitLayout>
+		</AuthLayout>
 	);
 }
 

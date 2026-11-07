@@ -7,7 +7,7 @@ import { setMockLoaderData, setMockRouteContext } from "./_mocks/tanstack-router
 
 const McpSettingsPage = (Route as unknown as { options: { component: ComponentType } }).options.component;
 
-function load(page: Partial<McpPageData>, appName = "Elmo", appUrl = "https://app.elmohq.com/") {
+function load(page: Partial<McpPageData>, appName = "ChatSpy", appUrl = "https://chatspy.example.com/") {
 	const readOnly = page.readOnlyDeployment ?? false;
 	setMockMcpPage(page);
 	setMockRouteContext({
@@ -74,7 +74,7 @@ export const SignInNeedsNoKey: Story = {
 		const canvas = within(canvasElement);
 		// Signing in is the path that works without issuing anything, so its
 		// snippet must not carry a key the reader has to go and fetch first.
-		const signIn = await canvas.findByText(`claude mcp add --transport http elmo ${window.location.origin}/api/mcp`);
+		const signIn = await canvas.findByText(`claude mcp add --transport http chatspy ${window.location.origin}/api/mcp`);
 		await expect(signIn).toBeVisible();
 		await expect(signIn).not.toHaveTextContent("Authorization");
 	},
@@ -92,7 +92,7 @@ export const OtherClients: Story = {
 		await userEvent.click(await canvas.findByRole("tab", { name: "Cursor" }));
 		await expect(await canvas.findByText(/~\/.cursor\/mcp.json/)).toBeVisible();
 		await userEvent.click(await canvas.findByRole("tab", { name: "Codex" }));
-		await expect(await canvas.findByText(/codex mcp login elmo/)).toBeVisible();
+		await expect(await canvas.findByText(/codex mcp login chatspy/)).toBeVisible();
 	},
 };
 
@@ -105,7 +105,7 @@ export const Whitelabel: Story = {
 		const canvas = within(canvasElement);
 		await expect(await canvas.findByText("Connect any chat bot to Acme Visibility.")).toBeVisible();
 		// Nothing on the page names the vendor.
-		await expect(canvas.queryByText(/elmo/i)).toBeNull();
+		await expect(canvas.queryByText(/chatspy|elmo/i)).toBeNull();
 	},
 };
 

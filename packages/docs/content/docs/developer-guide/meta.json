@@ -1,14 +1,4 @@
 {
 	"title": "Developer Guide",
-	"pages": [
-		"index",
-		"development-setup",
-		"commands",
-		"architecture",
-		"configuration",
-		"cloud-deployment",
-		"telemetry",
-		"ai-policy",
-		"releases"
-	]
+	"pages": ["index", "development-setup", "commands", "architecture", "configuration", "ai-policy", "releases"]
 }

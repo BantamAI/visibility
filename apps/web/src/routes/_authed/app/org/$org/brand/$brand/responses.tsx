@@ -10,7 +10,6 @@ import { ResponseCard, ResponseCardSkeletons } from "@/components/response-card"
 import { SentimentFilterCard } from "@/components/sentiment-filter";
 import { useBrandId } from "@/hooks/use-brand-id";
 import { useBrand } from "@/hooks/use-brands";
-import { useCrispChat } from "@/hooks/use-crisp-chat";
 import { joinTags, splitTags, useListFilters } from "@/hooks/use-list-filters";
 import { usePromptsSummary } from "@/hooks/use-prompts-summary";
 import { useResponseSearch, useResponseSentimentCounts } from "@/hooks/use-responses";
@@ -38,7 +37,6 @@ function ResponsesPage() {
 	const { model, lookback, tags, search: query } = useListFilters();
 
 	const { data: brand } = useBrand(brandId);
-	const { launcher } = useCrispChat();
 	const { domainFor } = useSiteIcons(brandId);
 	const trackedTargets = brand?.trackedTargets ?? [];
 	const modelParam = model === ALL_MODELS_VALUE ? undefined : model;
@@ -93,12 +91,7 @@ function ResponsesPage() {
 	} else {
 		content = (
 			<div
-				// Bottom padding keeps the pager clear of the floating support chat button.
-				className={cn(
-					"space-y-4 transition-opacity",
-					launcher === "floating" && "pb-20",
-					isPlaceholderData && "opacity-50",
-				)}
+				className={cn("space-y-4 transition-opacity", isPlaceholderData && "opacity-50")}
 				aria-busy={isPlaceholderData}
 			>
 				{data.matches.map((match) => (

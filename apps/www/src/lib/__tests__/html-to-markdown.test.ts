@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { htmlToMarkdown as convert } from "@/lib/html-to-markdown";
 
-const PAGE_URL = "https://www.elmohq.com/pricing";
+const PAGE_URL = "https://chatspy.example.com/pricing";
 
 function htmlToMarkdown(html: string, url: string): string {
 	return convert(html, url).replace(/^---\n[\s\S]*?\n---\n\n/, "");
 }
 
-function page(body: string, head = "<title>Pricing · Elmo</title>"): string {
+function page(body: string, head = "<title>Pricing · ChatSpy</title>"): string {
 	return `<!DOCTYPE html><html><head>${head}</head><body>${body}</body></html>`;
 }
 
@@ -47,7 +47,7 @@ describe("htmlToMarkdown", () => {
 			PAGE_URL,
 		);
 
-		expect(markdown).toBe("# Pricing · Elmo\n\nReal copy.");
+		expect(markdown).toBe("# Pricing · ChatSpy\n\nReal copy.");
 	});
 
 	it("joins text the renderer split with empty comments", () => {
@@ -58,12 +58,12 @@ describe("htmlToMarkdown", () => {
 
 	it("rewrites site-relative links and images to absolute URLs", () => {
 		const markdown = htmlToMarkdown(
-			page(`<main><a href="/docs">Docs</a> <a href="https://github.com/elmohq/elmo">Source</a></main>`),
+			page(`<main><a href="/docs">Docs</a> <a href="https://github.com/example/project">Source</a></main>`),
 			PAGE_URL,
 		);
 
-		expect(markdown).toContain("[Docs](https://www.elmohq.com/docs)");
-		expect(markdown).toContain("[Source](https://github.com/elmohq/elmo)");
+		expect(markdown).toContain("[Docs](https://chatspy.example.com/docs)");
+		expect(markdown).toContain("[Source](https://github.com/example/project)");
 	});
 
 	it("leaves protocol-relative URLs alone", () => {
@@ -73,7 +73,7 @@ describe("htmlToMarkdown", () => {
 	});
 
 	it("uses the document title when the content has no heading of its own", () => {
-		expect(htmlToMarkdown(page("<main><p>Body copy.</p></main>"), PAGE_URL)).toBe("# Pricing · Elmo\n\nBody copy.");
+		expect(htmlToMarkdown(page("<main><p>Body copy.</p></main>"), PAGE_URL)).toBe("# Pricing · ChatSpy\n\nBody copy.");
 	});
 
 	it("does not add a title when the content already has a heading", () => {
@@ -86,13 +86,13 @@ describe("htmlToMarkdown", () => {
 		const markdown = convert(
 			page(
 				"<main><h1>Pricing</h1></main>",
-				'<title>Pricing: Plans · Elmo</title><meta name="description" content="Plans and prices."><link rel="canonical" href="https://www.elmohq.com/pricing"><meta property="article:modified_time" content="2026-10-01">',
+				'<title>Pricing: Plans · ChatSpy</title><meta name="description" content="Plans and prices."><link rel="canonical" href="https://chatspy.example.com/pricing"><meta property="article:modified_time" content="2026-10-01">',
 			),
 			PAGE_URL,
 		);
 
 		expect(markdown).toMatch(
-			/^---\ntitle: "Pricing: Plans · Elmo"\ndescription: Plans and prices.\ncanonical: https:\/\/www.elmohq.com\/pricing\nupdated: "2026-10-01"\n---\n\n# Pricing/,
+			/^---\ntitle: "Pricing: Plans · ChatSpy"\ndescription: Plans and prices.\ncanonical: https:\/\/chatspy.example.com\/pricing\nupdated: "2026-10-01"\n---\n\n# Pricing/,
 		);
 	});
 

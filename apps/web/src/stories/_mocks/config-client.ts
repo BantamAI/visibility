@@ -28,7 +28,6 @@ export interface BrandingConfig {
 export interface AnalyticsConfig {
 	plausibleDomain?: string;
 	clarityProjectId?: string;
-	crispWebsiteId?: string;
 }
 
 export interface ClientConfig {
@@ -49,7 +48,7 @@ let _config: ClientConfig = {
 		canCreateBrands: false,
 	},
 	branding: {
-		name: "Elmo",
+		name: "ChatSpy",
 		chartColors: DEFAULT_CHART_COLORS,
 	},
 	analytics: {},

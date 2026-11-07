@@ -10,7 +10,7 @@ const WHITELABEL_ENV = {
 };
 
 describe("branding", () => {
-	it("falls back to the Elmo defaults when nothing is configured", () => {
+	it("falls back to the ChatSpy defaults when nothing is configured", () => {
 		expect(buildDeployment("local", {}).branding).toEqual({
 			name: DEFAULT_APP_NAME,
 			icon: DEFAULT_APP_ICON,
@@ -51,7 +51,7 @@ describe("branding", () => {
 		});
 	});
 
-	it("ignores VITE_APP_* overrides in cloud, which ships the Elmo defaults", () => {
+	it("ignores VITE_APP_* overrides in cloud, which ships the ChatSpy defaults", () => {
 		const { branding } = buildDeployment("cloud", {
 			VITE_APP_NAME: "Should Be Ignored",
 			VITE_APP_ICON: "https://cdn.example.com/ignored.png",
@@ -93,7 +93,7 @@ describe("getDeployment", () => {
 		expect(deployment.features.readOnly).toBe(true);
 	});
 
-	it("promotes Elmo Cloud only on Elmo's own demo, not a read-only self-hosted install", () => {
+	it("promotes ChatSpy Cloud only on ChatSpy's own demo, not a read-only self-hosted install", () => {
 		expect(getDeployment({ env: { DEPLOYMENT_MODE: "demo" } }).features.promotesCloud).toBe(true);
 		resetDeploymentCache();
 		expect(getDeployment({ env: { DEPLOYMENT_MODE: "local", READ_ONLY: "true" } }).features.promotesCloud).toBe(false);

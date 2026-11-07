@@ -30,10 +30,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useBrandId } from "@/hooks/use-brand-id";
 import { useBranding, useDeploymentFeatures, useDeploymentMode } from "@/hooks/use-deployment-features";
 import { useOrganizations } from "@/hooks/use-organizations";
-import { resetCrispSession } from "@/lib/crisp";
 import { organizationTree } from "@/lib/organizations/tree";
 import type { OrganizationSummary } from "@/lib/organizations/types";
-import { resetPostHog } from "@/lib/posthog";
 
 const INLINE_ORGANIZATION_LIMIT = 3;
 
@@ -185,8 +183,6 @@ function AccountActions({ onNavigate }: { onNavigate: () => void }) {
 						authClient.signOut({
 							fetchOptions: {
 								onSuccess: () => {
-									resetPostHog();
-									resetCrispSession();
 									window.location.href = "/auth/logout";
 								},
 							},

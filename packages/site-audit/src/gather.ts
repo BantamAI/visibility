@@ -175,7 +175,7 @@ async function fetchRobots(fetcher: Fetcher, origin: string) {
 		ignoreRobots: true,
 		maxBytes: ROBOTS_BODY,
 	});
-	// Judged by the body rather than Content-Type, so rules served as text/html still bind ElmoBot.
+	// Judged by the body rather than Content-Type, so rules served as text/html still bind ChatSpyBot.
 	const robots =
 		isOk(robotsFetch) && !looksLikeHtml(robotsFetch.body)
 			? parseRobots(`${origin}/robots.txt`, robotsFetch.body)
@@ -208,8 +208,8 @@ async function fetchPages(
 	return pages;
 }
 
-// The probes act as other bots, so robots.txt rules for ElmoBot can't gate them
-// request by request; a site that keeps ElmoBot off its homepage gets none.
+// The probes act as other bots, so robots.txt rules for ChatSpyBot can't gate them
+// request by request; a site that keeps ChatSpyBot off its homepage gets none.
 async function probeBots(
 	options: GatherOptions,
 	robots: ParsedRobots | undefined,
@@ -315,7 +315,7 @@ export async function gatherSite(options: GatherOptions): Promise<SiteArtifacts>
 		page.markdownSuffix = await fetcher.get(markdownSuffixUrl(page.url), { accept: MARKDOWN_ACCEPT });
 	}
 
-	const notFound = await fetcher.get(`${origin}/elmo-audit-${Date.now().toString(36)}-not-a-page`);
+	const notFound = await fetcher.get(`${origin}/chatspy-audit-${Date.now().toString(36)}-not-a-page`);
 	const llmsFullHead = await fetcher.get(`${origin}/llms-full.txt`, { method: "HEAD", accept: TEXT_ACCEPT });
 	const headUnsupported = isResponse(llmsFullHead) && (llmsFullHead.status === 405 || llmsFullHead.status === 501);
 	const llmsFullTxt = headUnsupported

@@ -21,7 +21,6 @@ import {
 } from "./jobs/reprocess";
 import { configureMentionAnalyzer, mentionAnalyzer } from "./mention-judge";
 import { initializePipeline } from "./rollups-startup";
-import { shutdownTelemetry } from "./telemetry";
 
 if (process.env.SENTRY_DSN) {
 	Sentry.init({
@@ -183,7 +182,7 @@ main().catch(async (error) => {
 async function shutDownGracefully(signal: NodeJS.Signals): Promise<void> {
 	console.log(`Received ${signal}, shutting down gracefully...`);
 	await getBoss().stop({ graceful: true, timeout: 30000 });
-	await Promise.all([Sentry.flush(2000), shutdownTelemetry()]);
+	await Sentry.flush(2000);
 	console.log("Worker stopped");
 	process.exit(0);
 }

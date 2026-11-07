@@ -38,7 +38,7 @@ function desiredCatalog(): DesiredPrice[] {
 		for (const [interval, usd, stripeInterval] of entries) {
 			prices.push({
 				lookupKey: stripePlanLookupKey(key, interval),
-				productName: `Elmo Cloud ${plan.name}`,
+				productName: `ChatSpy Cloud ${plan.name}`,
 				productKey: key,
 				unitAmountUsd: usd,
 				interval: stripeInterval,
@@ -47,14 +47,14 @@ function desiredCatalog(): DesiredPrice[] {
 	}
 	prices.push({
 		lookupKey: PREMIUM_ADDON_LOOKUP_KEYS.monthly,
-		productName: "Elmo Cloud Extra Premium Prompts",
+		productName: "ChatSpy Cloud Extra Premium Prompts",
 		productKey: "premium-addon",
 		unitAmountUsd: PREMIUM_ADDON_MONTHLY_USD,
 		interval: "month",
 	});
 	prices.push({
 		lookupKey: PREMIUM_ADDON_LOOKUP_KEYS.annual,
-		productName: "Elmo Cloud Extra Premium Prompts",
+		productName: "ChatSpy Cloud Extra Premium Prompts",
 		productKey: "premium-addon",
 		unitAmountUsd: PREMIUM_ADDON_ANNUAL_USD,
 		interval: "year",

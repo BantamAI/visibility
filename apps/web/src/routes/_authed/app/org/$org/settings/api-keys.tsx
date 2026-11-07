@@ -46,7 +46,6 @@ import { useDeploymentFeatures } from "@/hooks/use-deployment-features";
 import { useIsTruncated } from "@/hooks/use-is-truncated";
 import { useOrganization } from "@/hooks/use-organizations";
 import { API_SCOPES } from "@/lib/api/scopes";
-import { trackEvent } from "@/lib/posthog";
 import { pageHead } from "@/lib/route-head";
 import {
 	type ApiKeyAccess,
@@ -290,7 +289,6 @@ function CreateKeyForm({
 					expiresInDays: expiresInDays === "never" ? null : Number(expiresInDays),
 				},
 			});
-			trackEvent("api_key_created", { access, restricted: restrictBrands });
 			onCreated(key);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to create the API key");

@@ -1,6 +1,6 @@
 # License Compliance Check
 #
-# Validates that all dependencies use licenses compatible with MIT.
+# Validates that all dependencies use licenses compatible with MIT and that\n# no commercially licensed (ee/, enterprise/) code is in the tree.
 # Lightweight – only needs Node + pnpm, no Docker or databases.
 
 name: License Check
@@ -8,15 +8,8 @@ name: License Check
 on:
   push:
     branches: [main]
-    paths: &deps
-      - "**/package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "scripts/check-licenses.mjs"
-      - ".github/workflows/license-check.yaml"
   pull_request:
     branches: [main]
-    paths: *deps
   workflow_dispatch:
 
 permissions:

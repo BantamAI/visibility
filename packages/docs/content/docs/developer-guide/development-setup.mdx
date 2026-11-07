@@ -1,6 +1,6 @@
 ---
 title: Development Setup
-description: Set up a local development environment for contributing to Elmo.
+description: Set up a local development environment for contributing to ChatSpy.
 updated: 2026-10-25
 ---
 
@@ -14,8 +14,8 @@ updated: 2026-10-25
 ## Clone and Install
 
 ```bash
-git clone https://github.com/elmohq/elmo.git
-cd elmo
+git clone <repository-url> chatspy
+cd chatspy
 pnpm install
 ```
 
@@ -78,18 +78,18 @@ For a setup closer to production, use the CLI in dev mode:
 
 ```bash
 # Build from local source instead of pulling images
-elmo init --dev
+chatspy init --dev
 
 # Rebuild after code changes
-elmo compose build
-elmo compose up -d
+chatspy compose build
+chatspy compose up -d
 ```
 
 The Docker build uses a multi-stage `docker/Dockerfile` with separate targets for `web` and `worker`.
 
 ## Component Stories
 
-Elmo uses Storybook for component development in isolation:
+ChatSpy uses Storybook for component development in isolation:
 
 ```bash
 pnpm --filter @workspace/web storybook

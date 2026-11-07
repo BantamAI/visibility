@@ -19,8 +19,7 @@
 		"auth0": "catalog:",
 		"drizzle-orm": "catalog:",
 		"pg": "catalog:",
-		"pg-boss": "catalog:",
-		"posthog-node": "catalog:"
+		"pg-boss": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",

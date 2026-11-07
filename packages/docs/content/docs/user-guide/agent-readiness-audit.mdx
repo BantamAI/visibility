@@ -1,15 +1,15 @@
 ---
 title: Agent Readiness Audit
-description: Check how well AI agents and crawlers can reach, read, and understand your website, from the Elmo CLI.
+description: Check how well AI agents and crawlers can reach, read, and understand your website, from the ChatSpy CLI.
 updated: 2026-11-05
 ---
 
-`elmo lab audit` checks a website the way AI crawlers and agents see it, then lists what to fix. It runs
-on its own: you don't need an Elmo instance or Docker.
+`chatspy lab audit` checks a website the way AI crawlers and agents see it, then lists what to fix. It runs
+on its own: you don't need an ChatSpy instance or Docker.
 
 ```bash
 npm install -g @elmohq/cli
-elmo lab audit example.com
+chatspy lab audit example.com
 ```
 
 ## Alternate Domains
@@ -17,7 +17,7 @@ elmo lab audit example.com
 Pass every other domain your brand uses with `--domain`:
 
 ```bash
-elmo lab audit example.com --domain example.co --domain docs.example.com
+chatspy lab audit example.com --domain example.co --domain docs.example.com
 ```
 
 Each domain is resolved first, then handled by where it lands:
@@ -80,24 +80,24 @@ don't apply to it. The exception is a site that blocks the audit, through robots
 requests: agents hit the same wall, so its unchecked results count as failures. With more than one
 site, the overall score is their average.
 
-## ElmoBot
+## ChatSpyBot
 
-The audit identifies itself as `ElmoBot/1.0` and links to this page. It is built to be cheap for the
+The audit identifies itself as `ChatSpyBot/1.0` and links to this page. It is built to be cheap for the
 sites it checks:
 
 - At most 75 requests per run by default, made one at a time per site, at least one second apart.
 - It honors `Crawl-delay`, backs off on `429` and `503` responses, and stops after repeated errors.
 - It fetches each domain's homepage once to see where it redirects. After that it reads the site's
-  `robots.txt` and skips any page that disallows `ElmoBot`. A site that disallows the homepage for
-  `ElmoBot` gets no requests that use other bots' user agents either. A `robots.txt` that fails with
+  `robots.txt` and skips any page that disallows `ChatSpyBot`. A site that disallows the homepage for
+  `ChatSpyBot` gets no requests that use other bots' user agents either. A `robots.txt` that fails with
   a server error or a `429` is treated as disallowing everything.
 - It stops on a `Crawl-delay` longer than 10 seconds rather than waiting it out.
 - It only fetches public HTTPS URLs.
 
-To stop ElmoBot after its first homepage request:
+To stop ChatSpyBot after its first homepage request:
 
 ```text
-User-agent: ElmoBot
+User-agent: ChatSpyBot
 Disallow: /
 ```
 
