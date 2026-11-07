@@ -7,8 +7,6 @@
 
 import { DocsSidebar } from "@workspace/docs/components/docs-sidebar";
 import { DocsToc } from "@workspace/docs/components/docs-toc";
-import { Feedback } from "@workspace/docs/components/feedback/client";
-import type { ActionResponse, PageFeedback } from "@workspace/docs/components/feedback/schema";
 import browserCollections from "collections/browser";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import type { OpenAPIPageProps } from "fumadocs-openapi/ui";
@@ -29,16 +27,6 @@ function docsMarkdownPath(slugs: string[]): string {
 	return slugs.length ? `/docs/${slugs.join("/")}.md` : "/docs.md";
 }
 
-async function onFeedback(feedback: PageFeedback): Promise<ActionResponse> {
-	const { trackEvent } = await import("@/lib/posthog");
-	trackEvent("docs_page_feedback", {
-		opinion: feedback.opinion,
-		message: feedback.message || undefined,
-		url: feedback.url,
-	});
-	return { success: true };
-}
-
 /**
  * The rendered page body. Its own component so useMDXComponents runs at the
  * top level of one, rather than inside the loader's render callback.
@@ -57,9 +45,6 @@ function DocsArticle({
 			<h1>{title}</h1>
 			{description && <p className="lead text-muted-foreground">{description}</p>}
 			<MDX components={useMDXComponents()} />
-			<div className="not-prose">
-				<Feedback onSendAction={onFeedback} />
-			</div>
 		</article>
 	);
 }

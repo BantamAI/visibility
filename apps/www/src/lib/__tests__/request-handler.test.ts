@@ -23,9 +23,6 @@ function fakeApp() {
 			}
 			if (pathname.startsWith("/llms.mdx/")) return markdownNotFound();
 			if (pathname === "/auth.md") return new Response("# auth.md", { headers: { "Content-Type": MARKDOWN } });
-			if (pathname === "/blog/rss.xml") {
-				return new Response("<rss/>", { headers: { "Content-Type": "application/rss+xml; charset=utf-8" } });
-			}
 			const titles: Record<string, string> = { "/": "Home", "/pricing": "Pricing", "/docs/getting-started": "Docs" };
 			const title = titles[pathname];
 			return new Response(page(title ?? "Not Found"), {
@@ -145,7 +142,7 @@ describe("markdown for pages without an MDX source", () => {
 	});
 });
 
-describe("docs and blog", () => {
+describe("docs", () => {
 	it("serves a docs page's MDX source at its own URL", async () => {
 		const { handle, seen } = fakeApp();
 		const response = await handle(get("/docs/getting-started", "text/markdown"));
@@ -154,16 +151,6 @@ describe("docs and blog", () => {
 		expect(response.headers.get("Vary")).toBe("Accept");
 		expect(new URL(seen[0].url).pathname).toBe("/llms.mdx/docs/getting-started");
 	});
-
-	it.each(["application/rss+xml, application/atom+xml", "text/markdown"])(
-		"serves the RSS feed to Accept %s untouched",
-		async (accept) => {
-			const { handle } = fakeApp();
-			const response = await handle(get("/blog/rss.xml", accept));
-			expect(response.headers.get("Content-Type")).toBe("application/rss+xml; charset=utf-8");
-			expect(await response.text()).toBe("<rss/>");
-		},
-	);
 });
 
 describe("not-found pages", () => {
@@ -197,15 +184,8 @@ describe("not-found pages", () => {
 describe("redirects", () => {
 	it("still redirects permanently regardless of Accept", async () => {
 		const { handle } = fakeApp();
-		const response = await handle(get("/terms", "text/markdown"));
+		const response = await handle(get("/docs/mcp", "text/markdown"));
 		expect(response.status).toBe(308);
-		expect(response.headers.get("Location")).toBe("/legal/terms");
-	});
-
-	it("points OAuth discovery at the app, which is the issuer", async () => {
-		const { handle } = fakeApp();
-		const response = await handle(get("/.well-known/oauth-authorization-server"));
-		expect(response.status).toBe(307);
-		expect(response.headers.get("Location")).toBe("https://app.elmohq.com/.well-known/oauth-authorization-server");
+		expect(response.headers.get("Location")).toBe("/docs/api/mcp");
 	});
 });

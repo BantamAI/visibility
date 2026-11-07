@@ -1,11 +1,10 @@
 import type { InferPageType } from "fumadocs-core/source";
-import type { blogSource } from "@/lib/blog";
 import { withFrontmatter } from "@/lib/frontmatter";
 import { pageLastUpdated } from "@/lib/page-dates";
 import { canonicalUrl } from "@/lib/seo";
 import type { source } from "@/lib/source";
 
-type MarkdownPage = InferPageType<typeof source> | InferPageType<typeof blogSource>;
+type MarkdownPage = InferPageType<typeof source>;
 
 export async function getLLMText(page: MarkdownPage) {
 	if (page.type === "openapi") {

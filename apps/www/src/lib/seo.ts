@@ -1,4 +1,3 @@
-import { PLAN_KEYS, PLANS } from "@workspace/config/plans";
 import { getMarketingOgImage } from "./og";
 
 export const SITE_URL = "https://www.elmohq.com";
@@ -9,7 +8,7 @@ export const SITE_NAME = "Elmo";
 // carries no pricing so it stays true wherever it is reused.
 export const SITE_DESCRIPTION =
 	"Open-source answer engine optimization (AEO) platform: track how AI answers mention and cite your brand.";
-const SITE_LOGO_URL = `${SITE_URL}/brand/icons/elmo-icon-512.png`;
+const SITE_LOGO_URL = `${SITE_URL}/icons/elmo-icon-512.png`;
 
 export function canonicalUrl(path: string): string {
 	return `${SITE_URL}${path}`;
@@ -76,98 +75,9 @@ export function organizationJsonLd() {
 	return jsonLd({
 		"@type": "Organization",
 		name: SITE_NAME,
-		// "Elmo" collides with several unrelated products and a Sesame Street
-		// character, so spell out the alternate names and what we actually do —
-		// the signals search engines use to tell entities apart.
-		alternateName: ["ElmoHQ", "Elmo AEO"],
 		description: SITE_DESCRIPTION,
 		url: SITE_URL,
 		logo: SITE_LOGO_URL,
-		sameAs: [
-			"https://github.com/elmohq/elmo",
-			"https://hub.docker.com/u/elmohq",
-			"https://www.npmjs.com/package/@elmohq/cli",
-			"https://stackshare.io/elmo-mp4ocwtq",
-			"https://x.com/tryelmo",
-			"https://www.linkedin.com/company/elmohq",
-			"https://discord.gg/s24nubCtKz",
-			"https://www.producthunt.com/products/elmo",
-			"https://www.crunchbase.com/organization/elmo-14db",
-			"https://www.g2.com/products/blue-whale-software-llc-elmo/reviews",
-			"https://alternativeto.net/software/elmo/",
-			"https://www.saashub.com/elmohq",
-			"https://peerpush.com/p/elmo",
-			"https://devhunt.org/tool/elmo",
-		],
-		foundingDate: "2025-07",
-		founder: {
-			"@type": "Person",
-			name: "Jared Rhizor",
-			url: "https://jrhizor.dev",
-			sameAs: ["https://www.linkedin.com/in/jrhizor", "https://x.com/jaredrhizor", "https://github.com/jrhizor"],
-		},
-		address: {
-			"@type": "PostalAddress",
-			addressLocality: "San Francisco",
-			addressRegion: "CA",
-			addressCountry: "US",
-		},
-		contactPoint: [
-			{
-				"@type": "ContactPoint",
-				contactType: "customer support",
-				email: "contact@elmohq.com",
-				url: canonicalUrl("/support"),
-				availableLanguage: "English",
-			},
-			{
-				"@type": "ContactPoint",
-				contactType: "security",
-				email: "security@elmohq.com",
-				url: canonicalUrl("/support"),
-				availableLanguage: "English",
-			},
-		],
-		parentOrganization: {
-			"@type": "Organization",
-			name: "Blue Whale Software, LLC",
-			url: "https://bluewhale.dev",
-		},
-	});
-}
-
-/** The prices the homepage pricing section shows. */
-export function softwareApplicationJsonLd() {
-	const cloudPlans = PLAN_KEYS.map((key) => PLANS[key]);
-	return jsonLd({
-		"@type": "SoftwareApplication",
-		name: SITE_NAME,
-		description: SITE_DESCRIPTION,
-		applicationCategory: "BusinessApplication",
-		operatingSystem: "Any",
-		offers: {
-			"@type": "AggregateOffer",
-			priceCurrency: "USD",
-			lowPrice: "0",
-			highPrice: String(Math.max(...cloudPlans.map((plan) => plan.monthlyPriceUsd))),
-			offerCount: cloudPlans.length + 1,
-			offers: [
-				{ "@type": "Offer", name: "Self-hosted", price: "0", priceCurrency: "USD" },
-				...cloudPlans.map((plan) => ({
-					"@type": "Offer",
-					name: `Elmo Cloud ${plan.name}`,
-					price: String(plan.monthlyPriceUsd),
-					priceCurrency: "USD",
-					priceSpecification: {
-						"@type": "UnitPriceSpecification",
-						price: String(plan.monthlyPriceUsd),
-						priceCurrency: "USD",
-						unitText: "MONTH",
-					},
-				})),
-			],
-		},
-		url: SITE_URL,
 	});
 }
 
@@ -196,41 +106,6 @@ export function articleJsonLd({
 	});
 }
 
-export function blogPostingJsonLd({
-	title,
-	description,
-	path,
-	datePublished,
-	dateModified,
-	authorName,
-}: {
-	title: string;
-	description: string;
-	path: string;
-	datePublished: string;
-	dateModified?: string;
-	/** A real person's name. Omit for AI-generated posts — the org is credited. */
-	authorName?: string;
-}) {
-	return jsonLd({
-		"@type": "BlogPosting",
-		headline: title,
-		description,
-		url: canonicalUrl(path),
-		datePublished,
-		...(dateModified ? { dateModified } : {}),
-		author: authorName
-			? { "@type": "Person", name: authorName }
-			: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
-		publisher: {
-			"@type": "Organization",
-			name: SITE_NAME,
-			url: SITE_URL,
-			logo: { "@type": "ImageObject", url: SITE_LOGO_URL },
-		},
-	});
-}
-
 export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
 	return jsonLd({
 		"@type": "BreadcrumbList",
@@ -239,130 +114,6 @@ export function breadcrumbJsonLd(items: { name: string; path: string }[]) {
 			position: index + 1,
 			name: item.name,
 			item: canonicalUrl(item.path),
-		})),
-	});
-}
-
-/**
- * FAQPage schema — the question/answer pairs an answer engine is most likely to
- * lift verbatim. Pair it with a visibly rendered FAQ (the <Faq> component, or
- * the blog FAQ block) so the markup and the content stay in sync.
- */
-export function faqJsonLd(
-	items: { question: string; answer: string }[],
-	page?: { path: string; dateModified?: string },
-) {
-	return jsonLd({
-		"@type": "FAQPage",
-		...(page && { url: canonicalUrl(page.path) }),
-		...(page?.dateModified && { dateModified: page.dateModified }),
-		mainEntity: items.map((item) => ({
-			"@type": "Question",
-			name: item.question,
-			acceptedAnswer: {
-				"@type": "Answer",
-				text: item.answer,
-			},
-		})),
-	});
-}
-
-/**
- * ItemList schema for roundup/listicle and directory pages. Provide `path` for a
- * site-relative item (canonicalized here) or `url` for an absolute one (e.g. an
- * external vendor); `description` is optional.
- */
-export function itemListJsonLd(items: { name: string; path?: string; url?: string; description?: string }[]) {
-	return jsonLd({
-		"@type": "ItemList",
-		itemListElement: items.map((item, index) => ({
-			"@type": "ListItem",
-			position: index + 1,
-			name: item.name,
-			...(item.path
-				? { url: canonicalUrl(item.path) }
-				: item.url
-					? { url: item.url.startsWith("http") ? item.url : canonicalUrl(item.url) }
-					: {}),
-			...(item.description ? { description: item.description } : {}),
-		})),
-	});
-}
-
-/** Elmo's entry for a comparison ItemList (always the open-source option). */
-export const ELMO_LISTING = { name: SITE_NAME, url: SITE_URL };
-
-/**
- * ItemList of the software products weighed on a comparison page, each as a
- * SoftwareApplication. Honest structured data for "X vs Y" and "X vs Y vs Z"
- * pages: it names the tools compared so answer engines can parse the matchup,
- * without asserting prices or ratings we don't have for other vendors. Pair it
- * with softwareApplicationJsonLd() so Elmo's free offer is stated explicitly.
- */
-export function comparisonJsonLd(tools: { name: string; url?: string }[]) {
-	return jsonLd({
-		"@type": "ItemList",
-		itemListElement: tools.map((tool, index) => ({
-			"@type": "ListItem",
-			position: index + 1,
-			item: {
-				"@type": "SoftwareApplication",
-				name: tool.name,
-				applicationCategory: "BusinessApplication",
-				...(tool.url ? { url: tool.url } : {}),
-			},
-		})),
-	});
-}
-
-/**
- * DefinedTermSet schema for the glossary. Each term is a DefinedTerm; `url` is
- * an optional "see also" target (canonicalized when site-relative).
- */
-export function definedTermSetJsonLd({
-	name,
-	description,
-	path,
-	terms,
-}: {
-	name: string;
-	description?: string;
-	path?: string;
-	terms: { term: string; definition: string; url?: string }[];
-}) {
-	return jsonLd({
-		"@type": "DefinedTermSet",
-		name,
-		...(description ? { description } : {}),
-		...(path ? { url: canonicalUrl(path) } : {}),
-		hasDefinedTerm: terms.map((t) => ({
-			"@type": "DefinedTerm",
-			name: t.term,
-			description: t.definition,
-			...(t.url ? { url: t.url.startsWith("http") ? t.url : canonicalUrl(t.url) } : {}),
-		})),
-	});
-}
-
-/** HowTo schema for step-by-step guides (e.g. tracking a brand in AI search). */
-export function howToJsonLd({
-	name,
-	description,
-	steps,
-}: {
-	name: string;
-	description?: string;
-	steps: { name: string; text: string }[];
-}) {
-	return jsonLd({
-		"@type": "HowTo",
-		name,
-		...(description ? { description } : {}),
-		step: steps.map((step, index) => ({
-			"@type": "HowToStep",
-			position: index + 1,
-			name: step.name,
-			text: step.text,
 		})),
 	});
 }

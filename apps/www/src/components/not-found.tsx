@@ -1,14 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, Home } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Footer } from "./footer";
 import { Navbar } from "./navbar";
-
-const suggestedLinks = [
-	{ label: "Documentation", href: "/docs", description: "Get started and learn the API" },
-	{ label: "Features", href: "/features", description: "What Elmo can do for your brand" },
-	{ label: "Pricing", href: "/pricing", description: "Free to self-host; cloud from $29/mo" },
-	{ label: "Roadmap", href: "/roadmap", description: "What we're building next" },
-];
 
 export function NotFound() {
 	return (
@@ -30,13 +23,6 @@ export function NotFound() {
 							</p>
 							<div className="mt-8 flex flex-wrap items-center justify-center gap-2">
 								<Link
-									to="/"
-									className="inline-flex h-8 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-sm font-medium leading-none text-white ring-1 ring-blue-600 hover:bg-blue-700"
-								>
-									<Home className="size-3.5" />
-									Back to home
-								</Link>
-								<Link
 									to="/docs"
 									className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white px-3 text-sm font-medium leading-none text-zinc-900 ring-1 ring-zinc-200 hover:bg-zinc-50 hover:ring-zinc-300"
 								>
@@ -45,28 +31,6 @@ export function NotFound() {
 								</Link>
 							</div>
 						</div>
-					</div>
-				</section>
-
-				<section className="border-b border-zinc-200 bg-zinc-50 py-12 lg:py-16">
-					<div className="mx-auto max-w-6xl px-4 md:px-6">
-						<h2 className="font-heading text-2xl text-zinc-950 md:text-3xl">Popular destinations</h2>
-						<ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-							{suggestedLinks.map((link) => (
-								<li key={link.href}>
-									<a
-										href={link.href}
-										className="group flex h-full flex-col rounded-md border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
-									>
-										<span className="flex items-center justify-between text-sm font-semibold text-zinc-950">
-											{link.label}
-											<ArrowUpRight className="size-3.5 text-zinc-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-zinc-700" />
-										</span>
-										<span className="mt-1 text-sm text-zinc-600">{link.description}</span>
-									</a>
-								</li>
-							))}
-						</ul>
 					</div>
 				</section>
 			</main>
