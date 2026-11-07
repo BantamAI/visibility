@@ -186,8 +186,6 @@ async function main(): Promise<void> {
 	await acceptDefault("How should ChatSpy call Jev?");
 	await answer("TypeSafe API key", "stub");
 
-	await confirm("Share telemetry?", false, { defaultAnswer: true });
-	await acceptDefault("email to receive product updates");
 	await acceptDefault("How will you access ChatSpy?");
 	await acceptDefault("Web app port");
 	await confirm("Start the stack now?", false, { defaultAnswer: true });

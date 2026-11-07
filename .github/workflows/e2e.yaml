@@ -331,7 +331,6 @@ jobs:
       DATABASE_URL: postgres://elmo:elmo@localhost:5432/elmo
       BETTER_AUTH_SECRET: scheduling-policy-ci-secret-0123456789
       APP_URL: http://localhost:3000
-      DISABLE_TELEMETRY: 1
 
     steps:
       - name: Checkout

@@ -12,7 +12,6 @@ import { SidebarTrigger } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
 import { Fragment } from "react";
 import { DemoSignupCta } from "@/components/demo-signup-cta";
-import { SupportChatButton } from "@/components/support-chat-button";
 import { type Crumb, useBreadcrumbs } from "@/lib/breadcrumbs";
 
 // `transition-none` overrides the link's own `transition-colors`: the rail and
@@ -68,7 +67,6 @@ export function SiteHeader() {
 				</Breadcrumb>
 				<div className="ml-auto flex items-center gap-2">
 					<DemoSignupCta />
-					<SupportChatButton />
 				</div>
 			</div>
 		</header>

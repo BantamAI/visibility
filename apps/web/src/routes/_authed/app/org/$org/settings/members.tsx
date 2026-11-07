@@ -7,7 +7,6 @@ import { Label } from "@workspace/ui/components/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { useState } from "react";
 import { WriteErrorMessage } from "@/components/write-error-message";
-import { trackEvent } from "@/lib/posthog";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
 import { cancelInvitationFn, inviteTeamMemberFn, listTeamFn, removeTeamMemberFn, type TeamData } from "@/server/team";
@@ -40,7 +39,6 @@ function TeamSettingsPage() {
 		setInviting(true);
 		try {
 			await inviteTeamMemberFn({ data: { organizationId, email: inviteEmail, role: inviteRole } });
-			trackEvent("team_member_invited", { role: inviteRole });
 			setInviteEmail("");
 			setInviteRole("member");
 			await router.invalidate();

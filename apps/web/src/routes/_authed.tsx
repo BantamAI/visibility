@@ -9,16 +9,12 @@
  * lib/shell-scope.ts.
  */
 
-import { createFileRoute, Outlet, redirect, useRouteContext } from "@tanstack/react-router";
-import type { ClientConfig } from "@workspace/config/types";
-import { useEffect, useRef } from "react";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { AppShell, PageContent } from "@/components/app-shell";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { useShellScope } from "@/hooks/use-shell-scope";
 import { attributionParams } from "@/lib/attribution";
-import { identifyCrispUser } from "@/lib/crisp";
-import { identifyUser, setPersonProperties } from "@/lib/posthog";
 import { viewerQuery } from "@/lib/viewer/queries";
 
 export const Route = createFileRoute("/_authed")({
@@ -39,28 +35,6 @@ export const Route = createFileRoute("/_authed")({
 });
 
 function AuthedLayout() {
-	const context = useRouteContext({ strict: false }) as {
-		session?: { user: { id: string; name?: string; email?: string } } | null;
-		clientConfig?: ClientConfig;
-	};
-	const identifiedRef = useRef<string | null>(null);
-
-	useEffect(() => {
-		const user = context.session?.user;
-		if (!user || identifiedRef.current === user.id) return;
-		identifiedRef.current = user.id;
-
-		identifyUser(user.id, {
-			email: user.email,
-			name: user.name,
-			deployment_mode: context.clientConfig?.mode,
-		});
-		setPersonProperties({
-			deployment_mode: context.clientConfig?.mode,
-		});
-		identifyCrispUser({ id: user.id, email: user.email, name: user.name });
-	}, [context.session?.user, context.clientConfig?.mode]);
-
 	return <Shell />;
 }
 

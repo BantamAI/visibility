@@ -27,7 +27,6 @@ When you run `elmo init`, the CLI generates a `.env` file in your config directo
 | `BETTER_AUTH_SECRET` | Secret key for session encryption | Auto-generated |
 | `ELMO_ENCRYPTION_KEY` | Base64-encoded 32-byte key used to encrypt provider credentials stored in the database | Auto-generated |
 | `ELMO_ENCRYPTION_KEY_OLD` | Previous encryption keys, comma-separated, kept readable during a rotation | — |
-| `DISABLE_TELEMETRY` | Set to `1` to disable all telemetry. See [Telemetry](/docs/developer-guide/telemetry). | — |
 | `DEFAULT_DELAY_HOURS` | How often each enabled prompt is re-run against the AI models, in hours. | `24` |
 | `RUNS_PER_PROMPT` | How many times each run samples every tracked platform. Answers vary between identical calls, so several samples make a mention rate a measurement rather than an anecdote — but each one is a provider call you pay for. | `5` |
 

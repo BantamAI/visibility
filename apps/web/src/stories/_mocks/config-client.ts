@@ -28,7 +28,6 @@ export interface BrandingConfig {
 export interface AnalyticsConfig {
 	plausibleDomain?: string;
 	clarityProjectId?: string;
-	crispWebsiteId?: string;
 }
 
 export interface ClientConfig {

@@ -35,7 +35,6 @@
 		"fumadocs-ui": "^16.17.9",
 		"lucide-react": "catalog:",
 		"nitro": "catalog:",
-		"posthog-js": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"rehype-parse": "^9.0.1",

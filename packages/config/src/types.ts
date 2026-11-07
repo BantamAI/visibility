@@ -27,9 +27,6 @@ export interface FeaturesConfig {
 export interface AnalyticsConfig {
 	plausibleDomain?: string;
 	clarityProjectId?: string;
-	posthogKey?: string;
-	/** Only set on deployments we operate (cloud and demo). */
-	crispWebsiteId?: string;
 }
 
 export interface BrandingConfig {

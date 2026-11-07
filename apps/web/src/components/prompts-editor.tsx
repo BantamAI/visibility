@@ -11,7 +11,6 @@ import {
 import { type EditablePrompt, type PremiumAllowance, PromptsListEditor } from "@/components/prompts-list-editor";
 import { UnsavedChangesBar } from "@/components/unsaved-changes-bar";
 import { useInvalidatePromptsSummary } from "@/hooks/use-prompts-summary";
-import { trackEvent } from "@/lib/posthog";
 import { useWriteErrorMessage } from "@/lib/write-errors";
 import { updatePromptsFn } from "@/server/prompts";
 
@@ -153,13 +152,6 @@ export function PromptsEditor({ initialPrompts, brandId, pageTitle, pageDescript
 			];
 
 			const saved = await updatePromptsFn({ data: { brandId, prompts: allPrompts } });
-
-			trackEvent("prompts_updated", {
-				added: addedCount,
-				edited: editedCount,
-				deleted: removedCount,
-				suggested: validPrompts.filter((p) => p.suggested && !p.id).length,
-			});
 
 			// Adopt the server's rows so newly inserted prompts carry their real
 			// ids — re-saving without them would insert duplicates.

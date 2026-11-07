@@ -9,7 +9,6 @@ import { WriteErrorMessage } from "@/components/write-error-message";
 import { useOrganizationsChanged } from "@/hooks/use-organizations";
 import { useOrganizationParams } from "@/hooks/use-route-params";
 import { validateWebsiteUrl } from "@/lib/brand-website";
-import { trackEvent } from "@/lib/posthog";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
 import { createBrandInOrgFn } from "@/server/brands";
@@ -58,7 +57,6 @@ function NewBrandPage() {
 					...(enabledModels && enabledModels.length > 0 && { enabledModels }),
 				},
 			});
-			trackEvent("brand_created", { has_website: Boolean(website) });
 
 			await organizationsChanged(() =>
 				navigate({ to: "/app/org/$org/brand/$brand", params: { ...organizationParams, brand: brandSlug } }),

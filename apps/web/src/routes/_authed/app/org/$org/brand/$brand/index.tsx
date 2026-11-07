@@ -4,10 +4,9 @@ import { labelForModelFilter } from "@workspace/config/model-filter";
 import type { ClientConfig } from "@workspace/config/types";
 import type { BrandTrackingState } from "@workspace/lib/brand-state";
 import { buttonVariants } from "@workspace/ui/components/button";
-import { Card, CardContent } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip";
-import { type ReactNode, useEffect } from "react";
+import type { ReactNode } from "react";
 import { ALL_MODELS_VALUE, FilterBar } from "@/components/filter-bar";
 import { CompetitiveLandscape } from "@/components/overview/competitive-landscape";
 import { HeadlineCard } from "@/components/overview/headline-card";
@@ -21,8 +20,6 @@ import { usePromptsSummary } from "@/hooks/use-prompts-summary";
 import { useBrandParams } from "@/hooks/use-route-params";
 import { brandRank, LANDSCAPE_METRICS } from "@/lib/landscape";
 import { describeTargetSchedule, type TrackedTarget } from "@/lib/model-filter";
-import { METRIC_META } from "@/lib/overview-metrics";
-import { setPersonProperties } from "@/lib/posthog";
 import { pageHead } from "@/lib/route-head";
 import { BRAND_ROUTE_ID } from "@/lib/route-subject";
 import type { DashboardSummaryResponse } from "@/server/dashboard";
@@ -255,13 +252,6 @@ function ResearchBrandData({ brandId, clientConfig }: { brandId: string; clientC
 	);
 }
 
-/** Mirrors the brand's active prompt count onto the PostHog person. */
-function useReportedPromptCount(totalPrompts: number | undefined) {
-	useEffect(() => {
-		if (totalPrompts != null) setPersonProperties({ active_prompt_count: totalPrompts });
-	}, [totalPrompts]);
-}
-
 function OverviewFigures({
 	summary,
 	loading,
@@ -319,7 +309,6 @@ function DashboardPage() {
 		tags,
 	});
 	// A tag filter narrows the count, which would understate the brand's prompts.
-	useReportedPromptCount(tags.length === 0 ? summary?.totalPrompts : undefined);
 	const context = useRouteContext({ from: BRAND_ROUTE_ID }) as { clientConfig?: ClientConfig };
 	const clientConfig = context.clientConfig;
 	// The footer reports what this brand actually runs, resolved server-side.
