@@ -7,7 +7,12 @@
 	"scripts": {
 		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs"
 	},
+	"exports": {
+		"./local/delete-brand": "./src/local/delete-brand.ts"
+	},
 	"dependencies": {
+		"@workspace/lib": "workspace:*",
+		"drizzle-orm": "catalog:",
 		"pg": "catalog:"
 	}
 }

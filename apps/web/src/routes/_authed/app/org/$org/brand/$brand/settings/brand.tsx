@@ -4,6 +4,15 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { brandSegment, brandSlugPrefix, normalizeSlug } from "@workspace/lib/app-urls";
 import { cleanAndValidateDomain } from "@workspace/lib/citations/domain-categories";
 import { Button } from "@workspace/ui/components/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { TagsInput } from "@workspace/ui/components/tags-input";
@@ -18,7 +27,7 @@ import { useOrganization, useOrganizationsChanged } from "@/hooks/use-organizati
 import { useBrandParams } from "@/hooks/use-route-params";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
-import { updateBrandFn } from "@/server/brands";
+import { deleteBrandFn, updateBrandFn } from "@/server/brands";
 
 export const Route = createFileRoute("/_authed/app/org/$org/brand/$brand/settings/brand")({
 	staticData: { crumb: "Brand" },
@@ -231,6 +240,95 @@ function BrandSettingsPage() {
 					</Button>
 				</div>
 			</form>
+
+			<DeleteBrandSection brandId={brand.id} brandName={brand.name} />
+		</div>
+	);
+}
+
+function DeleteBrandSection({ brandId, brandName }: { brandId: string; brandName: string }) {
+	const brandParams = useBrandParams();
+	const navigate = useNavigate();
+	const organizationsChanged = useOrganizationsChanged();
+	const writeError = useWriteErrorMessage();
+	const [open, setOpen] = useState(false);
+	const [confirmation, setConfirmation] = useState("");
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [error, setError] = useState("");
+
+	const handleOpenChange = (next: boolean) => {
+		setOpen(next);
+		setConfirmation("");
+		setError("");
+	};
+
+	const handleDelete = async () => {
+		setIsDeleting(true);
+		setError("");
+		try {
+			await deleteBrandFn({ data: { brandId } });
+			await organizationsChanged(() =>
+				navigate({ to: "/app/org/$org", params: { org: brandParams.org }, replace: true }),
+			);
+		} catch (err) {
+			setError(writeError(err, "Failed to delete the brand."));
+			setIsDeleting(false);
+		}
+	};
+
+	return (
+		<div className="space-y-3 rounded-md border border-destructive/40 p-4">
+			<div>
+				<h2 className="text-lg font-semibold">Delete Brand</h2>
+				<p className="text-sm text-muted-foreground">
+					Permanently deletes this brand with its prompts, competitors, runs and citations. This can&apos;t be undone.
+				</p>
+			</div>
+			<Dialog open={open} onOpenChange={handleOpenChange}>
+				<DialogTrigger render={<Button variant="destructive" className="cursor-pointer" />}>Delete Brand</DialogTrigger>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete {brandName}?</DialogTitle>
+						<DialogDescription>
+							All of its prompts, competitors, runs and citations are deleted for good. Type the brand name to confirm.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-2">
+						<Label htmlFor="delete-brand-confirmation">Brand Name</Label>
+						<Input
+							id="delete-brand-confirmation"
+							value={confirmation}
+							onChange={(e) => setConfirmation(e.target.value)}
+							placeholder={brandName}
+							autoComplete="off"
+							disabled={isDeleting}
+						/>
+					</div>
+					{error && (
+						<div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+							<WriteErrorMessage message={error} />
+						</div>
+					)}
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => handleOpenChange(false)}
+							disabled={isDeleting}
+							className="cursor-pointer"
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleDelete}
+							disabled={isDeleting || confirmation.trim() !== brandName}
+							className="cursor-pointer"
+						>
+							{isDeleting ? "Deleting..." : "Delete Brand"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

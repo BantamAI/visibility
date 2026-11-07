@@ -44,6 +44,7 @@
 		"@workspace/deployment": "workspace:*",
 		"@workspace/lib": "workspace:*",
 		"@workspace/og": "workspace:*",
+		"@workspace/service": "workspace:*",
 		"@workspace/ui": "workspace:*",
 		"auth0": "catalog:",
 		"drizzle-orm": "catalog:",

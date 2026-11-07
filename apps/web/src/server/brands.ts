@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import type { Entitlements } from "@workspace/config/entitlements";
 import { getFanoutSupport } from "@workspace/config/fanout-support";
 import { targetFilterValue } from "@workspace/config/model-filter";
+import { isOrgAdminRole } from "@workspace/config/roles";
 import { parseScrapeTargets } from "@workspace/config/scrape-targets";
 import { getDeployment } from "@workspace/deployment";
 import { isValidSlug, MAX_SLUG_LENGTH, slugify } from "@workspace/lib/app-urls";
@@ -28,6 +29,7 @@ import {
 } from "@workspace/lib/entitlements";
 import { isGroundedApiTarget, resolveProviderAccess, selectTargetsForBrand } from "@workspace/lib/providers";
 import { defaultPlatformPicks, resolvePromptRunPlan } from "@workspace/lib/run-policy";
+import { deleteBrand } from "@workspace/service/local/delete-brand";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -335,6 +337,15 @@ export const updateBrandFn = createServerFn({ method: "POST" })
 		}
 
 		return result[0];
+	});
+
+export const deleteBrandFn = createServerFn({ method: "POST" })
+	.validator(z.object({ brandId: z.string() }))
+	.handler(async ({ data }) => {
+		const session = await requireAuthSession();
+		const org = await requireBrandOrganization(session.user.id, data.brandId);
+		if (!isOrgAdminRole(org.role)) throw new Error("Only organization admins can delete brands");
+		if (!(await deleteBrand(data.brandId))) throw new Error("Brand not found");
 	});
 
 export const getCompetitors = createServerFn({ method: "GET" })
