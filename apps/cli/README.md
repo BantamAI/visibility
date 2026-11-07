@@ -1,11 +1,11 @@
 <p align="center">
   <a href="https://github.com/elmohq/elmo">
-    <img src="https://raw.githubusercontent.com/elmohq/elmo/main/apps/www/public/brand/logos/chatspy-logo-xl.png" alt="Elmo" width="300">
+    <img src="https://raw.githubusercontent.com/elmohq/elmo/main/apps/www/public/brand/logos/chatspy-logo-xl.png" alt="ChatSpy" width="300">
   </a>
 </p>
 
 <p align="center">
-  The official CLI for <a href="https://www.elmohq.com/">Elmo</a> — open source AI visibility tracking and optimization.
+  The official CLI for <a href="https://www.elmohq.com/">ChatSpy</a> — open source AI visibility tracking and optimization.
   <br />
   <br />
   <a href="https://www.elmohq.com/docs"><strong>Read the docs »</strong></a>
@@ -23,11 +23,11 @@
 
 <br />
 
-## What is Elmo?
+## What is ChatSpy?
 
-[Elmo](https://www.elmohq.com/) is an open source platform for tracking and optimizing how your brand shows up in AI assistants like ChatGPT, Claude, Gemini, and Perplexity. Define the prompts your customers ask, run them across providers on a schedule, and get visibility into mentions, sentiment, citations, and competitor positioning over time.
+[ChatSpy](https://www.elmohq.com/) is an open source platform for tracking and optimizing how your brand shows up in AI assistants like ChatGPT, Claude, Gemini, and Perplexity. Define the prompts your customers ask, run them across providers on a schedule, and get visibility into mentions, sentiment, citations, and competitor positioning over time.
 
-`@elmohq/cli` is the fastest way to run Elmo on your own infrastructure. It generates a Docker Compose stack, manages secrets and configuration, and gives you a single command to start, stop, and operate your instance.
+`@elmohq/cli` is the fastest way to run ChatSpy on your own infrastructure. It generates a Docker Compose stack, manages secrets and configuration, and gives you a single command to start, stop, and operate your instance.
 
 ## Installation
 
@@ -51,14 +51,14 @@ elmo compose up -d
 
 `elmo init` will prompt you for a few things (database, AI provider credentials), generate `elmo.yaml` and `.env`, and optionally start the stack for you.
 
-For the full self-hosting walkthrough, see the [Elmo docs](https://www.elmohq.com/docs).
+For the full self-hosting walkthrough, see the [ChatSpy docs](https://www.elmohq.com/docs).
 
 ## Commands
 
 | Command                    | Description                                                                                                                                                                  |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `elmo init`                | Interactive wizard to set up a local Elmo instance                                                                                                                           |
-| `elmo compose <args...>`   | Run any `docker compose` command against your Elmo project (e.g. `elmo compose up -d`, `elmo compose down`, `elmo compose logs -f`, `elmo compose build`, `elmo compose ps`) |
+| `elmo init`                | Interactive wizard to set up a local ChatSpy instance                                                                                                                           |
+| `elmo compose <args...>`   | Run any `docker compose` command against your ChatSpy project (e.g. `elmo compose up -d`, `elmo compose down`, `elmo compose logs -f`, `elmo compose build`, `elmo compose ps`) |
 | `elmo edit <env\|compose>` | Change API keys, scrape targets, or the Docker Compose YAML                                                                                                                  |
 | `elmo upgrade`             | Move your deployment to this CLI's version — runs migrations, re-pins image tags, and restarts the stack                                                                     |
 
@@ -82,7 +82,7 @@ See [the telemetry docs](https://www.elmohq.com/docs/developer-guide/telemetry) 
 
 ## Star, contribute, and chat
 
-Elmo is built in the open and we'd love your help.
+ChatSpy is built in the open and we'd love your help.
 - ⭐ **[Star us on GitHub](https://github.com/elmohq/elmo)** — it genuinely helps more people find the project.
 - 💬 **[Join the Discord](https://discord.gg/s24nubCtKz)** — get help, share what you're building, and talk to the team.
 - 🐛 **[File an issue](https://github.com/elmohq/elmo/issues)** if something breaks or you have a feature request.
