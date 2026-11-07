@@ -8,11 +8,8 @@ import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { DEFAULT_APP_ICON, ELMO_THEME_COLOR } from "@workspace/config/constants";
 import type { MissingEnvVar } from "@workspace/config/env";
-import { isElmoHosted, legalUrl } from "@workspace/config/legal";
 import type { DeploymentMode } from "@workspace/config/types";
-import { CookieConsentBanner } from "@workspace/ui/consent/cookie-consent-banner";
-import { isConsentRequired } from "@workspace/ui/lib/cookie-consent";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { usesWordmarkFont } from "@/components/logo";
 import MissingEnvPage from "@/components/missing-env-page";
 import { NotFoundPage } from "@/components/not-found-page";
@@ -139,19 +136,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-	const { envValidation, clientConfig, consentRegion } = Route.useRouteContext();
+	const { envValidation, clientConfig } = Route.useRouteContext();
 	const clarityProjectId = clientConfig?.analytics?.clarityProjectId;
-	const asksForConsent = isElmoHosted(clientConfig?.mode);
-	// Null until the browser resolves it — the time-zone fallback would read the
-	// server's own zone during SSR.
-	const [consentRequired, setConsentRequired] = useState<boolean | null>(null);
 
-	useEffect(() => {
-		const required = asksForConsent ? isConsentRequired(consentRegion ?? null) : false;
-		if (asksForConsent) setConsentRequired(required);
-
-		return clarityProjectId ? initClarity(clarityProjectId, required) : undefined;
-	}, [clarityProjectId, asksForConsent, consentRegion]);
+	useEffect(() => (clarityProjectId ? initClarity(clarityProjectId, false) : undefined), [clarityProjectId]);
 
 	// Only swap in the missing-env page once we actually know env is invalid —
 	// envValidation is absent while a navigation's root beforeLoad is in flight.
@@ -176,9 +164,6 @@ function RootComponent() {
 			</head>
 			<body className="font-sans antialiased">
 				<Outlet />
-				{asksForConsent && consentRequired !== null && (
-					<CookieConsentBanner consentRequired={consentRequired} policyHref={legalUrl("cookies")} />
-				)}
 				<TanStackDevtools plugins={[queryDevtools]} />
 				<Scripts />
 			</body>

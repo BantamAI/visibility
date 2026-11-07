@@ -8,7 +8,6 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import { type APIRequestContext, test } from "@playwright/test";
-import { hashPassword } from "@better-auth/utils/password";
 import pg from "pg";
 import {
   DATABASE_URL,
@@ -104,21 +103,6 @@ export async function ensureUser(client: pg.Client, user: { email: string; name:
     [user.name, user.email],
   );
   return rows[0].id;
-}
-
-export async function ensureDemoAccount(
-  client: pg.Client,
-  credentials: { email: string; password: string },
-): Promise<string> {
-  const userId = await ensureUser(client, { email: credentials.email, name: "Demo User" });
-  await client.query(`DELETE FROM account WHERE user_id = $1 AND provider_id = 'credential'`, [userId]);
-  await client.query(
-    `INSERT INTO account (id, account_id, provider_id, user_id, password, created_at, updated_at)
-     VALUES (gen_random_uuid(), $1, 'credential', $1, $2, NOW(), NOW())`,
-    [userId, await hashPassword(credentials.password)],
-  );
-  await ensureOrgMembership(client, userId);
-  return userId;
 }
 
 /** Local's signup hook already does this; the other modes need it, and it picks up a renamed TEST_BRAND_NAME. */

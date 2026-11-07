@@ -108,8 +108,7 @@ export function useBlocker(_opts?: unknown) {
 	};
 }
 
-// Stories render with an empty search (all filters at defaults) unless one sets
-// it — /choose-plan reads `?status=success` to know it came back from Stripe.
+// Stories render with an empty search (all filters at defaults) unless one sets it.
 // Honor `select` so per-key subscribers (filter-bar widgets) get `undefined`
 // instead of the whole empty object.
 let _search: Record<string, unknown> = {};

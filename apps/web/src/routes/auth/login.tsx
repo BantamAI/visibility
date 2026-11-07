@@ -1,9 +1,7 @@
 /**
  * /auth/login - Login page
  *
- * Local/cloud modes: email/password form.
- * Demo mode: signs in to the shared account automatically — a demo visitor
- * is already looking, and has nothing to buy.
+ * Local, cloud and demo modes: email/password form.
  * Whitelabel mode: auto-redirects to Auth0 SSO (no form shown).
  */
 
@@ -22,7 +20,6 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import FullPageCard from "@/components/full-page-card";
-import { LegalConsentNotice } from "@/components/legal-consent-notice";
 import { CAPTCHA_FAILED_MESSAGE, CaptchaError, isCaptchaRejection, useTurnstile } from "@/hooks/use-turnstile";
 import { type AttributionParams, attributionParams } from "@/lib/attribution";
 import { safeReturnTo } from "@/lib/return-to";
@@ -77,10 +74,6 @@ function LoginPage() {
 		return <SSOLogin destination={destination} />;
 	}
 
-	if (mode === "demo") {
-		return <DemoLogin destination={destination} />;
-	}
-
 	if (mode === "local" && !hasUsers) {
 		window.location.href = "/auth/register";
 		return null;
@@ -125,36 +118,6 @@ export function SSOLogin({ destination = "/app" }: { destination?: string }) {
 	if (error) return <SignInFailed error={error} />;
 
 	return <FullPageCard title="Signing in..." subtitle="Redirecting to your identity provider" />;
-}
-
-export function DemoLogin({ destination = "/app" }: { destination?: string }) {
-	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-
-		authClient.signIn
-			.email({ email: "demo@elmohq.com", password: "demo" })
-			.then((result) => {
-				if (cancelled) return;
-				if (result.error) {
-					setError(result.error.message ?? "Invalid email or password");
-					return;
-				}
-				window.location.href = destination;
-			})
-			.catch(() => {
-				if (!cancelled) setError("Something went wrong. Please try again.");
-			});
-
-		return () => {
-			cancelled = true;
-		};
-	}, [destination]);
-
-	if (error) return <SignInFailed error={error} />;
-
-	return <FullPageCard title="Signing in..." subtitle="Opening the demo account" />;
 }
 
 function SignInFailed({ error }: { error: string }) {
@@ -268,7 +231,6 @@ export function EmailPasswordLogin({
 						Continue with Google
 						{lastLoginMethod === "google" && <LastUsedBadge />}
 					</Button>
-					<LegalConsentNotice action="continuing with Google" />
 					<div className="flex items-center gap-3">
 						<Separator className="flex-1" />
 						<span className="text-xs text-muted-foreground">or</span>

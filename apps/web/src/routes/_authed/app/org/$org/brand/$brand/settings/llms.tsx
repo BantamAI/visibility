@@ -10,7 +10,7 @@
  * renders them.
  */
 
-import { IconArrowUpRight, IconExternalLink } from "@tabler/icons-react";
+import { IconExternalLink } from "@tabler/icons-react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { PROVIDERS_DOCS_URL } from "@workspace/config/constants";
 import { getModelMeta } from "@workspace/config/models";
@@ -25,7 +25,7 @@ import { type ReactNode, useState } from "react";
 import { formatUsd, PlatformList, PlatformPicker, projectSelectionCostUsd } from "@/components/platform-picker";
 import { UnsavedChangesBar } from "@/components/unsaved-changes-bar";
 import { useBrandId } from "@/hooks/use-brand-id";
-import { useBrandParams, useOrganizationParams } from "@/hooks/use-route-params";
+import { useBrandParams } from "@/hooks/use-route-params";
 import { groupPlatformOptions, type PlatformGroup, platformGroupCopy } from "@/lib/platform-groups";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
@@ -91,7 +91,6 @@ function TrackedPlatforms({ picker }: { picker: ModelPickerState }) {
 			) : (
 				<PlatformTierCard groups={groups} renderGroup={(group) => <PlatformList options={group.options} />} />
 			)}
-			{picker.upgradeOptions.length > 0 && <UpgradePanel options={picker.upgradeOptions} />}
 		</div>
 	);
 }
@@ -194,8 +193,6 @@ function PlatformGroups({ picker }: { picker: ModelPickerState }) {
 				)}
 			/>
 
-			{picker.upgradeOptions.length > 0 && <UpgradePanel options={picker.upgradeOptions} />}
-
 			{selected.size === 0 && (
 				<Alert variant="destructive">
 					<AlertDescription>Pick at least one platform — a brand with none is not tracked.</AlertDescription>
@@ -233,46 +230,6 @@ function summarizeSelection(count: number, spend: { saved: number; next: number 
 }
 
 /**
- * What a higher plan would add, in the same tiers as the cards above. A single
- * wrapped sentence of platform names was unreadable once a plan was missing more
- * than a couple, so each name is its own chip and each tier its own row.
- */
-function UpgradePanel({ options }: { options: ModelPickerState["upgradeOptions"] }) {
-	const organizationParams = useOrganizationParams();
-	return (
-		<div className="space-y-3 rounded-md border border-dashed p-4">
-			<p className="text-sm font-medium">Upgrade to track more platforms</p>
-			<div className="space-y-2.5">
-				{groupPlatformOptions(options).map((group) => (
-					<div key={group.id} className="space-y-1.5">
-						<p className="text-xs text-muted-foreground">{group.title}</p>
-						<div className="flex flex-wrap gap-1.5">
-							{group.options.map((option) => (
-								<span
-									key={option.model}
-									className="flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs text-muted-foreground"
-								>
-									<ModelIcon iconId={getModelMeta(option.model).iconId} className="size-3.5" />
-									{getModelMeta(option.model).label}
-								</span>
-							))}
-						</div>
-					</div>
-				))}
-			</div>
-			<Link
-				to="/app/org/$org/settings/billing"
-				params={organizationParams}
-				className={buttonVariants({ variant: "outline", size: "sm" })}
-			>
-				Compare plans
-				<IconArrowUpRight className="h-4 w-4" />
-			</Link>
-		</div>
-	);
-}
-
-/**
  * The premium group in cloud: a grounded call is an allowance rather than a pick,
  * so this card reports the pool and points at the two places that change it —
  * billing for how many slots, the prompts editor for which prompts and models
@@ -280,7 +237,6 @@ function UpgradePanel({ options }: { options: ModelPickerState["upgradeOptions"]
  */
 function PremiumApiPool({ premium }: { premium: PremiumPool }) {
 	const brandParams = useBrandParams();
-	const organizationParams = useOrganizationParams();
 	const copy = platformGroupCopy("premium");
 	const remaining = Math.max(0, premium.total - premium.assigned);
 
@@ -311,7 +267,7 @@ function PremiumApiPool({ premium }: { premium: PremiumPool }) {
 				<p className="text-sm text-muted-foreground">
 					{remaining > 0
 						? `${remaining} of ${premium.total} pairings still available, shared across every brand in this organization. A prompt spends one for each model you track it on.`
-						: `All ${premium.total} pairings are in use. Free one up or buy more to add another.`}
+						: `All ${premium.total} pairings are in use. Free one up to add another.`}
 				</p>
 
 				<div className="flex flex-wrap gap-2">
@@ -321,14 +277,6 @@ function PremiumApiPool({ premium }: { premium: PremiumPool }) {
 						className={buttonVariants({ variant: "outline", size: "sm" })}
 					>
 						Choose prompts
-					</Link>
-					<Link
-						to="/app/org/$org/settings/billing"
-						params={organizationParams}
-						className={buttonVariants({ variant: "ghost", size: "sm" })}
-					>
-						Change how many
-						<IconArrowUpRight className="h-4 w-4" />
 					</Link>
 				</div>
 			</CardContent>

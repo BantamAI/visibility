@@ -2,11 +2,9 @@
  * The read-only policy is unit-tested; these check it is wired into the running
  * server and that a refused write leaves the database untouched.
  */
-import type { Page } from "@playwright/test";
-import { ABORTED_SSR_STREAM, expect, failedResource, test } from "../../test";
+import { expect, failedResource, test } from "../../test";
 import {
   COMPETITOR_IDS,
-  DEMO_CREDENTIALS,
   PROMPT_IDS,
   TEST_API_KEY,
   TEST_BRAND_ID,
@@ -19,11 +17,6 @@ import { withDb } from "../../session";
 import { fillUntilSaveable, openAccountMenu } from "../../interactions";
 
 const authed = { Authorization: `Bearer ${TEST_API_KEY}` };
-
-async function expectSignedInAsDemo(page: Page): Promise<void> {
-  const session = await (await page.request.get("/api/auth/get-session")).json();
-  expect(session?.user?.email).toBe(DEMO_CREDENTIALS.email);
-}
 
 async function countRows(table: string, where: string, params: unknown[]): Promise<number> {
   return withDb(async (client) => {
@@ -132,32 +125,6 @@ test.describe("Demo auth is sign-in only", () => {
     expect(response.status()).toBe(200);
   });
 
-  test("the login page signs you in to the shared demo account", async ({ page }) => {
-    await page.goto("/auth/login");
-
-    await page.waitForURL((url) => url.pathname.startsWith("/app"), { timeout: 30_000 });
-    await expectSignedInAsDemo(page);
-  });
-
-  test("signing in lands on the page you were sent from", async ({ page }) => {
-    await page.goto(brandUrl());
-
-    await page.waitForURL((url) => url.pathname === brandUrl(), { timeout: 30_000 });
-    await expectSignedInAsDemo(page);
-  });
-
-  test("the register page signs you in instead", async ({ page, consoleErrors }) => {
-    consoleErrors.allow(ABORTED_SSR_STREAM);
-    await page.goto("/auth/register");
-    await page.waitForURL((url) => url.pathname.startsWith("/app"), { timeout: 30_000 });
-    await expectSignedInAsDemo(page);
-  });
-
-  test("the bare app URL opens on the demo account", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForURL((url) => url.pathname.startsWith("/app"), { timeout: 30_000 });
-    await expectSignedInAsDemo(page);
-  });
 });
 
 test.describe("Demo features", () => {
@@ -168,11 +135,6 @@ test.describe("Demo features", () => {
     await expect(menu.getByRole("menuitem").first()).toBeVisible();
     await expect(menu.getByRole("menuitem", { name: "Log Out" })).toHaveCount(0);
     await expect(menu.locator('[role="separator"]:last-child')).toHaveCount(0);
-  });
-
-  test("the demo pill is shown", async ({ page }) => {
-    await page.goto(`${brandUrl()}`);
-    await expect(page.getByText("Demo", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
   });
 
   test("nothing can be created", async ({ page }) => {
@@ -194,12 +156,7 @@ test.describe("Demo features", () => {
     const save = page.getByRole("button", { name: "Save", exact: true });
     await fillUntilSaveable(nameField, "Renamed In Demo", save);
     await save.click();
-    const refusal = page.getByText("The demo is read-only").locator("..");
-    await expect(refusal).toBeVisible({ timeout: 30_000 });
-    await expect(refusal.getByRole("link", { name: "ChatSpy Cloud" })).toHaveAttribute(
-      "href",
-      /app\.elmohq\.com\/auth\/register\?ref=demo-read-only/,
-    );
+    await expect(page.getByText("Edits are not allowed in demo mode.")).toBeVisible({ timeout: 30_000 });
   });
 
   test("the team page is not offered and not reachable", async ({ page, consoleErrors }) => {

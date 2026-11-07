@@ -1,5 +1,5 @@
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
-import { Button, buttonVariants } from "@workspace/ui/components/button";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { useState } from "react";
@@ -105,15 +105,7 @@ function NewBrandPage() {
 				}
 				subtitle={blocked.message}
 				showBackButton
-			>
-				<Link
-					to="/app/org/$org/settings/billing"
-					params={organizationParams}
-					className={buttonVariants({ className: "w-full" })}
-				>
-					Go to billing
-				</Link>
-			</FullPageCard>
+			/>
 		);
 	}
 

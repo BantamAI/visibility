@@ -15,7 +15,6 @@ import { Route as DotwellKnownChangePasswordRouteImport } from './routes/[.]well
 import { Route as AuthedAdminRouteImport } from './routes/_authed/admin'
 import { Route as AuthedAppRouteImport } from './routes/_authed/app'
 import { Route as AuthedChangePasswordRouteImport } from './routes/_authed/change-password'
-import { Route as AuthedChoosePlanRouteImport } from './routes/_authed/choose-plan'
 import { Route as AuthedReportsRouteImport } from './routes/_authed/reports'
 import { Route as AuthAuthorizeRouteImport } from './routes/auth/authorize'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
@@ -73,7 +72,6 @@ import { Route as AuthedAppOrgOrgBrandBrandRouteImport } from './routes/_authed/
 import { Route as AuthedAppOrgOrgSettingsIndexRouteImport } from './routes/_authed/app/org/$org/settings/index'
 import { Route as AuthedAppOrgOrgSettingsApiRouteImport } from './routes/_authed/app/org/$org/settings/api'
 import { Route as AuthedAppOrgOrgSettingsApiKeysRouteImport } from './routes/_authed/app/org/$org/settings/api-keys'
-import { Route as AuthedAppOrgOrgSettingsBillingRouteImport } from './routes/_authed/app/org/$org/settings/billing'
 import { Route as AuthedAppOrgOrgSettingsBrandsRouteImport } from './routes/_authed/app/org/$org/settings/brands'
 import { Route as AuthedAppOrgOrgSettingsMcpRouteImport } from './routes/_authed/app/org/$org/settings/mcp'
 import { Route as AuthedAppOrgOrgSettingsMembersRouteImport } from './routes/_authed/app/org/$org/settings/members'
@@ -129,11 +127,6 @@ const AuthedAppRoute = AuthedAppRouteImport.update({
 const AuthedChangePasswordRoute = AuthedChangePasswordRouteImport.update({
   id: '/change-password',
   path: '/change-password',
-  getParentRoute: () => AuthedRoute,
-} as any)
-const AuthedChoosePlanRoute = AuthedChoosePlanRouteImport.update({
-  id: '/choose-plan',
-  path: '/choose-plan',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedReportsRoute = AuthedReportsRouteImport.update({
@@ -440,12 +433,6 @@ const AuthedAppOrgOrgSettingsApiKeysRoute =
     path: '/api-keys',
     getParentRoute: () => AuthedAppOrgOrgSettingsRoute,
   } as any)
-const AuthedAppOrgOrgSettingsBillingRoute =
-  AuthedAppOrgOrgSettingsBillingRouteImport.update({
-    id: '/billing',
-    path: '/billing',
-    getParentRoute: () => AuthedAppOrgOrgSettingsRoute,
-  } as any)
 const AuthedAppOrgOrgSettingsBrandsRoute =
   AuthedAppOrgOrgSettingsBrandsRouteImport.update({
     id: '/brands',
@@ -609,7 +596,6 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthedAdminRouteWithChildren
   '/app': typeof AuthedAppRouteWithChildren
   '/change-password': typeof AuthedChangePasswordRoute
-  '/choose-plan': typeof AuthedChoosePlanRoute
   '/reports': typeof AuthedReportsRouteWithChildren
   '/auth/authorize': typeof AuthAuthorizeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -666,7 +652,6 @@ export interface FileRoutesByFullPath {
   '/app/org/$org/brand/$brand': typeof AuthedAppOrgOrgBrandBrandRouteWithChildren
   '/app/org/$org/settings/api': typeof AuthedAppOrgOrgSettingsApiRoute
   '/app/org/$org/settings/api-keys': typeof AuthedAppOrgOrgSettingsApiKeysRoute
-  '/app/org/$org/settings/billing': typeof AuthedAppOrgOrgSettingsBillingRoute
   '/app/org/$org/settings/brands': typeof AuthedAppOrgOrgSettingsBrandsRoute
   '/app/org/$org/settings/mcp': typeof AuthedAppOrgOrgSettingsMcpRoute
   '/app/org/$org/settings/members': typeof AuthedAppOrgOrgSettingsMembersRoute
@@ -699,7 +684,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/.well-known/change-password': typeof DotwellKnownChangePasswordRoute
   '/change-password': typeof AuthedChangePasswordRoute
-  '/choose-plan': typeof AuthedChoosePlanRoute
   '/auth/authorize': typeof AuthAuthorizeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -752,7 +736,6 @@ export interface FileRoutesByTo {
   '/api/plausible/js/script': typeof ApiPlausibleJsScriptIndexRoute
   '/app/org/$org/settings/api': typeof AuthedAppOrgOrgSettingsApiRoute
   '/app/org/$org/settings/api-keys': typeof AuthedAppOrgOrgSettingsApiKeysRoute
-  '/app/org/$org/settings/billing': typeof AuthedAppOrgOrgSettingsBillingRoute
   '/app/org/$org/settings/brands': typeof AuthedAppOrgOrgSettingsBrandsRoute
   '/app/org/$org/settings/mcp': typeof AuthedAppOrgOrgSettingsMcpRoute
   '/app/org/$org/settings/members': typeof AuthedAppOrgOrgSettingsMembersRoute
@@ -789,7 +772,6 @@ export interface FileRoutesById {
   '/_authed/admin': typeof AuthedAdminRouteWithChildren
   '/_authed/app': typeof AuthedAppRouteWithChildren
   '/_authed/change-password': typeof AuthedChangePasswordRoute
-  '/_authed/choose-plan': typeof AuthedChoosePlanRoute
   '/_authed/reports': typeof AuthedReportsRouteWithChildren
   '/auth/authorize': typeof AuthAuthorizeRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -846,7 +828,6 @@ export interface FileRoutesById {
   '/_authed/app/org/$org/brand/$brand': typeof AuthedAppOrgOrgBrandBrandRouteWithChildren
   '/_authed/app/org/$org/settings/api': typeof AuthedAppOrgOrgSettingsApiRoute
   '/_authed/app/org/$org/settings/api-keys': typeof AuthedAppOrgOrgSettingsApiKeysRoute
-  '/_authed/app/org/$org/settings/billing': typeof AuthedAppOrgOrgSettingsBillingRoute
   '/_authed/app/org/$org/settings/brands': typeof AuthedAppOrgOrgSettingsBrandsRoute
   '/_authed/app/org/$org/settings/mcp': typeof AuthedAppOrgOrgSettingsMcpRoute
   '/_authed/app/org/$org/settings/members': typeof AuthedAppOrgOrgSettingsMembersRoute
@@ -883,7 +864,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/change-password'
-    | '/choose-plan'
     | '/reports'
     | '/auth/authorize'
     | '/auth/forgot-password'
@@ -940,7 +920,6 @@ export interface FileRouteTypes {
     | '/app/org/$org/brand/$brand'
     | '/app/org/$org/settings/api'
     | '/app/org/$org/settings/api-keys'
-    | '/app/org/$org/settings/billing'
     | '/app/org/$org/settings/brands'
     | '/app/org/$org/settings/mcp'
     | '/app/org/$org/settings/members'
@@ -973,7 +952,6 @@ export interface FileRouteTypes {
     | '/'
     | '/.well-known/change-password'
     | '/change-password'
-    | '/choose-plan'
     | '/auth/authorize'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -1026,7 +1004,6 @@ export interface FileRouteTypes {
     | '/api/plausible/js/script'
     | '/app/org/$org/settings/api'
     | '/app/org/$org/settings/api-keys'
-    | '/app/org/$org/settings/billing'
     | '/app/org/$org/settings/brands'
     | '/app/org/$org/settings/mcp'
     | '/app/org/$org/settings/members'
@@ -1062,7 +1039,6 @@ export interface FileRouteTypes {
     | '/_authed/admin'
     | '/_authed/app'
     | '/_authed/change-password'
-    | '/_authed/choose-plan'
     | '/_authed/reports'
     | '/auth/authorize'
     | '/auth/forgot-password'
@@ -1119,7 +1095,6 @@ export interface FileRouteTypes {
     | '/_authed/app/org/$org/brand/$brand'
     | '/_authed/app/org/$org/settings/api'
     | '/_authed/app/org/$org/settings/api-keys'
-    | '/_authed/app/org/$org/settings/billing'
     | '/_authed/app/org/$org/settings/brands'
     | '/_authed/app/org/$org/settings/mcp'
     | '/_authed/app/org/$org/settings/members'
@@ -1231,13 +1206,6 @@ declare module '@tanstack/react-router' {
       path: '/change-password'
       fullPath: '/change-password'
       preLoaderRoute: typeof AuthedChangePasswordRouteImport
-      parentRoute: typeof AuthedRoute
-    }
-    '/_authed/choose-plan': {
-      id: '/_authed/choose-plan'
-      path: '/choose-plan'
-      fullPath: '/choose-plan'
-      preLoaderRoute: typeof AuthedChoosePlanRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/reports': {
@@ -1639,13 +1607,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppOrgOrgSettingsApiKeysRouteImport
       parentRoute: typeof AuthedAppOrgOrgSettingsRoute
     }
-    '/_authed/app/org/$org/settings/billing': {
-      id: '/_authed/app/org/$org/settings/billing'
-      path: '/billing'
-      fullPath: '/app/org/$org/settings/billing'
-      preLoaderRoute: typeof AuthedAppOrgOrgSettingsBillingRouteImport
-      parentRoute: typeof AuthedAppOrgOrgSettingsRoute
-    }
     '/_authed/app/org/$org/settings/brands': {
       id: '/_authed/app/org/$org/settings/brands'
       path: '/brands'
@@ -1850,7 +1811,6 @@ const AuthedAdminRouteWithChildren = AuthedAdminRoute._addFileChildren(
 interface AuthedAppOrgOrgSettingsRouteChildren {
   AuthedAppOrgOrgSettingsApiRoute: typeof AuthedAppOrgOrgSettingsApiRoute
   AuthedAppOrgOrgSettingsApiKeysRoute: typeof AuthedAppOrgOrgSettingsApiKeysRoute
-  AuthedAppOrgOrgSettingsBillingRoute: typeof AuthedAppOrgOrgSettingsBillingRoute
   AuthedAppOrgOrgSettingsBrandsRoute: typeof AuthedAppOrgOrgSettingsBrandsRoute
   AuthedAppOrgOrgSettingsMcpRoute: typeof AuthedAppOrgOrgSettingsMcpRoute
   AuthedAppOrgOrgSettingsMembersRoute: typeof AuthedAppOrgOrgSettingsMembersRoute
@@ -1862,7 +1822,6 @@ const AuthedAppOrgOrgSettingsRouteChildren: AuthedAppOrgOrgSettingsRouteChildren
   {
     AuthedAppOrgOrgSettingsApiRoute: AuthedAppOrgOrgSettingsApiRoute,
     AuthedAppOrgOrgSettingsApiKeysRoute: AuthedAppOrgOrgSettingsApiKeysRoute,
-    AuthedAppOrgOrgSettingsBillingRoute: AuthedAppOrgOrgSettingsBillingRoute,
     AuthedAppOrgOrgSettingsBrandsRoute: AuthedAppOrgOrgSettingsBrandsRoute,
     AuthedAppOrgOrgSettingsMcpRoute: AuthedAppOrgOrgSettingsMcpRoute,
     AuthedAppOrgOrgSettingsMembersRoute: AuthedAppOrgOrgSettingsMembersRoute,
@@ -1988,7 +1947,6 @@ interface AuthedRouteChildren {
   AuthedAdminRoute: typeof AuthedAdminRouteWithChildren
   AuthedAppRoute: typeof AuthedAppRouteWithChildren
   AuthedChangePasswordRoute: typeof AuthedChangePasswordRoute
-  AuthedChoosePlanRoute: typeof AuthedChoosePlanRoute
   AuthedReportsRoute: typeof AuthedReportsRouteWithChildren
   AuthedAcceptInvitationInvitationIdRoute: typeof AuthedAcceptInvitationInvitationIdRoute
 }
@@ -1997,7 +1955,6 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAdminRoute: AuthedAdminRouteWithChildren,
   AuthedAppRoute: AuthedAppRouteWithChildren,
   AuthedChangePasswordRoute: AuthedChangePasswordRoute,
-  AuthedChoosePlanRoute: AuthedChoosePlanRoute,
   AuthedReportsRoute: AuthedReportsRouteWithChildren,
   AuthedAcceptInvitationInvitationIdRoute:
     AuthedAcceptInvitationInvitationIdRoute,

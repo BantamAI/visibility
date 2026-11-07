@@ -1,18 +1,16 @@
 import spec from "@workspace/api-spec";
 import { DEFAULT_APP_NAME } from "@workspace/config/constants";
-import { CLOUD_APP_URL } from "@workspace/config/referrals";
 import type { OpenAPIV3_2 } from "fumadocs-openapi";
 import { createOpenAPI } from "fumadocs-openapi/server";
 
 /**
- * These pages document the hosted product, so they name its host outright — the
- * relative server in the spec would resolve against this marketing site, which
- * serves no API. An instance serving its own spec fills the host in from the
- * request instead.
+ * The relative server in the spec would resolve against this docs site, which
+ * serves no API, so the pages show a placeholder host. An instance serving its
+ * own spec fills the host in from the request instead.
  */
 export const hostedSpec = {
 	...spec,
-	servers: [{ url: `${CLOUD_APP_URL}/api/v1`, description: `${DEFAULT_APP_NAME} API` }],
+	servers: [{ url: "https://chatspy.example.com/api/v1", description: `${DEFAULT_APP_NAME} API` }],
 };
 
 export const openapi = createOpenAPI({

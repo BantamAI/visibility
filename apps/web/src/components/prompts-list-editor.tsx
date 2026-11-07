@@ -1,5 +1,4 @@
 import { IconInfoCircle } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
 import { getModelMeta } from "@workspace/config/models";
 import {
 	PREMIUM_MODELS,
@@ -24,7 +23,6 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Inbox, ListPlus, Plus, Sparkles, X } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useOrganizationParams } from "@/hooks/use-route-params";
 
 export interface EditablePrompt {
 	id?: string;
@@ -53,16 +51,6 @@ export function newPromptEntry(partial?: Partial<EditablePrompt>): EditablePromp
 		...(partial?.id ? { id: partial.id } : {}),
 		...(partial?.suggested ? { suggested: true } : {}),
 	};
-}
-
-/** Both places that offer more pairings send you to the same page. */
-function BillingLink({ children }: { children: ReactNode }) {
-	const params = useOrganizationParams();
-	return (
-		<Link to="/app/org/$org/settings/billing" params={params} className="underline">
-			{children}
-		</Link>
-	);
 }
 
 /**
@@ -136,9 +124,7 @@ function PremiumModelsField({
 					);
 				})}
 				{atCapacity && (
-					<p className="px-2 pt-1 text-xs text-muted-foreground">
-						No premium pairings left. Untick one, or <BillingLink>buy more</BillingLink>.
-					</p>
+					<p className="px-2 pt-1 text-xs text-muted-foreground">No premium pairings left. Untick one to free it up.</p>
 				)}
 			</PopoverContent>
 		</Popover>
@@ -607,12 +593,7 @@ export function PromptsListEditor({
 						{premiumUsed} of {premium.total}
 					</span>{" "}
 					pairings in use across this organization — one for each model a prompt is tracked on.
-					{premiumAtCapacity && (
-						<>
-							{" "}
-							Unassign one to free it up, or <BillingLink>buy more</BillingLink>.
-						</>
-					)}
+					{premiumAtCapacity && <> Unassign one to free it up.</>}
 				</p>
 			)}
 

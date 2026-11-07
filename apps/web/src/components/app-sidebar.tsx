@@ -5,7 +5,6 @@ import {
 	IconChartBar,
 	IconCode,
 	IconCpu,
-	IconCreditCard,
 	IconDashboard,
 	IconKey,
 	IconLink,
@@ -34,7 +33,6 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { DemoModePill } from "@/components/demo-mode-pill";
 import { Logo } from "@/components/logo";
 import { NavAppInfo } from "@/components/nav-app-info";
 import { type NavGroup, type NavItem, NavMain } from "@/components/nav-main";
@@ -60,10 +58,6 @@ function organizationGroups(
 
 	if (features?.teamInvites) {
 		items.push({ title: "Team", link: { to: "/app/org/$org/settings/members", params }, icon: IconUsers });
-	}
-
-	if (features?.billing) {
-		items.push({ title: "Billing", link: { to: "/app/org/$org/settings/billing", params }, icon: IconCreditCard });
 	}
 
 	items.push({ title: "API Keys", link: { to: "/app/org/$org/settings/api-keys", params }, icon: IconKey });
@@ -151,9 +145,6 @@ export function AppSidebar({ section, organization, brand }: AppSidebarProps) {
 	const brandmark = (
 		<>
 			<Logo iconClassName="!size-5" />
-			<div className="ml-auto group-data-[collapsible=icon]:hidden">
-				<DemoModePill />
-			</div>
 		</>
 	);
 

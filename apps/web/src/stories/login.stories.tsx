@@ -8,7 +8,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { DEFAULT_CHART_COLORS } from "@workspace/config/constants";
 import type { ReactNode } from "react";
 import { expect, within } from "storybook/test";
-import { DemoLogin, EmailPasswordLogin, SSOLogin } from "@/routes/auth/login";
+import { EmailPasswordLogin, SSOLogin } from "@/routes/auth/login";
 import { resetMockAuthClient, setMockEmailSignIn, setMockLastLoginMethod, setMockSsoError } from "./_mocks/auth-client";
 import { type ClientConfig, setMockClientConfig } from "./_mocks/config-client";
 import { setMockRouteContext } from "./_mocks/tanstack-router";
@@ -125,18 +125,6 @@ export const SelfHosted: StoryObj = {
 		await expect(canvas.queryByText("Last Used")).not.toBeInTheDocument();
 		await expect(canvas.queryByRole("button", { name: /Google/ })).not.toBeInTheDocument();
 	},
-};
-
-/** Demo signs in to the shared account on its own; this is what shows meanwhile. */
-export const Demo = () => {
-	setMockEmailSignIn("hang");
-	return <DemoLogin />;
-};
-
-/** Demo when the automatic sign-in fails: the error, and a way to retry. */
-export const DemoError = () => {
-	setMockEmailSignIn({ error: "Invalid email or password" });
-	return <DemoLogin />;
 };
 
 /**

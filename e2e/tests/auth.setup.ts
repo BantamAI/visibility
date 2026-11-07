@@ -1,10 +1,9 @@
 /** Saves the browser state each `<mode>` project reuses, so every spec starts as an admin of the seeded brand. */
 import type { APIRequestContext, Page } from "@playwright/test";
-import { authStatePath, DEMO_CREDENTIALS, isDeploymentMode, TEST_USER, type DeploymentMode } from "../fixtures";
+import { authStatePath, isDeploymentMode, TEST_USER, type DeploymentMode } from "../fixtures";
 import {
   assertSessionAccepted,
   ensureActiveCloudPlan,
-  ensureDemoAccount,
   ensureOrgMembership,
   ensureUser,
   issueSessionCookie,
@@ -25,8 +24,6 @@ setup("authenticate", async ({ page, baseURL }, testInfo) => {
   } else {
     await authenticateWithPassword(page.request, mode);
   }
-
-  if (mode === "demo") await withDb((client) => ensureDemoAccount(client, DEMO_CREDENTIALS));
 
   await assertSessionAccepted(page.request, TEST_USER.email);
   await page.context().storageState({ path: authStatePath(mode) });

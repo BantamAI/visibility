@@ -5,7 +5,6 @@
  */
 
 import { getModelMeta } from "./models";
-import { CLOUD_APP_URL } from "./referrals";
 
 export type PlanKey = "starter" | "basic" | "pro" | "business";
 
@@ -369,7 +368,5 @@ export function summarizeSubscriptionCost(input: {
 		totalUsd: lines.reduce((sum, line) => sum + line.amountUsd, 0),
 	};
 }
-
-export const CLOUD_SIGNUP_URL = `${CLOUD_APP_URL}/auth/register`;
 
 export const CLOUD_ENTRY_PRICE_USD = Math.min(...PLAN_KEYS.map((key) => PLANS[key].monthlyPriceUsd));

@@ -61,7 +61,7 @@ test.describe("Cloud self-serve signup", () => {
     await expect(page.getByText(NEW_USER.email)).toBeVisible();
   });
 
-  test("an unverified account cannot sign in, and a verified one reaches plan selection", async ({ page, request }) => {
+  test("an unverified account cannot sign in, and a verified one can", async ({ request }) => {
     const signUp = await request.post("/api/auth/sign-up/email", {
       data: NEW_USER,
       failOnStatusCode: false,
@@ -76,14 +76,11 @@ test.describe("Cloud self-serve signup", () => {
 
     await verifyEmail(NEW_USER.email);
 
-    await page.goto("/auth/login");
-    await page.getByLabel("Email").fill(NEW_USER.email);
-    await page.getByLabel("Password").fill(NEW_USER.password);
-    await page.getByRole("button", { name: "Sign in" }).click();
-
-    await page.waitForURL(/\/choose-plan(?:\?.*)?$/, { timeout: 30_000 });
-    await expect(page.getByRole("heading", { name: "Choose your plan" })).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole("button", { name: "Subscribe to Starter" })).toBeVisible();
+    const verified = await request.post("/api/auth/sign-in/email", {
+      data: { email: NEW_USER.email, password: NEW_USER.password },
+      failOnStatusCode: false,
+    });
+    expect(verified.status()).toBe(200);
   });
 
   // A 400 rather than the allowlist's 403, so unlike the case below this

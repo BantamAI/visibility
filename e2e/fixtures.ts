@@ -245,9 +245,3 @@ export const CLOUD_SIGNUP = {
   blockedDomain: "e2e-blocked.test",
   disposableDomain: "mailinator.com",
 } as const;
-
-/** The shared credentials a demo deployment advertises on its login page. */
-export const DEMO_CREDENTIALS = {
-  email: "demo@elmohq.com",
-  password: "demo",
-} as const;
