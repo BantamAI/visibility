@@ -120,7 +120,7 @@ async function restartAfterUpgrade(configDir: string, wasRunning: boolean): Prom
 
 export async function runUpgrade(options: UpgradeOptions, cliVersion: string): Promise<void> {
 	printBanner();
-	p.intro(pc.bold("Upgrading Elmo"));
+	p.intro(pc.bold("Upgrading ChatSpy"));
 
 	await confirmStaleCli(cliVersion, options.yes);
 
@@ -194,7 +194,7 @@ export async function runUpgrade(options: UpgradeOptions, cliVersion: string): P
 /** The first version to judge with Jev; a deployment from before it hasn't chosen how to call Jev. */
 const FIRST_JEV_VERSION = "0.7.0";
 
-/** Elmo can't judge answers without a Jev key, so an upgrade that lacks one asks for it before stopping anything. */
+/** ChatSpy can't judge answers without a Jev key, so an upgrade that lacks one asks for it before stopping anything. */
 async function ensureJudgeKey(
 	configDir: string,
 	context: MigrationContext,
@@ -222,7 +222,7 @@ async function ensureJudgeKey(
 		return;
 	}
 	if (nonInteractive) {
-		// A key saved only in Elmo's settings lives in the database, which the CLI can't read.
+		// A key saved only in ChatSpy's settings lives in the database, which the CLI can't read.
 		log.error(
 			"This version judges mentions and sentiment with Jev, and needs TYPESAFE_API_KEY (https://console.typesafe.ai) or OPENROUTER_API_KEY in .env to call it.",
 		);
@@ -232,7 +232,7 @@ async function ensureJudgeKey(
 	await collectJudgeKey(env);
 	await context.writeEnv(env);
 	log.success(
-		`Saved .env: Elmo will call Jev ${env.TYPESAFE_API_KEY ? "directly from TypeSafe" : "through OpenRouter"}.`,
+		`Saved .env: ChatSpy will call Jev ${env.TYPESAFE_API_KEY ? "directly from TypeSafe" : "through OpenRouter"}.`,
 	);
 }
 

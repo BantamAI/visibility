@@ -196,7 +196,7 @@ test.describe("Demo features", () => {
     await save.click();
     const refusal = page.getByText("The demo is read-only").locator("..");
     await expect(refusal).toBeVisible({ timeout: 30_000 });
-    await expect(refusal.getByRole("link", { name: "Elmo Cloud" })).toHaveAttribute(
+    await expect(refusal.getByRole("link", { name: "ChatSpy Cloud" })).toHaveAttribute(
       "href",
       /app\.elmohq\.com\/auth\/register\?ref=demo-read-only/,
     );

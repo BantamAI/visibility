@@ -254,7 +254,7 @@ export function EmailPasswordLogin({
 	return (
 		<AuthLayout
 			title="Welcome back"
-			subtitle={isCloud ? "Check in on your AI visibility." : "Sign in to your Elmo instance."}
+			subtitle={isCloud ? "Check in on your AI visibility." : "Sign in to your ChatSpy instance."}
 		>
 			{isCloud && (
 				<div className="space-y-4 w-full pb-4">

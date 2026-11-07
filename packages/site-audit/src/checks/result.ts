@@ -31,7 +31,7 @@ export function notFetched(definition: CheckDefinition, fetched: Fetched | undef
 		fetched?.kind === "skipped"
 			? {
 					budget: "the request budget ran out",
-					robots: "robots.txt disallows ElmoBot",
+					robots: "robots.txt disallows ChatSpyBot",
 					"crawl-delay": "robots.txt asks for a Crawl-delay longer than the audit waits",
 					"host-stopped": "the site stopped responding normally",
 				}[fetched.reason]

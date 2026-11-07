@@ -10,7 +10,7 @@ import { setMockRouteContext } from "./_mocks/tanstack-router";
 const demoConfig: ClientConfig = {
 	mode: "demo",
 	features: { readOnly: true, showOptimizeButton: false, canCreateBrands: false, promotesCloud: true },
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS },
 	analytics: {},
 };
 
@@ -22,7 +22,7 @@ const readOnlySelfHostConfig: ClientConfig = {
 const cloudConfig: ClientConfig = {
 	mode: "cloud",
 	features: { readOnly: false, showOptimizeButton: false, canCreateBrands: true, billing: true },
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS },
 	analytics: {},
 };
 
@@ -68,7 +68,7 @@ export const ReadOnlyRefusal: StoryObj = {
 	play: async ({ canvasElement }) => {
 		const alert = await within(canvasElement).findByRole("alert");
 		await expect(alert).toHaveTextContent("The demo is read-only");
-		const link = within(alert).getByRole("link", { name: "Elmo Cloud" });
+		const link = within(alert).getByRole("link", { name: "ChatSpy Cloud" });
 		await expect(link).toHaveAttribute("href", "https://app.elmohq.com/auth/register?ref=demo-read-only");
 	},
 };

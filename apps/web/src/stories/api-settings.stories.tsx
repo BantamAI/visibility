@@ -6,7 +6,7 @@ import { setMockRouteContext } from "./_mocks/tanstack-router";
 
 const ApiSettingsPage = (Route as unknown as { options: { component: ComponentType } }).options.component;
 
-function load(mode = "cloud", appName = "Elmo", appUrl = "https://app.elmohq.com/", readOnly = false) {
+function load(mode = "cloud", appName = "ChatSpy", appUrl = "https://app.elmohq.com/", readOnly = false) {
 	setMockRouteContext({ clientConfig: { mode, branding: { name: appName, url: appUrl }, features: { readOnly } } });
 }
 
@@ -70,14 +70,14 @@ export const Whitelabel: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await expect(await canvas.findByText("Programmatic interface for Acme Visibility.")).toBeVisible();
-		// Nothing on the page names the vendor, so the Elmo-branded SDKs stay hidden.
-		await expect(canvas.queryByText(/elmo/i)).toBeNull();
+		// Nothing on the page names the vendor, so the ChatSpy-branded SDKs stay hidden.
+		await expect(canvas.queryByText(/chatspy|elmo/i)).toBeNull();
 	},
 };
 
 export const ReadOnlyDeployment: Story = {
 	render: () => {
-		load("demo", "Elmo", "https://app.elmohq.com/", true);
+		load("demo", "ChatSpy", "https://app.elmohq.com/", true);
 		return <ApiSettingsPage />;
 	},
 	play: async ({ canvasElement }) => {

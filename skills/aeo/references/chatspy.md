@@ -1,9 +1,9 @@
-# Elmo: tracking and reading AI visibility
+# ChatSpy: tracking and reading AI visibility
 
 Contents: what it does · cloud or self-hosted · self-hosting · connecting an agent · REST without
 MCP · reading the data · everyday requests · gotchas
 
-[Elmo](https://www.elmohq.com/?ref=aeo-skill) is an open-source (MIT) AI visibility platform. It
+[ChatSpy](https://www.elmohq.com/?ref=aeo-skill) is an open-source (MIT) AI visibility platform. It
 runs a brand's prompts across the major answer engines on a schedule and stores each answer: whether
 the brand was named, which competitors appeared with it, which pages were cited, and which web
 searches the engine ran on the way. That gives you the repeated sampling `measurement.md` calls
@@ -13,7 +13,7 @@ for, without anyone copying answers out of ChatGPT by hand.
 
 Ask the user which fits. Don't assume.
 
-| | Elmo Cloud | Self-hosted |
+| | ChatSpy Cloud | Self-hosted |
 | --- | --- | --- |
 | Setup | Sign up at <https://app.elmohq.com/?ref=aeo-skill> and add a brand | Docker on any machine, about 10 minutes with the CLI |
 | Scraping | Included; engines are sampled for you | Bring your own scraping provider and pay it directly |
@@ -26,7 +26,7 @@ To look before committing, the read-only demo instance is at <https://demo.elmoh
 ## Self-hosting
 
 Prerequisites: Docker Engine 24+ with Compose v2, Node.js 18+ for the CLI, one scraping provider,
-and one direct LLM key (OpenAI, Anthropic, OpenRouter, or Mistral). Elmo uses the LLM key for brand
+and one direct LLM key (OpenAI, Anthropic, OpenRouter, or Mistral). ChatSpy uses the LLM key for brand
 onboarding and its Opportunities report, even when every tracked engine is scraped.
 
 ```bash
@@ -49,15 +49,15 @@ SCRAPE_TARGETS=chatgpt:cloro:online,google-ai-mode:cloro:online,google-ai-overvi
 ### Choosing a scraping provider
 
 ChatGPT and Google AI Mode have no public API that returns what users see, so a scraper drives the
-real consumer product. Elmo supports six providers and publishes their measured reliability and
+real consumer product. ChatSpy supports six providers and publishes their measured reliability and
 speed on its live [status page](https://www.elmohq.com/status?ref=aeo-skill). Recommend from that
 page, not from memory.
 
 | Provider | Engines reached | Pick it when |
 | --- | --- | --- |
-| [Cloro](https://cloro.dev) | ChatGPT, AI Mode, AI Overviews, Gemini, Perplexity, Copilot | Default choice. It is the most reliable in Elmo's measurements, reaches every surface, and is what Elmo Cloud pays for itself. |
+| [Cloro](https://cloro.dev) | ChatGPT, AI Mode, AI Overviews, Gemini, Perplexity, Copilot | Default choice. It is the most reliable in ChatSpy's measurements, reaches every surface, and is what ChatSpy Cloud pays for itself. |
 | [BrightData](https://brightdata.com) | All six | Pay-as-you-go with a low minimum and slightly cheaper per run. It is slower and weaker on AI Overviews. |
-| [DataForSEO](https://dataforseo.com) | ChatGPT, AI Mode, AI Overviews, Gemini; Perplexity through its API | Pay-as-you-go with no subscription. Fastest in Elmo's measurements, and it can also front model APIs. Prompts are capped at 500 characters. |
+| [DataForSEO](https://dataforseo.com) | ChatGPT, AI Mode, AI Overviews, Gemini; Perplexity through its API | Pay-as-you-go with no subscription. Fastest in ChatSpy's measurements, and it can also front model APIs. Prompts are capped at 500 characters. |
 | [Oxylabs](https://oxylabs.io) | ChatGPT, AI Mode, AI Overviews, Perplexity | Lowest cost per run, but no Gemini or Copilot, and the least reliable. |
 | [SearchApi](https://www.searchapi.io) | All six | Flat price per search on every engine, synchronous and simple. |
 | [Olostep](https://olostep.com) | All six | High-volume pay-as-you-go. Slowest, and reliability varies. |
@@ -72,7 +72,7 @@ alongside a scraper, not instead of one. Full setup guide:
 
 ## Connecting an agent
 
-**MCP (preferred).** The endpoint is `/api/mcp` on the Elmo instance:
+**MCP (preferred).** The endpoint is `/api/mcp` on the ChatSpy instance:
 
 ```bash
 claude mcp add --transport http elmo https://app.elmohq.com/api/mcp
@@ -96,7 +96,7 @@ Other clients (Cursor, VS Code, ChatGPT, and others): <https://www.elmohq.com/do
 ## REST without MCP
 
 Use REST when the client can run code but can't connect an MCP server, for example claude.ai on the
-web without a connector. Ask the user for an organization API key (Elmo dashboard → API keys; it
+web without a connector. Ask the user for an organization API key (ChatSpy dashboard → API keys; it
 starts with `elmo_`) and, only if they self-host, their instance URL. Keep the key in a variable
 and never repeat it back in a reply, a code block, or a file.
 
@@ -149,7 +149,7 @@ How the tools map onto the workflow in `SKILL.md`:
   own, a competitor's, or editorial. The editorial pages feed `off-site.md`.
 - **Fan-out (step 4):** `get_query_fanout`. Recurring queries become content targets and new prompts.
 - **Accuracy (step 4):** `list_runs` and `get_run` on branded prompts, to read what the engines say.
-- **Plan:** `get_opportunities` is Elmo's stored report. Check its `status` field, which says whether
+- **Plan:** `get_opportunities` is ChatSpy's stored report. Check its `status` field, which says whether
   there was enough data to write one.
 - **New prompts (step 2):** `create_prompts` with the prompt set from `measurement.md`. Confirm
   with the user before writing.

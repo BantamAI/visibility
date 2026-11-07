@@ -21,7 +21,7 @@ function openrouterHeaders(): Record<string, string> {
 		Authorization: `Bearer ${getCredential("OPENROUTER_API_KEY")}`,
 		"Content-Type": "application/json",
 		"HTTP-Referer": process.env.APP_URL ?? "https://github.com/elmohq/elmo",
-		"X-Title": "Elmo AEO",
+		"X-Title": "ChatSpy AEO",
 	};
 }
 
@@ -107,7 +107,7 @@ export const openrouter: Provider = {
 
 		// ":online" is exactly equivalent to plugins: [{ id: "web" }], and with the
 		// engine unset OpenRouter routes to the model provider's native web search
-		// (Exa only as a fallback) — which is the consumer surface Elmo tracks.
+		// (Exa only as a fallback) — which is the consumer surface ChatSpy tracks.
 		if (options?.webSearch && !modelSlug.includes(":online")) {
 			modelSlug = `${modelSlug}:online`;
 		}

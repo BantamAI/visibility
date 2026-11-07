@@ -291,6 +291,6 @@ export function createMentionAnalyzer(
 		);
 	}
 	throw new Error(
-		"Elmo judges mentions and sentiment with Jev: set TYPESAFE_API_KEY, or OPENROUTER_API_KEY to call Jev through OpenRouter",
+		"ChatSpy judges mentions and sentiment with Jev: set TYPESAFE_API_KEY, or OPENROUTER_API_KEY to call Jev through OpenRouter",
 	);
 }

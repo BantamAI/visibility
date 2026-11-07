@@ -175,7 +175,7 @@ async function fetchRobots(fetcher: Fetcher, origin: string) {
 		ignoreRobots: true,
 		maxBytes: ROBOTS_BODY,
 	});
-	// Judged by the body rather than Content-Type, so rules served as text/html still bind ElmoBot.
+	// Judged by the body rather than Content-Type, so rules served as text/html still bind ChatSpyBot.
 	const robots =
 		isOk(robotsFetch) && !looksLikeHtml(robotsFetch.body)
 			? parseRobots(`${origin}/robots.txt`, robotsFetch.body)
@@ -208,8 +208,8 @@ async function fetchPages(
 	return pages;
 }
 
-// The probes act as other bots, so robots.txt rules for ElmoBot can't gate them
-// request by request; a site that keeps ElmoBot off its homepage gets none.
+// The probes act as other bots, so robots.txt rules for ChatSpyBot can't gate them
+// request by request; a site that keeps ChatSpyBot off its homepage gets none.
 async function probeBots(
 	options: GatherOptions,
 	robots: ParsedRobots | undefined,

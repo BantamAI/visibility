@@ -540,7 +540,7 @@ function CustomPlanCallout() {
 			</div>
 			<a
 				className={buttonVariants({ variant: "outline", size: "sm" })}
-				href="mailto:hello@elmohq.com?subject=Elmo%20Cloud%20custom%20plan"
+				href="mailto:hello@elmohq.com?subject=ChatSpy%20Cloud%20custom%20plan"
 			>
 				Talk to us
 				<IconArrowUpRight className="h-4 w-4" />

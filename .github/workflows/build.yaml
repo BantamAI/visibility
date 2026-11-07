@@ -105,7 +105,7 @@ jobs:
           TZ: America/Los_Angeles
 
       # Runs against the database the integration tests just migrated. Every
-      # upstream Elmo table fails it until E53-S13 adds subject_id and policies;
+      # upstream ChatSpy table fails it until E53-S13 adds subject_id and policies;
       # drop continue-on-error then.
       - name: Tenant catalog check
         continue-on-error: true

@@ -16,7 +16,7 @@ import { setMockRouteContext } from "./_mocks/tanstack-router";
 const elmoConfig: ClientConfig = {
 	mode: "local",
 	features: { readOnly: false, showOptimizeButton: false, canCreateBrands: true },
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS.map((c) => c) },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS.map((c) => c) },
 	analytics: {},
 	defaultDelayHours: 24,
 	canRegister: true,

@@ -4,7 +4,7 @@
 import { DEFAULT_APP_NAME, ELMO_BRAND_COLOR } from "@workspace/config/constants";
 import type { ReactNode } from "react";
 
-export const ACCENT_COLORS = ["#2563eb", "#f4d35e", "#ee964b", "#f95738"];
+export const ACCENT_COLORS = ["#7c3aed", "#f4d35e", "#ee964b", "#f95738"];
 export const DEFAULT_TAGLINE = "AI Search Optimization";
 export const DEFAULT_DESCRIPTION = "Track and optimize your brand's visibility across AI models.";
 
@@ -194,7 +194,7 @@ export function OgHeader({ appName, iconDataUri, label }: OgHeaderOptions) {
 	return (
 		<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
 			{isElmo ? (
-				<div style={{ fontFamily: WORDMARK, fontSize: 60, lineHeight: 1, color: ELMO_BRAND_COLOR }}>elmo</div>
+				<div style={{ fontFamily: WORDMARK, fontSize: 60, lineHeight: 1, color: ELMO_BRAND_COLOR }}>chatspy</div>
 			) : (
 				<div style={{ display: "flex", alignItems: "center" }}>
 					{iconDataUri ? (

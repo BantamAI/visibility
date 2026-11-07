@@ -48,7 +48,7 @@ describe("getAvailableModels", () => {
 		]);
 	});
 
-	it("works for arbitrary deployment-configured model ids, not just the ones Elmo knows about", () => {
+	it("works for arbitrary deployment-configured model ids, not just the ones ChatSpy knows about", () => {
 		expect(getAvailableModels([target("my-custom-model"), target("another-model")])).toEqual([
 			ALL_MODELS_VALUE,
 			"my-custom-model",
@@ -126,7 +126,7 @@ describe("describeTargetSchedule", () => {
 		expect(describeTargetSchedule(target("chatgpt", true, { intervalHours: 24 }))).toBe("GPT Search — 1×/day");
 	});
 
-	it("title-cases a model id Elmo doesn't know", () => {
+	it("title-cases a model id ChatSpy doesn't know", () => {
 		expect(describeTargetSchedule(target("my-custom-model", false, { intervalHours: 24, replication: 2 }))).toBe(
 			"My Custom Model — 1×/day ×2",
 		);

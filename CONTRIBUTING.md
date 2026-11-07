@@ -1,4 +1,4 @@
-# Contributing to Elmo
+# Contributing to ChatSpy
 
 Thanks for your interest in contributing! For minor fixes, feel free to
 open a PR directly. For anything larger, please open an issue first so
@@ -9,7 +9,7 @@ Setup, commands, architecture, and the contribution workflow live in the
 
 ## License and Contributor License Agreement
 
-Elmo is licensed under the [MIT License](LICENSE.md). By contributing, you
+ChatSpy is licensed under the [MIT License](LICENSE.md). By contributing, you
 agree that your contributions will be licensed under the same terms.
 
 Before your first pull request can be merged, you must sign our

@@ -12,7 +12,7 @@ export function WriteErrorMessage({ message }: { message: string }) {
 		<span>
 			The demo is read-only. Track your own brand with{" "}
 			<a href={SIGNUP_URL} target="_blank" rel="noopener" className="font-medium underline underline-offset-4">
-				Elmo Cloud
+				ChatSpy Cloud
 			</a>
 			.
 		</span>

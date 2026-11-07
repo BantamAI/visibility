@@ -6,7 +6,7 @@ import { cn } from "@workspace/ui/lib/utils";
 /**
  * The "by doing this you agree to…" line under a signup or checkout action.
  *
- * Elmo Cloud only: a self-hosted instance creates no agreement with us, and a
+ * ChatSpy Cloud only: a self-hosted instance creates no agreement with us, and a
  * whitelabel one runs under its operator's agreements.
  */
 export function LegalConsentNotice({ action, className }: { action: string; className?: string }) {
@@ -17,7 +17,7 @@ export function LegalConsentNotice({ action, className }: { action: string; clas
 
 	return (
 		<p className={cn("text-center text-xs text-muted-foreground", className)}>
-			By {action} you agree to Elmo's{" "}
+			By {action} you agree to ChatSpy's{" "}
 			<a href={legalUrl("terms")} target="_blank" rel="noreferrer" className={linkClass}>
 				Terms of Service
 			</a>{" "}

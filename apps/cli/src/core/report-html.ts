@@ -252,13 +252,13 @@ export function buildEvalReportHtml(report: EvalReport): string {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Elmo eval — ${escapeHtml(report.brandName || "report")}</title>
+<title>ChatSpy eval — ${escapeHtml(report.brandName || "report")}</title>
 <style>${STYLE}</style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>Elmo eval${report.brandName ? ` — ${escapeHtml(report.brandName)}` : ""}</h1>
+    <h1>ChatSpy eval${report.brandName ? ` — ${escapeHtml(report.brandName)}` : ""}</h1>
     <div class="muted small">${escapeHtml(report.generatedAt)} · ${report.runsPerTarget} run(s) per target · ${escapeHtml(report.targetLabels.join(", "))}</div>
     <div class="totals">${stats}</div>
     <div class="bars">${sovBars}</div>

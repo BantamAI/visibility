@@ -83,7 +83,7 @@ services:
       STRIPE_SECRET_KEY: sk_test_e2e_placeholder
       STRIPE_WEBHOOK_SECRET: whsec_e2e_placeholder
       RESEND_API_KEY: re_e2e_placeholder
-      RESEND_FROM_EMAIL: Elmo E2E <e2e@example.test>
+      RESEND_FROM_EMAIL: ChatSpy E2E <e2e@example.test>
       GOOGLE_CLIENT_ID: e2e-google-client-id
       GOOGLE_CLIENT_SECRET: e2e-google-client-secret
 

@@ -45,7 +45,7 @@ function ApiSettingsPage() {
 				<CopyField value={baseUrl} label="Base URL" />
 			</div>
 
-			{/* The SDKs are published under Elmo's name, so a whitelabel deployment doesn't advertise them. */}
+			{/* The SDKs are published under ChatSpy's name, so a whitelabel deployment doesn't advertise them. */}
 			{mode && mode !== "whitelabel" && <SdkSection baseUrl={baseUrl} />}
 
 			<Card className="overflow-hidden p-0">

@@ -1,6 +1,6 @@
 /** Whitelabel never falls back to these; it must set its own branding. */
-export const DEFAULT_APP_NAME = "Elmo";
-export const DEFAULT_APP_ICON = "/icons/elmo-icon.svg";
+export const DEFAULT_APP_NAME = "ChatSpy";
+export const DEFAULT_APP_ICON = "/icons/chatspy-icon.svg";
 export const DEFAULT_APP_URL = "http://localhost:3000/";
 
 /** Per-provider anchors are appended, so this must stay the page itself, not the docs index. */
@@ -13,9 +13,9 @@ export const API_DOCS_URL = "https://www.elmohq.com/docs/api";
 /** Public identifier for the support chat, shared by the app and the marketing site. */
 export const CRISP_WEBSITE_ID = "2f79a110-4e29-41a8-b45d-4993df6ff487";
 
-export const ELMO_BRAND_COLOR = "#2563eb"; // blue-600
+export const ELMO_BRAND_COLOR = "#7c3aed"; // violet-600
 export const ELMO_BRAND_FONT = "Titan One";
-export const ELMO_THEME_COLOR = "#2563eb";
+export const ELMO_THEME_COLOR = "#7c3aed";
 export const ELMO_BACKGROUND_COLOR = "#ffffff";
 
 /**

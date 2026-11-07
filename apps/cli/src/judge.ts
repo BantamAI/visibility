@@ -14,7 +14,7 @@ export async function collectJudgeKey(env: EnvMap): Promise<void> {
 	const hasOpenRouter = Boolean(env.OPENROUTER_API_KEY?.trim());
 	p.note(
 		[
-			"Elmo reads every answer with Jev (TypeSafe) to decide which ones really",
+			"ChatSpy reads every answer with Jev (TypeSafe) to decide which ones really",
 			"mention your brand and competitors, how they describe each, and the",
 			"passage that shows it. Answers that name a tracked company are sent to",
 			"Jev for this; the rest cost nothing.",
@@ -24,7 +24,7 @@ export async function collectJudgeKey(env: EnvMap): Promise<void> {
 			"platforms is ~11,000 answers, about $2–4 a month; 100 prompts on 5",
 			"platforms is ~75,000, about $11–26.",
 			"",
-			"On first start Elmo also re-judges the last 90 days of history once",
+			"On first start ChatSpy also re-judges the last 90 days of history once",
 			"(REPROCESS_DAYS), about three months of the above.",
 			"",
 			"Jev is priced per token the same from TypeSafe directly or through",
@@ -33,7 +33,7 @@ export async function collectJudgeKey(env: EnvMap): Promise<void> {
 		"Mention and sentiment judging",
 	);
 	const gateway = await p.select<Gateway>({
-		message: "How should Elmo call Jev?",
+		message: "How should ChatSpy call Jev?",
 		options: hasOpenRouter
 			? [
 					{ value: "openrouter", label: "Through OpenRouter, with the OpenRouter key you entered above" },

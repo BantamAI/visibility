@@ -29,8 +29,8 @@ export type InitOptions = {
 	dockerDir?: string;
 };
 
-const DEFAULT_APP_NAME = "Elmo";
-const DEFAULT_APP_ICON = "/icons/elmo-icon.svg";
+const DEFAULT_APP_NAME = "ChatSpy";
+const DEFAULT_APP_ICON = "/icons/chatspy-icon.svg";
 const DEFAULT_APP_PORT = 1515;
 const LOCAL_DATABASE_URL = "postgres://postgres:postgres@postgres:5432/elmo";
 const TELEMETRY_DOC_URL = "https://elmohq.com/docs/developer-guide/telemetry";
@@ -48,8 +48,8 @@ async function confirmEnvOverwrite(configDir: string): Promise<string | undefine
 
 	p.log.warn(
 		isElmoEnv
-			? `An existing Elmo config was found at ${configDir}.`
-			: `A .env file already exists in ${configDir} and was NOT created by Elmo.`,
+			? `An existing ChatSpy config was found at ${configDir}.`
+			: `A .env file already exists in ${configDir} and was NOT created by ChatSpy.`,
 	);
 	const overwrite = await p.confirm({
 		message: isElmoEnv
@@ -129,7 +129,7 @@ function validatePublicUrl(value: string | undefined): string | undefined {
 	if (!value) return "Required";
 	const url = toPublicUrl(value.trim());
 	if (!url?.hostname.includes(".")) return "Enter a domain, e.g. elmo.example.com";
-	// Auth trusts only this origin, so Elmo can't be served from a subpath.
+	// Auth trusts only this origin, so ChatSpy can't be served from a subpath.
 	if (url.pathname !== "/") return "Must not include a path";
 	return undefined;
 }
@@ -137,7 +137,7 @@ function validatePublicUrl(value: string | undefined): string | undefined {
 async function configureProvidersInteractive(env: EnvMap): Promise<"recommended" | "custom"> {
 	p.note(
 		[
-			"Elmo needs two kinds of providers:",
+			"ChatSpy needs two kinds of providers:",
 			"",
 			pc.bold("1. A scraper") + " — to track ChatGPT and Google AI Mode (no public APIs):",
 			`     • ${pc.cyan("Cloro")}      — most reliable, every surface, ~$0.65/mo per prompt ($30/mo min)`,
@@ -152,7 +152,7 @@ async function configureProvidersInteractive(env: EnvMap): Promise<"recommended"
 			`     • ${pc.cyan("OpenRouter")} — one key, all major models (recommended)`,
 			`     • ${pc.cyan("Anthropic / OpenAI / Mistral")} — direct provider keys`,
 			"",
-			"Pricing assumes Elmo's default cadence (5 runs/day × 2 surfaces).",
+			"Pricing assumes ChatSpy's default cadence (5 runs/day × 2 surfaces).",
 		].join("\n"),
 		"AI providers",
 	);
@@ -278,7 +278,7 @@ async function doStart(configDir: string): Promise<void> {
 async function askTelemetryConsent(env: EnvMap): Promise<void> {
 	p.note(
 		[
-			"Elmo is open source and maintained by a small team. Telemetry",
+			"ChatSpy is open source and maintained by a small team. Telemetry",
 			"from both the CLI and your local deployment (web + worker)",
 			"tells us things like which CLI versions are still in use, where",
 			"`elmo init` drops off, which providers people pick, and whether",
@@ -313,7 +313,7 @@ async function askTelemetryConsent(env: EnvMap): Promise<void> {
 
 async function askAccess(): Promise<{ publicUrl: URL | undefined; port: number }> {
 	const access = await p.select({
-		message: "How will you access Elmo?",
+		message: "How will you access ChatSpy?",
 		options: [
 			{ value: "local" as const, label: "On this machine (localhost)" },
 			{ value: "public" as const, label: "From a domain (e.g. behind a reverse proxy)" },
@@ -346,7 +346,7 @@ async function askAccess(): Promise<{ publicUrl: URL | undefined; port: number }
 
 export async function runInit(options: InitOptions, version: string): Promise<void> {
 	printBanner();
-	p.intro(pc.bold("Setting up Elmo"));
+	p.intro(pc.bold("Setting up ChatSpy"));
 
 	assertDockerRunning();
 
@@ -474,7 +474,7 @@ export async function runInit(options: InitOptions, version: string): Promise<vo
 	}
 
 	p.log.message(
-		`If you find Elmo useful, star us on GitHub!\n  ${link(pc.cyan("https://github.com/elmohq/elmo"), "https://github.com/elmohq/elmo")}`,
+		`If you find ChatSpy useful, star us on GitHub!\n  ${link(pc.cyan("https://github.com/elmohq/elmo"), "https://github.com/elmohq/elmo")}`,
 	);
 
 	p.outro(pc.green("Setup complete!"));

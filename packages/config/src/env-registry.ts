@@ -435,7 +435,7 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 		scope: "server",
 		requiredBy: ["cloud"],
 		description:
-			"Sender address for transactional email, in the form: Elmo <notifications@updates.example.com>. The domain must be verified in Resend.",
+			"Sender address for transactional email, in the form: ChatSpy <notifications@updates.example.com>. The domain must be verified in Resend.",
 	},
 	{
 		name: "TURNSTILE_SECRET_KEY",

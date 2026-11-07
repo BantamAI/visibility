@@ -96,7 +96,7 @@ async function signIn(request: APIRequestContext): Promise<boolean> {
 }
 
 /**
- * An OIDC provider in CI would test the identity provider more than Elmo, so
+ * An OIDC provider in CI would test the identity provider more than ChatSpy, so
  * whitelabel's session is minted directly. The whitelabel specs cover the SSO
  * entry point.
  */

@@ -178,7 +178,7 @@ test.describe("MCP", () => {
     const discovery = await (await anonymous.get("/.well-known/oauth-authorization-server")).json();
     await page.goto(`${new URL(discovery.authorization_endpoint).pathname}?${query}`);
     await expect(page).toHaveURL(/\/auth\/authorize\?/);
-    await expect(page.getByText("Connect to Elmo")).toBeVisible();
+    await expect(page.getByText("Connect to ChatSpy")).toBeVisible();
     await expect(page.getByText("Playwright MCP Client").first()).toBeVisible();
     await expect(page.getByText("127.0.0.1:41999")).toBeVisible();
 

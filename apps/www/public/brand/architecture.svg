@@ -31,7 +31,7 @@
   <!-- User → Web Server -->
   <line x1="150" y1="100" x2="236" y2="100" stroke="#a1a1aa" stroke-width="2"/>
   <polygon points="250,100 236,95 236,105" fill="#a1a1aa"/>
-  <!-- Postgres ↔ Elmo S-curve -->
+  <!-- Postgres ↔ ChatSpy S-curve -->
   <path d="M 162 260 C 190 260, 190 195, 204 195" stroke="#a1a1aa" stroke-width="2" fill="none"/>
   <polygon points="148,260 162,255 162,265" fill="#a1a1aa"/>
   <polygon points="218,195 204,190 204,200" fill="#a1a1aa"/>
@@ -55,11 +55,11 @@
   <text x="90" y="268" text-anchor="middle" fill="white" font-size="15" font-weight="600">Postgres</text>
 
   <!-- Web Server -->
-  <rect x="250" y="70" width="380" height="60" rx="10" fill="#2563eb"/>
+  <rect x="250" y="70" width="380" height="60" rx="10" fill="#7c3aed"/>
   <text x="440" y="106" text-anchor="middle" fill="white" font-size="15" font-weight="600">Web Server</text>
 
   <!-- Worker -->
-  <rect x="250" y="230" width="380" height="60" rx="10" fill="#2563eb"/>
+  <rect x="250" y="230" width="380" height="60" rx="10" fill="#7c3aed"/>
   <text x="440" y="266" text-anchor="middle" fill="white" font-size="15" font-weight="600">Worker</text>
 
   <!-- LLM API chips -->

@@ -49,7 +49,7 @@ const localConfig: ClientConfig = {
 		showOptimizeButton: false,
 		canCreateBrands: true,
 	},
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS },
 	analytics: {},
 };
 
@@ -60,7 +60,7 @@ const demoConfig: ClientConfig = {
 		showOptimizeButton: false,
 		canCreateBrands: false,
 	},
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS },
 	analytics: {},
 };
 
@@ -101,7 +101,7 @@ const cloudConfig: ClientConfig = {
 		teamInvites: true,
 		reportGeneration: false,
 	},
-	branding: { name: "Elmo", chartColors: DEFAULT_CHART_COLORS },
+	branding: { name: "ChatSpy", chartColors: DEFAULT_CHART_COLORS },
 	analytics: {},
 };
 

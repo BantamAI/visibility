@@ -1,4 +1,4 @@
-# Elmo 
+# ChatSpy 
 # Supports: web app (Nitro server) and worker
 
 # Base stage with Node.js

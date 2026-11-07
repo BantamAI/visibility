@@ -1,10 +1,10 @@
 ---
 title: CLI Lab
-description: Run Elmo's core analysis as one-off commands — generate prompts, evaluate them, and plan AEO improvements — straight from your terminal.
+description: Run ChatSpy's core analysis as one-off commands — generate prompts, evaluate them, and plan AEO improvements — straight from your terminal.
 updated: 2026-11-05
 ---
 
-The `elmo lab` commands give you most of Elmo's intelligence in a one-off, no-database capacity. They reuse the providers and API keys you already configured with [`elmo init`](/docs/getting-started) (read from `~/.elmo/.env`), so you can generate tracking prompts, evaluate them across models, and get AEO recommendations without standing up the full stack.
+The `elmo lab` commands give you most of ChatSpy's intelligence in a one-off, no-database capacity. They reuse the providers and API keys you already configured with [`elmo init`](/docs/getting-started) (read from `~/.elmo/.env`), so you can generate tracking prompts, evaluate them across models, and get AEO recommendations without standing up the full stack.
 
 The three commands are designed to be run in sequence:
 
@@ -22,7 +22,7 @@ These commands call real provider APIs and cost money per run, just like schedul
 
 Run [`elmo init`](/docs/getting-started) once to configure providers and write `~/.elmo/.env`. The lab commands read that file for provider keys and your `SCRAPE_TARGETS`. If you keep config elsewhere, point any command at it with `--dir <path>`, or just export the keys (`OPENAI_API_KEY`, `BRIGHTDATA_API_TOKEN`, `SCRAPE_TARGETS`, …) in your shell.
 
-`eval` judges brand and competitor mentions with Jev, the same model scheduled tracking uses, so its mention rates and share of voice match what Elmo reports. It needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter, whenever you give it a brand. `elmo init` already sets one of these up for the worker.
+`eval` judges brand and competitor mentions with Jev, the same model scheduled tracking uses, so its mention rates and share of voice match what ChatSpy reports. It needs `TYPESAFE_API_KEY`, or `OPENROUTER_API_KEY` to call Jev through OpenRouter, whenever you give it a brand. `elmo init` already sets one of these up for the worker.
 
 ## Selecting a Model and Provider
 

@@ -507,7 +507,7 @@ function buildSummaryMarkdown(
 	contentGaps: { promptValue: string; competitorsMentioned: string[] }[],
 ): string {
 	const lines: string[] = [];
-	lines.push(`# Elmo eval${report.brandName ? ` — ${report.brandName}` : ""}`, "");
+	lines.push(`# ChatSpy eval${report.brandName ? ` — ${report.brandName}` : ""}`, "");
 	lines.push(`Generated ${report.generatedAt}`, "");
 	lines.push(
 		`- Prompts: ${report.totals.prompts}`,

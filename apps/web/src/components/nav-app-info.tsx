@@ -55,7 +55,7 @@ export function NavAppInfo() {
 									{document.title}
 								</DropdownMenuItem>
 							))}
-							{/* Only Elmo-hosted deployments gate anything on consent, so only they have a choice to revisit. */}
+							{/* Only ChatSpy-hosted deployments gate anything on consent, so only they have a choice to revisit. */}
 							{isElmoHosted(mode) && (
 								<>
 									<DropdownMenuSeparator />

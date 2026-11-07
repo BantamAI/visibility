@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { deploymentOpenApiSpec } from "../openapi";
 
-const ELMO = { name: "Elmo", url: "https://app.elmohq.com" };
+const ELMO = { name: "ChatSpy", url: "https://app.elmohq.com" };
 const AGENCY = { name: "Acme Visibility", url: "https://visibility.acme.com" };
 
 describe("deploymentOpenApiSpec", () => {
 	it("answers with the host the spec was fetched from", () => {
 		const spec = deploymentOpenApiSpec(ELMO, "https://app.elmohq.com");
 
-		expect(spec.servers).toEqual([{ url: "https://app.elmohq.com/api/v1", description: "Elmo API" }]);
+		expect(spec.servers).toEqual([{ url: "https://app.elmohq.com/api/v1", description: "ChatSpy API" }]);
 	});
 
 	it("does not leak the vendor into a whitelabel deployment", () => {
@@ -23,7 +23,7 @@ describe("deploymentOpenApiSpec", () => {
 	});
 
 	it("serves a self-hosted instance its own address, port and all", () => {
-		const spec = deploymentOpenApiSpec({ name: "Elmo", url: "http://localhost:3000" }, "http://localhost:3000");
+		const spec = deploymentOpenApiSpec({ name: "ChatSpy", url: "http://localhost:3000" }, "http://localhost:3000");
 
 		expect(spec.servers?.[0].url).toBe("http://localhost:3000/api/v1");
 	});

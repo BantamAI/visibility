@@ -5,7 +5,7 @@ export type ConsoleErrorPattern = string | RegExp;
 
 /**
  * Blocked, because Crisp's CDN serves some localhost ports and refuses others.
- * support-chat.spec.ts asserts on Elmo's loader, which is in the DOM either way.
+ * support-chat.spec.ts asserts on ChatSpy's loader, which is in the DOM either way.
  */
 export const CRISP_HOSTS = "**://*.crisp.chat/**";
 

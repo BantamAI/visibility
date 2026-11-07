@@ -1,6 +1,6 @@
 ---
 title: Quick Start
-description: Get Elmo running on your infrastructure in under 5 minutes using the CLI.
+description: Get ChatSpy running on your infrastructure in under 5 minutes using the CLI.
 updated: 2026-10-25
 ---
 
@@ -31,17 +31,17 @@ The wizard walks you through:
 1. **Config directory** — Where to store your `elmo.yaml` and `.env` files (default: `./elmo`)
 2. **PostgreSQL** — Run Postgres in Docker (recommended) or provide an existing `DATABASE_URL`
 3. **AI Providers** — Configure scrapers ([Cloro](https://cloro.dev), [BrightData](https://brightdata.com), [Oxylabs](https://oxylabs.io), [SearchApi](https://www.searchapi.io), [Olostep](https://olostep.com), [DataForSEO](https://dataforseo.com)) and/or direct model APIs (OpenAI, Anthropic, Mistral, OpenRouter); see [Providers](/docs/user-guide/providers) for details
-4. **Access** — Use Elmo on this machine (localhost), or from a domain behind a reverse proxy (see [Serving Elmo from a Domain](/docs/developer-guide/configuration#serving-elmo-from-a-domain))
+4. **Access** — Use ChatSpy on this machine (localhost), or from a domain behind a reverse proxy (see [Serving ChatSpy from a Domain](/docs/developer-guide/configuration#serving-elmo-from-a-domain))
 5. **Start** — Optionally start the stack immediately
 
-Once complete, Elmo generates two files in your config directory:
+Once complete, ChatSpy generates two files in your config directory:
 
 | File | Purpose |
 |------|---------|
 | `elmo.yaml` | Docker Compose configuration for all services |
 | `.env` | Environment variables, secrets, and API keys |
 
-## Start Elmo
+## Start ChatSpy
 
 If you didn't start during init, bring everything up with:
 
@@ -55,7 +55,7 @@ This pulls the Docker images and starts all services. Once they report healthy, 
 
 <img
   src="/brand/architecture.svg"
-  alt="Elmo system architecture: User connects to Web; Web and Worker share a Postgres database; Web calls LLM APIs; Worker calls both LLM APIs and an LLM Scraper."
+  alt="ChatSpy system architecture: User connects to Web; Web and Worker share a Postgres database; Web calls LLM APIs; Worker calls both LLM APIs and an LLM Scraper."
   className="my-6 w-full"
 />
 
@@ -66,11 +66,11 @@ This pulls the Docker images and starts all services. Once they report healthy, 
 | **Postgres** | Shared database and job queue |
 | **LLM APIs** | Direct API calls (OpenAI, Anthropic, OpenRouter) |
 | **LLM Scraper** | Scrapers for ChatGPT, Google AI Mode, and other live AI surfaces ([Cloro](https://cloro.dev), [BrightData](https://brightdata.com), [Oxylabs](https://oxylabs.io), [SearchApi](https://www.searchapi.io), [Olostep](https://olostep.com), [DataForSEO](https://dataforseo.com)) |
-| **Elmo CLI** | Generates `elmo.yaml` + `.env` and runs `docker compose` |
+| **ChatSpy CLI** | Generates `elmo.yaml` + `.env` and runs `docker compose` |
 
 ## CLI Commands Reference
 
-Once Elmo is running, these commands help you manage it:
+Once ChatSpy is running, these commands help you manage it:
 
 ```bash
 # View live logs
@@ -88,4 +88,4 @@ elmo compose down
 
 ## What's Next
 
-With Elmo running, head to the [User Guide](/docs/user-guide) to create your first brand, configure prompts, and start tracking AI visibility.
+With ChatSpy running, head to the [User Guide](/docs/user-guide) to create your first brand, configure prompts, and start tracking AI visibility.

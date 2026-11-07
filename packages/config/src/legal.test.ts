@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { legalUrl, showsLegalLinks } from "./legal";
 
 describe("showsLegalLinks", () => {
-	it("links Elmo's policies from the deployments Elmo operates or ships", () => {
+	it("links ChatSpy's policies from the deployments ChatSpy operates or ships", () => {
 		expect(showsLegalLinks("cloud")).toBe(true);
 		expect(showsLegalLinks("demo")).toBe(true);
 		expect(showsLegalLinks("local")).toBe(true);

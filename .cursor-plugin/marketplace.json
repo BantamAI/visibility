@@ -1,10 +1,10 @@
 {
   "name": "elmo",
   "owner": {
-    "name": "Elmo"
+    "name": "ChatSpy"
   },
   "metadata": {
-    "description": "Official Elmo plugins for Cursor"
+    "description": "Official ChatSpy plugins for Cursor"
   },
   "plugins": [
     {

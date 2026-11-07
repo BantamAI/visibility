@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-/** Fails when a dependency's license would conflict with distributing Elmo under MIT. */
+/** Fails when a dependency's license would conflict with distributing ChatSpy under MIT. */
 
 import { execSync } from "node:child_process";
 
 // MPL-2.0 is file-level copyleft, so as an unmodified dependency it puts no
-// obligations on Elmo's code. GPL, LGPL and AGPL stay out: they conflict with MIT.
+// obligations on ChatSpy's code. GPL, LGPL and AGPL stay out: they conflict with MIT.
 const ALLOWED_LICENSES = new Set([
   "MIT",
   "MIT-0",
@@ -37,7 +37,7 @@ const ALLOWED_LICENSES = new Set([
 
 // Each one needs its reason beside it.
 const PACKAGE_EXCEPTIONS = new Map([
-  // Sentry CLI – build-time tooling only, never distributed with Elmo.
+  // Sentry CLI – build-time tooling only, never distributed with ChatSpy.
   // FSL-1.1-MIT converts to MIT after two years.
   ["@sentry/cli", "FSL-1.1-MIT"],
   ["@sentry/cli-darwin", "FSL-1.1-MIT"],

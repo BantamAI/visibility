@@ -276,7 +276,7 @@ export const SYSTEM_TAGS = {
 export type SystemTag = (typeof SYSTEM_TAGS)[keyof typeof SYSTEM_TAGS];
 
 /**
- * Cloud billing state Elmo owns, beside the better-auth-managed `subscription`
+ * Cloud billing state ChatSpy owns, beside the better-auth-managed `subscription`
  * table. An org without a row has no overrides and no add-on; unused outside cloud.
  */
 export const organizationSettings = pgTable("organization_settings", {

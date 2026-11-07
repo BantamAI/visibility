@@ -20,14 +20,14 @@ const DEMO_CLOUD_SIGNUP_URL = cloudSignupUrl("demo-chat");
 const SELF_HOST_DOCS_URL = "https://www.elmohq.com/docs/getting-started";
 
 const DEMO_GREETING =
-	"👋 You're in the Elmo demo — it's read-only sample data, so click around freely. Ask me anything as you go.";
+	"👋 You're in the ChatSpy demo — it's read-only sample data, so click around freely. Ask me anything as you go.";
 
 // Not a carousel: at chatbox width its track shows one card at a time, which
 // left the last option off screen.
 const DEMO_NEXT_STEPS = [
 	"Whenever you're ready:",
 	`• [Book a walkthrough](${DEMO_WALKTHROUGH_URL}) — 30 minutes on your own brand's data`,
-	`• [Start with Elmo Cloud](${DEMO_CLOUD_SIGNUP_URL}) — the managed version, nothing to deploy`,
+	`• [Start with ChatSpy Cloud](${DEMO_CLOUD_SIGNUP_URL}) — the managed version, nothing to deploy`,
 	`• [Self-host it free](${SELF_HOST_DOCS_URL}) — open source, running in about five minutes`,
 ].join("\n");
 

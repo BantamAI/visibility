@@ -3,7 +3,7 @@
  *
  * Generates a manifest.json tailored to the current deployment mode:
  *   - Whitelabel: single 128×128 icon from the configured icon URL
- *   - Local/Demo (Elmo): static SVG icons committed to public/icons/
+ *   - Local/Demo (ChatSpy): static SVG icons committed to public/icons/
  *
  * Branding values (name, theme color, etc.) are read from server config
  * so they stay in sync with the rest of the app.
@@ -35,38 +35,38 @@ function buildManifest(): object {
 			},
 		];
 	} else {
-		// Elmo-only assets — never reference these from the whitelabel branch.
+		// ChatSpy-only assets — never reference these from the whitelabel branch.
 		icons = [
 			{
-				src: "/icons/elmo-icon.svg",
+				src: "/icons/chatspy-icon.svg",
 				sizes: "any",
 				type: "image/svg+xml",
 			},
 			{
-				src: "/icons/elmo-icon-maskable.svg",
+				src: "/icons/chatspy-icon-maskable.svg",
 				sizes: "any",
 				type: "image/svg+xml",
 				purpose: "maskable",
 			},
 			// PWA installers on Android/Chrome require concrete PNG sizes.
 			{
-				src: "/icons/elmo-icon-192.png",
+				src: "/icons/chatspy-icon-192.png",
 				sizes: "192x192",
 				type: "image/png",
 			},
 			{
-				src: "/icons/elmo-icon-512.png",
+				src: "/icons/chatspy-icon-512.png",
 				sizes: "512x512",
 				type: "image/png",
 			},
 			{
-				src: "/icons/elmo-icon-maskable-192.png",
+				src: "/icons/chatspy-icon-maskable-192.png",
 				sizes: "192x192",
 				type: "image/png",
 				purpose: "maskable",
 			},
 			{
-				src: "/icons/elmo-icon-maskable-512.png",
+				src: "/icons/chatspy-icon-maskable-512.png",
 				sizes: "512x512",
 				type: "image/png",
 				purpose: "maskable",

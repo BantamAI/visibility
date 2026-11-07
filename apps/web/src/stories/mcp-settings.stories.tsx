@@ -7,7 +7,7 @@ import { setMockLoaderData, setMockRouteContext } from "./_mocks/tanstack-router
 
 const McpSettingsPage = (Route as unknown as { options: { component: ComponentType } }).options.component;
 
-function load(page: Partial<McpPageData>, appName = "Elmo", appUrl = "https://app.elmohq.com/") {
+function load(page: Partial<McpPageData>, appName = "ChatSpy", appUrl = "https://app.elmohq.com/") {
 	const readOnly = page.readOnlyDeployment ?? false;
 	setMockMcpPage(page);
 	setMockRouteContext({
@@ -105,7 +105,7 @@ export const Whitelabel: Story = {
 		const canvas = within(canvasElement);
 		await expect(await canvas.findByText("Connect any chat bot to Acme Visibility.")).toBeVisible();
 		// Nothing on the page names the vendor.
-		await expect(canvas.queryByText(/elmo/i)).toBeNull();
+		await expect(canvas.queryByText(/chatspy|elmo/i)).toBeNull();
 	},
 };
 

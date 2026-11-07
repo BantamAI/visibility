@@ -13,13 +13,13 @@ import pngToIco from "png-to-ico";
  *   - apps/www/public/            favicon.ico, apple-touch-icon.png (root — so
  *                                 default browser probes for /favicon.ico and
  *                                 /apple-touch-icon.png resolve without needing
- *                                 explicit <link> tags). www is always Elmo-
+ *                                 explicit <link> tags). www is always ChatSpy-
  *                                 branded, so there's no whitelabel concern
  *                                 about these being served from the root.
- *   - apps/www/public/icons/      elmo-icon.svg, elmo-icon-maskable.svg,
- *                                 elmo-icon-96.png, elmo-icon-192.png,
- *                                 elmo-icon-512.png, elmo-icon-maskable-192.png,
- *                                 elmo-icon-maskable-512.png
+ *   - apps/www/public/icons/      chatspy-icon.svg, chatspy-icon-maskable.svg,
+ *                                 chatspy-icon-96.png, chatspy-icon-192.png,
+ *                                 chatspy-icon-512.png, chatspy-icon-maskable-192.png,
+ *                                 chatspy-icon-maskable-512.png
  *
  * Mirrors apps/web/scripts/generate-brand-icons.tsx — SVG built by embedding the
  * Titan One WOFF2 as base64, PNGs rasterized via Takumi, ICO packaged by
@@ -32,7 +32,7 @@ import pngToIco from "png-to-ico";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
-const BRAND_COLOR = "#2563eb";
+const BRAND_COLOR = "#7c3aed";
 const PUBLIC_DIR = resolve(__dirname, "../public");
 const ICONS_DIR = resolve(PUBLIC_DIR, "icons");
 
@@ -49,7 +49,7 @@ function fontFaceRule(base64: string): string {
 function buildStandardSvg(fontBase64: string): string {
 	return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <style>${fontFaceRule(fontBase64)}</style>
-  <text x="50%" y="93.5%" font-family="'Titan One', sans-serif" font-size="190" font-weight="400" fill="${BRAND_COLOR}" text-anchor="middle">e</text>
+  <text x="50%" y="93.5%" font-family="'Titan One', sans-serif" font-size="190" font-weight="400" fill="${BRAND_COLOR}" text-anchor="middle">c</text>
 </svg>`;
 }
 
@@ -57,7 +57,7 @@ function buildMaskableSvg(fontBase64: string): string {
 	return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
   <style>${fontFaceRule(fontBase64)}</style>
   <rect width="128" height="128" fill="#ffffff"/>
-  <text x="50%" y="78%" font-family="'Titan One', sans-serif" font-size="120" font-weight="400" fill="${BRAND_COLOR}" text-anchor="middle">e</text>
+  <text x="50%" y="78%" font-family="'Titan One', sans-serif" font-size="120" font-weight="400" fill="${BRAND_COLOR}" text-anchor="middle">c</text>
 </svg>`;
 }
 
@@ -84,7 +84,7 @@ function StandardIcon({ bg, size }: { bg?: string; size: number }) {
 					marginTop: -Math.round(size * 0.28),
 				}}
 			>
-				e
+				c
 			</div>
 		</div>
 	);
@@ -102,7 +102,7 @@ function MaskableIcon({ size }: { size: number }) {
 					marginTop: -Math.round(size * 0.18),
 				}}
 			>
-				e
+				c
 			</div>
 		</div>
 	);
@@ -117,8 +117,8 @@ mkdirSync(ICONS_DIR, { recursive: true });
 const fontBase64 = TITAN_ONE.toString("base64");
 
 const svgIcons = [
-	{ name: "elmo-icon.svg", build: buildStandardSvg },
-	{ name: "elmo-icon-maskable.svg", build: buildMaskableSvg },
+	{ name: "chatspy-icon.svg", build: buildStandardSvg },
+	{ name: "chatspy-icon-maskable.svg", build: buildMaskableSvg },
 ];
 
 for (const { name, build } of svgIcons) {
@@ -127,11 +127,11 @@ for (const { name, build } of svgIcons) {
 }
 
 const iconPngs = [
-	{ name: "elmo-icon-96.png", element: <StandardIcon size={96} />, size: 96 },
-	{ name: "elmo-icon-192.png", element: <StandardIcon size={192} />, size: 192 },
-	{ name: "elmo-icon-512.png", element: <StandardIcon size={512} />, size: 512 },
-	{ name: "elmo-icon-maskable-192.png", element: <MaskableIcon size={192} />, size: 192 },
-	{ name: "elmo-icon-maskable-512.png", element: <MaskableIcon size={512} />, size: 512 },
+	{ name: "chatspy-icon-96.png", element: <StandardIcon size={96} />, size: 96 },
+	{ name: "chatspy-icon-192.png", element: <StandardIcon size={192} />, size: 192 },
+	{ name: "chatspy-icon-512.png", element: <StandardIcon size={512} />, size: 512 },
+	{ name: "chatspy-icon-maskable-192.png", element: <MaskableIcon size={192} />, size: 192 },
+	{ name: "chatspy-icon-maskable-512.png", element: <MaskableIcon size={512} />, size: 512 },
 ];
 
 for (const { name, element, size } of iconPngs) {

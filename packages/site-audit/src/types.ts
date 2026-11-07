@@ -1,6 +1,7 @@
 export const REPORT_SCHEMA_VERSION = 1;
 
-export const DEFAULT_USER_AGENT = "ElmoBot/1.0 (+https://www.elmohq.com/docs/user-guide/agent-readiness-audit#elmobot)";
+export const DEFAULT_USER_AGENT =
+	"ChatSpyBot/1.0 (+https://www.elmohq.com/docs/user-guide/agent-readiness-audit#elmobot)";
 
 export type CheckStatus = "pass" | "warn" | "fail" | "info" | "not_checked";
 
