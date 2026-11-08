@@ -91,6 +91,29 @@ export interface ApiAuthFailure {
 
 export type ApiAuthResult = { auth: ApiAuth } | { failure: ApiAuthFailure };
 
+/** Who `agency_access_log` records for a caller. */
+export function principalActor(auth: Principal): string {
+	switch (auth.kind) {
+		case "admin":
+			return "instance admin key";
+		case "organization":
+			return `API key ${auth.keyId}`;
+		case "user":
+			return auth.email ?? auth.userId;
+	}
+}
+
+/**
+ * A caller verified from the auth tables alone, before the request has a tenant
+ * scope; its brand restriction is checked against its organization once it does.
+ */
+export interface IdentifiedCaller<P extends Principal = ApiAuth> {
+	auth: P;
+	brandRestriction: string[] | null;
+}
+
+export type ApiIdentityResult = { caller: IdentifiedCaller } | { failure: ApiAuthFailure };
+
 const UNAUTHORIZED: ApiAuthFailure = {
 	status: 401,
 	error: "Unauthorized",
@@ -151,11 +174,26 @@ async function intersectWithOrgBrands(organizationId: string, restriction: strin
 }
 
 export async function resolveApiAuth(request: Request): Promise<ApiAuthResult> {
+	const identified = await identifyApiCaller(request);
+	if ("failure" in identified) return identified;
+	return { auth: await completePrincipal(identified.caller) };
+}
+
+/** Reads brands, so it runs inside the request's tenant scope. */
+export async function completePrincipal<P extends Principal>(caller: IdentifiedCaller<P>): Promise<P> {
+	if (caller.auth.kind !== "organization") return caller.auth;
+	return {
+		...caller.auth,
+		brandIds: await intersectWithOrgBrands(caller.auth.organizationId, caller.brandRestriction),
+	};
+}
+
+export async function identifyApiCaller(request: Request): Promise<ApiIdentityResult> {
 	const token = bearerToken(request);
 	if (!token) return { failure: UNAUTHORIZED };
 
 	if (isAdminKey(token)) {
-		return { auth: { kind: "admin", scopes: null, organizationId: null } };
+		return { caller: { auth: { kind: "admin", scopes: null, organizationId: null }, brandRestriction: null } };
 	}
 
 	// Deferred: constructing auth reads APP_URL and throws without it, which
@@ -198,28 +236,32 @@ export async function resolveApiAuth(request: Request): Promise<ApiAuthResult> {
 	if (!org) return { failure: INVALID_KEY };
 
 	const scopes = new Set(permissionsToScopes(key.permissions));
-	const brandIds = await intersectWithOrgBrands(organizationId, readBrandRestriction(key.metadata));
+	const brandRestriction = readBrandRestriction(key.metadata);
 
 	return {
-		auth: {
-			kind: "organization",
-			keyId: key.id,
-			name: key.name ?? null,
-			organizationId,
-			organizationName: org.name,
-			scopes,
-			brandIds,
-			createdAt: asDate(key.createdAt),
-			lastUsedAt: asDate(key.lastRequest),
-			expiresAt: asDate(key.expiresAt),
-			rateLimit: { limit: key.rateLimitMax ?? API_KEY_RATE_LIMIT_PER_MINUTE, window: "minute" },
-			// The fixed-window counter has already consumed this request by the time
-			// the row is in hand, so this is the honest remainder. Null, and no
-			// header, beats inventing a full window.
-			rateLimitRemaining:
-				typeof key.requestCount === "number" && typeof key.rateLimitMax === "number"
-					? Math.max(0, key.rateLimitMax - key.requestCount)
-					: null,
+		caller: {
+			brandRestriction,
+			auth: {
+				kind: "organization",
+				keyId: key.id,
+				name: key.name ?? null,
+				organizationId,
+				organizationName: org.name,
+				scopes,
+				// Reaches nothing until completePrincipal checks the restriction.
+				brandIds: [],
+				createdAt: asDate(key.createdAt),
+				lastUsedAt: asDate(key.lastRequest),
+				expiresAt: asDate(key.expiresAt),
+				rateLimit: { limit: key.rateLimitMax ?? API_KEY_RATE_LIMIT_PER_MINUTE, window: "minute" },
+				// The fixed-window counter has already consumed this request by the time
+				// the row is in hand, so this is the honest remainder. Null, and no
+				// header, beats inventing a full window.
+				rateLimitRemaining:
+					typeof key.requestCount === "number" && typeof key.rateLimitMax === "number"
+						? Math.max(0, key.rateLimitMax - key.requestCount)
+						: null,
+			},
 		},
 	};
 }

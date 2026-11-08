@@ -87,13 +87,15 @@ ENV HOST="0.0.0.0"
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", ".output/server/index.mjs"]
 
-# Migration stage — runs drizzle-kit migrate then exits
+# Migration stage — runs drizzle-kit migrate as the owner (MIGRATION_DATABASE_URL),
+# lets the app role in DATABASE_URL log in, then exits
 FROM base AS migrate
 WORKDIR /app
 
 COPY --from=lib-deploy /deploy/lib ./
+COPY packages/service/scripts/enable-app-login.mjs ./scripts/enable-app-login.mjs
 
-CMD ["npx", "drizzle-kit", "migrate"]
+CMD ["sh", "-c", "npx drizzle-kit migrate && node scripts/enable-app-login.mjs"]
 
 # Worker stage
 FROM base AS worker
@@ -130,6 +132,7 @@ RUN chmod +x /entrypoint.sh
 COPY --from=web-build --chown=chatspy:nodejs /app/apps/web/.output ./web/.output
 COPY --from=worker-deploy --chown=chatspy:nodejs /deploy/worker ./worker
 COPY --from=lib-deploy --chown=chatspy:nodejs /deploy/lib ./lib
+COPY --chown=chatspy:nodejs packages/service/scripts/enable-app-login.mjs ./lib/scripts/enable-app-login.mjs
 
 USER chatspy
 

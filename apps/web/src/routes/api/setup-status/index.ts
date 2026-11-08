@@ -12,7 +12,8 @@ export const Route = createFileRoute("/api/setup-status/")({
 		handlers: {
 			GET: async () => {
 				try {
-					await db.query.brands.findFirst();
+					// Not brands: this runs unscoped, and the app role reads no subject rows there.
+					await db.query.user.findFirst();
 					return Response.json({ ready: true });
 				} catch {
 					return Response.json({ ready: false });

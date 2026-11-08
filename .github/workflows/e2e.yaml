@@ -327,8 +327,11 @@ jobs:
           --health-timeout 5s
           --health-retries 10
 
+    # The worker connects as the app role; migrating, seeding and checking results
+    # are the owner's.
     env:
-      DATABASE_URL: postgres://elmo:elmo@localhost:5432/elmo
+      DATABASE_URL: postgres://visibility_app:visibility_app@localhost:5432/elmo
+      MIGRATION_DATABASE_URL: postgres://elmo:elmo@localhost:5432/elmo
       BETTER_AUTH_SECRET: scheduling-policy-ci-secret-0123456789
       APP_URL: http://localhost:3000
 
@@ -349,10 +352,12 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Apply migrations
-        run: pnpm -C packages/lib exec drizzle-kit migrate
+        run: |
+          pnpm -C packages/lib exec drizzle-kit migrate
+          node packages/service/scripts/enable-app-login.mjs
 
       - name: Seed local fixtures
-        run: pnpm -C e2e exec tsx seed.ts
+        run: DATABASE_URL="$MIGRATION_DATABASE_URL" pnpm -C e2e exec tsx seed.ts
 
       - name: "Local mode: fixed volume + cadence enforcement"
         env:
@@ -364,7 +369,7 @@ jobs:
             nohup pnpm -C apps/worker exec tsx src/index.ts > /tmp/worker-local.log 2>&1 &
           echo $! > /tmp/worker.pid
           sleep 15
-          npx tsx e2e/scheduling/verify-scheduling.ts local
+          DATABASE_URL="$MIGRATION_DATABASE_URL" npx tsx e2e/scheduling/verify-scheduling.ts local
           kill "$(cat /tmp/worker.pid)" || true
 
       - name: "Cloud mode: plan policy + billing lifecycle"
@@ -382,7 +387,7 @@ jobs:
           nohup pnpm -C apps/worker exec tsx src/index.ts > /tmp/worker-cloud.log 2>&1 &
           echo $! > /tmp/worker.pid
           sleep 15
-          npx tsx e2e/scheduling/verify-scheduling.ts cloud
+          DATABASE_URL="$MIGRATION_DATABASE_URL" npx tsx e2e/scheduling/verify-scheduling.ts cloud
           kill "$(cat /tmp/worker.pid)" || true
 
       - name: Dump worker logs

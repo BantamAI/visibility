@@ -3,7 +3,8 @@
 /**
  * Fails when a table in the public schema isn't tenant-safe (E53-S13): it needs RLS,
  * and either subject_id with an index and a visibility_subject policy, or an entry
- * in tenancy.agency_only_tables.
+ * in tenancy.agency_only_tables. The app's login role (E53-S37) may reach a subject
+ * table only by switching to visibility_subject or visibility_agency.
  */
 
 import pg from "pg";
@@ -29,7 +30,8 @@ try {
 			EXISTS (
 				SELECT 1 FROM pg_policy p
 				WHERE p.polrelid = c.oid AND 'visibility_subject'::regrole = ANY (p.polroles)
-			) AS has_subject_policy
+			) AS has_subject_policy,
+			has_table_privilege('visibility_app', c.oid, 'SELECT, INSERT, UPDATE, DELETE') AS app_reaches
 		FROM pg_class c
 		JOIN pg_namespace n ON n.oid = c.relnamespace
 		LEFT JOIN pg_attribute a
@@ -54,10 +56,13 @@ function problems(row) {
 let failing = 0;
 for (const row of rows) {
 	const missing = problems(row);
-	if (missing.length === 0) continue;
-	failing++;
-	const hint = row.agency_only ? "" : " (or register it with tenancy.restrict_to_agency)";
-	console.log(`✗ ${row.table}: missing ${missing.join(", ")}${hint}`);
+	const appReaches = row.app_reaches && !row.agency_only;
+	if (missing.length > 0) {
+		const hint = row.agency_only ? "" : " (or register it with tenancy.restrict_to_agency)";
+		console.log(`✗ ${row.table}: missing ${missing.join(", ")}${hint}`);
+	}
+	if (appReaches) console.log(`✗ ${row.table}: visibility_app reaches it without switching to a tenancy role`);
+	if (missing.length > 0 || appReaches) failing++;
 }
 const agencyOnly = rows.filter((row) => row.agency_only).length;
 console.log(

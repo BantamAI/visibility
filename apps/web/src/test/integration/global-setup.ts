@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { enableAppLogin } from "../../../../../packages/lib/src/test/integration/app-role";
 
 const migrationsFolder = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
@@ -38,4 +39,5 @@ export default async function setup() {
 	} finally {
 		await db.$client.end();
 	}
+	await enableAppLogin(url);
 }

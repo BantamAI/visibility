@@ -4,9 +4,17 @@ import { verifyMcpAccessToken } from "@workspace/lib/auth/server";
 import { db } from "@workspace/lib/db/db";
 import { oauthClient, user } from "@workspace/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { type ApiAuthFailure, type Principal, resolveApiAuth, type UserAuth } from "@/lib/auth/api-auth";
+import {
+	type ApiAuthFailure,
+	completePrincipal,
+	type IdentifiedCaller,
+	identifyApiCaller,
+	type Principal,
+	type UserAuth,
+} from "@/lib/auth/api-auth";
 
 export type McpAuthResult = { auth: Principal } | { failure: ApiAuthFailure };
+export type McpIdentityResult = { caller: IdentifiedCaller<Principal> } | { failure: ApiAuthFailure };
 
 /** Named in the `401` challenge so an unconfigured client can find the
  * authorization server. */
@@ -60,13 +68,20 @@ async function resolveOAuthPrincipal(request: Request): Promise<UserAuth | null>
 }
 
 export async function resolveMcpAuth(request: Request): Promise<McpAuthResult> {
-	const asKey = await resolveApiAuth(request);
-	if ("auth" in asKey) return { auth: asKey.auth };
+	const identified = await identifyMcpCaller(request);
+	if ("failure" in identified) return identified;
+	return { auth: await completePrincipal(identified.caller) };
+}
+
+/** Reads only the auth tables, so it runs before the request has a tenant scope. */
+export async function identifyMcpCaller(request: Request): Promise<McpIdentityResult> {
+	const asKey = await identifyApiCaller(request);
+	if ("caller" in asKey) return asKey;
 	// A spent key is a different answer from one that was never a key.
 	if (asKey.failure.code === "rate_limited") return asKey;
 
 	const asUser = await resolveOAuthPrincipal(request);
-	if (asUser) return { auth: asUser };
+	if (asUser) return { caller: { auth: asUser, brandRestriction: null } };
 
 	return asKey;
 }

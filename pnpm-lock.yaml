@@ -632,6 +632,9 @@ importers:
       '@workspace/lib':
         specifier: workspace:*
         version: link:../../packages/lib
+      '@workspace/service':
+        specifier: workspace:*
+        version: link:../../packages/service
       auth0:
         specifier: 'catalog:'
         version: 7.6.0

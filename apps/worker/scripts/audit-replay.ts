@@ -23,6 +23,7 @@ import { loadRawOutputs, selectRuns } from "@workspace/lib/db/runs";
 import { brands, citations, competitors, promptRuns } from "@workspace/lib/db/schema";
 import { type MentionConfig, mentionConfigFrom } from "@workspace/lib/mentions";
 import { extractorFor, extractRun } from "@workspace/lib/text-extraction";
+import { withAgency } from "@workspace/service/local/tenancy";
 import { and, asc, eq, gt, gte, inArray } from "drizzle-orm";
 import { mentionAnalyzer } from "../src/mention-judge";
 
@@ -185,7 +186,7 @@ async function main(): Promise<void> {
 	await db.$client.end();
 }
 
-main().catch((error) => {
+withAgency({ actor: "audit-replay", reason: "replay audit across brands" }, main).catch((error) => {
 	console.error(error);
 	process.exit(1);
 });

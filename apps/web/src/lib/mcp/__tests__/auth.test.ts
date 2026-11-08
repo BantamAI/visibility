@@ -15,9 +15,14 @@ const selectUser = vi.hoisted(() =>
 );
 const selectClient = vi.hoisted(() => vi.fn<() => Promise<Array<{ disabled?: boolean | null }>>>());
 
+// The key path answers as a whole: an identified key completes to itself.
 vi.mock("@/lib/auth/api-auth", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@/lib/auth/api-auth")>()),
-	resolveApiAuth,
+	identifyApiCaller: async (request: Request) => {
+		const result = await resolveApiAuth(request);
+		return "auth" in result ? { caller: { auth: result.auth, brandRestriction: null } } : result;
+	},
+	completePrincipal: async (caller: { auth: unknown }) => caller.auth,
 }));
 vi.mock("@workspace/lib/auth/server", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@workspace/lib/auth/server")>()),

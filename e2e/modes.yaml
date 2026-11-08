@@ -14,8 +14,11 @@ x-mode: &mode
 
 # Reached over the compose network rather than the published port, so these are
 # not the URLs e2e/fixtures.ts hands the specs.
+# The owner migrates; web connects as the app role, whose login db-migrate turns on.
 x-cloud-database: &cloud-database postgres://postgres:postgres@postgres:5432/elmo_cloud
 x-whitelabel-database: &whitelabel-database postgres://postgres:postgres@postgres:5432/elmo_whitelabel
+x-cloud-app-database: &cloud-app-database postgres://visibility_app:visibility_app@postgres:5432/elmo_cloud
+x-whitelabel-app-database: &whitelabel-app-database postgres://visibility_app:visibility_app@postgres:5432/elmo_whitelabel
 
 services:
   # The services below carry no build of their own, so `docker compose build`
@@ -50,7 +53,8 @@ services:
   db-migrate-cloud:
     image: elmo-e2e-migrate
     environment:
-      DATABASE_URL: *cloud-database
+      MIGRATION_DATABASE_URL: *cloud-database
+      DATABASE_URL: *cloud-app-database
     depends_on:
       mode-databases:
         condition: service_completed_successfully
@@ -58,7 +62,8 @@ services:
   db-migrate-whitelabel:
     image: elmo-e2e-migrate
     environment:
-      DATABASE_URL: *whitelabel-database
+      MIGRATION_DATABASE_URL: *whitelabel-database
+      DATABASE_URL: *whitelabel-app-database
     depends_on:
       mode-databases:
         condition: service_completed_successfully
@@ -74,7 +79,7 @@ services:
       db-migrate-cloud:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: *cloud-database
+      DATABASE_URL: *cloud-app-database
       DEPLOYMENT_MODE: cloud
       APP_URL: http://localhost:1516
       VITE_APP_URL: http://localhost:1516
@@ -97,7 +102,7 @@ services:
       db-migrate-whitelabel:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: *whitelabel-database
+      DATABASE_URL: *whitelabel-app-database
       DEPLOYMENT_MODE: whitelabel
       APP_URL: http://localhost:1517
       VITE_APP_URL: http://localhost:1517

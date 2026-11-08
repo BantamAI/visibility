@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { db } from "@workspace/lib/db/db";
+import { createDb, db } from "@workspace/lib/db/db";
 import { insertRuns, type NewRun } from "@workspace/lib/db/runs";
-import * as schema from "@workspace/lib/db/schema";
 import {
 	brands,
 	citations,
@@ -25,7 +24,6 @@ import {
 	ROLLUP_VERSION,
 } from "@workspace/lib/rollups";
 import { and, eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { deriveQueue } from "./jobs/__fixtures__/derive-queue";
 import { refreshRollupsJob, runRefreshTick } from "./jobs/refresh-rollups";
@@ -39,10 +37,7 @@ const B0 = new Date("2026-02-01T10:00:00.000Z");
 const B1 = new Date(B0.getTime() + BUCKET_MS);
 
 /** Gives up on a lock quickly, which is how these tests make a rebuild fail. */
-const impatient = drizzle({
-	connection: { connectionString: process.env.DATABASE_URL, options: "-c lock_timeout=50" },
-	schema,
-});
+const impatient = createDb(process.env.DATABASE_URL!, { options: "-c lock_timeout=50" });
 
 interface Fixture {
 	brandId: string;

@@ -2,6 +2,14 @@ import "../instrument.server.mjs";
 import { wrapFetchWithSentry } from "@sentry/tanstackstart-react";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
+import { assertAppRole, UnsafeAppRoleError } from "@workspace/service/local/tenancy";
+
+// Not awaited, like the refresh below, but fatal when it finds the app connected as a
+// role that gets past row-level security.
+void assertAppRole().catch((error) => {
+	console.error(error);
+	if (error instanceof UnsafeAppRoleError) process.exit(1);
+});
 
 // Not awaited: the app has to serve sign-in and settings whether or not the
 // credential store is reachable.

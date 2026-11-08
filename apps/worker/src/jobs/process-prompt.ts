@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/node";
 import type { Entitlements } from "@workspace/config/entitlements";
+import { getDeploymentModeFromEnv } from "@workspace/config/env";
 import { parseScrapeTargets } from "@workspace/config/scrape-targets";
 import { getDefaultDelayHours } from "@workspace/lib/constants";
 import { db } from "@workspace/lib/db/db";
@@ -21,6 +22,7 @@ import {
 	type TargetPlan,
 } from "@workspace/lib/run-policy";
 import { estimateRunCostUsd } from "@workspace/lib/usage";
+import { withAgency } from "@workspace/service/local/tenancy";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
 import { getBoss } from "../boss";
@@ -28,6 +30,8 @@ import { DERIVE_PRIORITY, sendDeriveRuns } from "./derive-runs";
 
 export interface ProcessPromptData {
 	promptId: string;
+	/** The prompt's brand, which the worker runs the job as; looked up when a job lacks it. */
+	brandId?: string;
 	/** Accepted for queued jobs created by older app versions; the worker resolves cadence from current policy. */
 	cadenceHours?: number;
 	/** Cycles in a row where every run failed, carried forward to size the backoff. */
@@ -39,13 +43,18 @@ interface PromptContext {
 	brand: Brand;
 }
 
-async function scheduleNextRun(promptId: string, delayHours: number, consecutiveFailures: number): Promise<void> {
+async function scheduleNextRun(
+	promptId: string,
+	brandId: string,
+	delayHours: number,
+	consecutiveFailures: number,
+): Promise<void> {
 	const startAfterSeconds = Math.round(delayHours * 60 * 60);
 
 	try {
 		await getBoss().send(
 			PROCESS_PROMPT_QUEUE,
-			{ promptId, consecutiveFailures },
+			{ promptId, brandId, consecutiveFailures },
 			{
 				singletonKey: promptSingletonKey(promptId),
 				singletonSeconds: startAfterSeconds, // Prevent duplicates until the next attempt is due
@@ -83,21 +92,33 @@ async function getPromptContext(promptId: string): Promise<PromptContext | null>
 	return { prompt, brand };
 }
 
+/**
+ * The job runs as its brand, but a cloud plan's limits span the organization's
+ * brands, so those reads step up to agency access. Elsewhere plans are unlimited and
+ * read nothing.
+ */
+function acrossOrg<T>(organizationId: string, what: string, fn: () => Promise<T>): Promise<T> {
+	if (getDeploymentModeFromEnv() !== "cloud") return fn();
+	return withAgency({ actor: PROCESS_PROMPT_QUEUE, reason: `${what} for organization ${organizationId}` }, fn);
+}
+
 /** Outside cloud this reads nothing extra and uses the deployment's fixed run settings. */
 async function resolvePlanForPrompt(
 	context: PromptContext,
 	scrapeTargets: ModelConfig[],
 ): Promise<{ plan: PromptRunPlan; entitlements: Entitlements }> {
 	const { prompt, brand } = context;
-	const entitlements = await getOrgEntitlements(brand.organizationId);
+	const entitlements = await acrossOrg(brand.organizationId, "plan", () => getOrgEntitlements(brand.organizationId));
 
 	const orgPrompts = entitlements.unlimited
 		? []
-		: await db
-				.select({ id: prompts.id, createdAt: prompts.createdAt, premiumModels: prompts.premiumModels })
-				.from(prompts)
-				.innerJoin(brands, eq(prompts.brandId, brands.id))
-				.where(and(eq(brands.organizationId, brand.organizationId), eq(prompts.enabled, true)));
+		: await acrossOrg(brand.organizationId, "plan's prompt pool", () =>
+				db
+					.select({ id: prompts.id, createdAt: prompts.createdAt, premiumModels: prompts.premiumModels })
+					.from(prompts)
+					.innerJoin(brands, eq(prompts.brandId, brands.id))
+					.where(and(eq(brands.organizationId, brand.organizationId), eq(prompts.enabled, true))),
+			);
 
 	const plans = resolveBrandPromptRunPlans({
 		scrapeTargets,
@@ -138,12 +159,17 @@ async function getLastRunsByTargetKey(promptId: string, maxIntervalHours: number
  * index on (organization_id, created_at), so this scan is cheap.
  */
 async function isOrgOverDailyCeiling(organizationId: string, ceiling: number): Promise<boolean> {
-	const [row] = await db
-		.select({ value: sql<number>`COUNT(*)` })
-		.from(usageEvents)
-		.where(
-			and(eq(usageEvents.organizationId, organizationId), gt(usageEvents.createdAt, sql`now() - interval '24 hours'`)),
-		);
+	const [row] = await acrossOrg(organizationId, "daily run ceiling", () =>
+		db
+			.select({ value: sql<number>`COUNT(*)` })
+			.from(usageEvents)
+			.where(
+				and(
+					eq(usageEvents.organizationId, organizationId),
+					gt(usageEvents.createdAt, sql`now() - interval '24 hours'`),
+				),
+			),
+	);
 	return Number(row?.value ?? 0) >= ceiling;
 }
 
@@ -374,7 +400,7 @@ async function processPrompt(
 
 	if (action.kind === "stop") return;
 	if (action.kind === "reschedule") {
-		await scheduleNextRun(promptId, action.delayHours, action.consecutiveFailures);
+		await scheduleNextRun(promptId, context.brand.id, action.delayHours, action.consecutiveFailures);
 		return;
 	}
 
@@ -385,7 +411,7 @@ async function processPrompt(
 		rescheduleHours: action.rescheduleHours,
 		consecutiveFailures,
 	});
-	await scheduleNextRun(promptId, next.delayHours, next.consecutiveFailures);
+	await scheduleNextRun(promptId, context.brand.id, next.delayHours, next.consecutiveFailures);
 }
 
 /** After a cycle it schedules the next run: on cadence when anything came back, on a backoff when nothing did. */
