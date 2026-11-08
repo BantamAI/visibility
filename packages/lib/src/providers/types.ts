@@ -50,7 +50,7 @@ export interface LocationSupport {
 export interface ProviderOptions {
 	webSearch?: boolean;
 	version?: string;
-	/** Given only at a tier `locationSupport` lists for the model, with every field it reads. */
+	/** Given only at a tier `locationSupport` lists for the target, with every field it reads. */
 	location?: RunLocation;
 	locationTier?: FidelityTier;
 }
@@ -85,8 +85,8 @@ export interface Provider {
 	docsAnchor?: string;
 	isConfigured(): boolean;
 	run(model: string, prompt: string, options?: ProviderOptions): Promise<ScrapeResult>;
-	/** The tiers below T5 the model's surface can serve. Omitted when it sends no location below country. */
-	locationSupport?(model: string): readonly LocationSupport[];
+	/** The tiers below T5 the target can serve. Omitted when it sends no location below country. */
+	locationSupport?(config: ModelConfig): readonly LocationSupport[];
 	/** An error message for a target this provider can't serve. Omitted by providers that accept any model. */
 	validateTarget?(config: ModelConfig): string | null;
 

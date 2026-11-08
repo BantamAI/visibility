@@ -19,7 +19,7 @@ function provider(id: string, support?: Record<string, LocationSupport[]>): Prov
 		access: "scraped",
 		isConfigured: () => true,
 		run: async () => ({ rawOutput: {}, webQueries: [] }),
-		...(support ? { locationSupport: (model: string) => support[model] ?? [] } : {}),
+		...(support ? { locationSupport: (config: ModelConfig) => support[config.model] ?? [] } : {}),
 	};
 }
 

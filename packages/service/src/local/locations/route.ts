@@ -39,10 +39,10 @@ export class LocationNotHonouredError extends Error {
  * Why the provider can't serve this request, or null when it can. T5 names the city
  * in the prompt and sends no location, so every surface serves it.
  */
-export function whyNotHonoured(provider: Provider, model: string, request: LocationRequest): string | null {
+export function whyNotHonoured(provider: Provider, config: ModelConfig, request: LocationRequest): string | null {
 	if (request.tier === "T5") return null;
-	const support = provider.locationSupport?.(model).find((entry) => entry.tier === request.tier);
-	if (!support) return `${provider.name} doesn't place ${model} runs at ${request.tier}`;
+	const support = provider.locationSupport?.(config).find((entry) => entry.tier === request.tier);
+	if (!support) return `${provider.name} doesn't place ${config.model} runs at ${request.tier}`;
 	const missing = support.reads.filter((field) => request.location[field] === undefined);
 	if (missing.length > 0) return `point ${request.location.pointId} has no ${missing.join(", ")}`;
 	return null;
@@ -59,7 +59,7 @@ export function providerOptionsFor(
 ): ProviderOptions {
 	const options: ProviderOptions = { webSearch: config.webSearch, version: config.version };
 	if (!request) return options;
-	const reason = whyNotHonoured(provider, config.model, request);
+	const reason = whyNotHonoured(provider, config, request);
 	if (reason) throw new LocationNotHonouredError(config, request.tier, reason);
 	if (request.tier === "T5") return options;
 	return { ...options, location: request.location, locationTier: request.tier };
@@ -78,7 +78,7 @@ export function pickRoute<C extends RouteCandidate>(
 ): { route: C | null; refused: { candidate: C; reason: string }[] } {
 	const refused: { candidate: C; reason: string }[] = [];
 	for (const candidate of candidates) {
-		const reason = whyNotHonoured(getProvider(candidate.config.provider), candidate.config.model, {
+		const reason = whyNotHonoured(getProvider(candidate.config.provider), candidate.config, {
 			location,
 			tier: candidate.tier,
 		});
