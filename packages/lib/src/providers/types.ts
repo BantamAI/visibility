@@ -8,11 +8,51 @@ export interface ScrapeResult {
 	rawOutput: unknown;
 	webQueries: string[];
 	modelVersion?: string;
+	/** The vendor's own id for the run, when it gives one. */
+	vendorRunId?: string;
+	/** Where the vendor says the run came from, when it says. */
+	vendorReportedLocation?: Record<string, unknown>;
+	/** What the vendor billed for the run, when the response says. */
+	costUsd?: number;
+}
+
+/**
+ * How closely a run reproduces where a real person asks from, best first. The
+ * method each tier sends a location by is fixed; see ADR-33.
+ */
+export type FidelityTier = "T1" | "T2" | "T3" | "T4" | "T5";
+
+/** A sample point to fetch an answer as if from, resolved in advance so adapters never geocode. */
+export interface RunLocation {
+	pointId: string;
+	latitude: number;
+	longitude: number;
+	/** Missing for a point no place is near. */
+	city?: string;
+	/** State or region code: "NC". */
+	region?: string;
+	/** ISO 3166-1 alpha-2, upper case. */
+	country: string;
+	postalCode?: string;
+	/** IANA zone. */
+	timezone: string;
+	/** Google's geotargeting name: "Raleigh,North Carolina,United States". */
+	googleCanonicalName?: string;
+	uule?: string;
+}
+
+/** One tier a surface can serve, and the location fields it sends at that tier. */
+export interface LocationSupport {
+	tier: FidelityTier;
+	reads: readonly (keyof RunLocation)[];
 }
 
 export interface ProviderOptions {
 	webSearch?: boolean;
 	version?: string;
+	/** Given only at a tier `locationSupport` lists for the model, with every field it reads. */
+	location?: RunLocation;
+	locationTier?: FidelityTier;
 }
 
 export interface StructuredResearchOptions<T> {
@@ -45,6 +85,8 @@ export interface Provider {
 	docsAnchor?: string;
 	isConfigured(): boolean;
 	run(model: string, prompt: string, options?: ProviderOptions): Promise<ScrapeResult>;
+	/** The tiers below T5 the model's surface can serve. Omitted when it sends no location below country. */
+	locationSupport?(model: string): readonly LocationSupport[];
 	/** An error message for a target this provider can't serve. Omitted by providers that accept any model. */
 	validateTarget?(config: ModelConfig): string | null;
 
