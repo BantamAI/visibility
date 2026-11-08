@@ -133,9 +133,13 @@ function buildDbMigrateService(options: {
 		lines.push(`  image: elmohq/elmo-db-migrate:${options.version}`);
 	}
 
+	// Migrates as the owner, then lets the app role in .env's DATABASE_URL log in.
 	lines.push(
+		"  env_file:",
+		"    - path: .env",
+		"      required: true",
 		"  environment:",
-		"    - DATABASE_URL=postgres://postgres:postgres@postgres:5432/elmo",
+		"    - MIGRATION_DATABASE_URL=postgres://postgres:postgres@postgres:5432/elmo",
 		"  depends_on:",
 		"    postgres:",
 		"      condition: service_healthy",

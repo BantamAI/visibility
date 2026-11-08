@@ -31,7 +31,9 @@ export type InitOptions = {
 const DEFAULT_APP_NAME = "ChatSpy";
 const DEFAULT_APP_ICON = "/icons/chatspy-icon.svg";
 const DEFAULT_APP_PORT = 1515;
-const LOCAL_DATABASE_URL = "postgres://postgres:postgres@postgres:5432/elmo";
+// The app's own login role, which row-level security applies to; db-migrate keeps
+// the postgres owner for migrations.
+const LOCAL_DATABASE_URL = "postgres://visibility_app:visibility_app@postgres:5432/elmo";
 
 /**
  * Guard an existing config from being replaced by accident. Returns the
@@ -347,13 +349,22 @@ export async function runInit(options: InitOptions, version: string): Promise<vo
 	env.VITE_APP_ICON = DEFAULT_APP_ICON;
 
 	if (postgresMode === "external") {
-		p.note("Must be an IPv4-compatible direct connection or database pooler.", "DATABASE_URL");
+		p.note(
+			"Must be an IPv4-compatible direct connection or database pooler. The app connects as the visibility_app role, with a password of your choosing; migrations run as the database owner.",
+			"DATABASE_URL",
+		);
 		const url = await p.password({
-			message: "DATABASE_URL",
+			message: "DATABASE_URL (as visibility_app)",
 			validate: (v) => (!v ? "Required" : undefined),
 		});
 		assertNotCancelled(url);
 		env.DATABASE_URL = url;
+		const ownerUrl = await p.password({
+			message: "MIGRATION_DATABASE_URL (as the owner)",
+			validate: (v) => (!v ? "Required" : undefined),
+		});
+		assertNotCancelled(ownerUrl);
+		env.MIGRATION_DATABASE_URL = ownerUrl;
 	} else {
 		env.DATABASE_URL = LOCAL_DATABASE_URL;
 	}

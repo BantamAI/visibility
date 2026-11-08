@@ -8,7 +8,9 @@ kill_timeout = 35
   build-target = "fly"
 
 [deploy]
-  release_command = "sh -c 'cd /app/lib && npx drizzle-kit migrate'"
+  # Migrates as the owner in MIGRATION_DATABASE_URL; web and worker connect with
+  # DATABASE_URL as visibility_app, whose login the second step turns on.
+  release_command = "sh -c 'cd /app/lib && npx drizzle-kit migrate && node scripts/enable-app-login.mjs'"
 
 [env]
   DEPLOYMENT_MODE = "local"
