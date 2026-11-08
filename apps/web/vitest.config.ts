@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vitest/config";
+import { asAppRole } from "../../packages/lib/src/test/integration/app-role";
 import pkg from "./package.json" with { type: "json" };
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,7 +35,11 @@ export default defineConfig({
 					globalSetup: ["src/test/integration/global-setup.ts"],
 					// Its own variable rather than DATABASE_URL, which in a dev checkout
 					// points at data these tests would write into.
-					env: { DATABASE_URL: process.env.TEST_DATABASE_URL ?? "" },
+					env: {
+						DATABASE_URL: asAppRole(process.env.TEST_DATABASE_URL),
+						MIGRATION_DATABASE_URL: process.env.TEST_DATABASE_URL ?? "",
+					},
+					setupFiles: ["../../packages/lib/src/test/integration/agency-scope.ts"],
 				},
 			},
 			{

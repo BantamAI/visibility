@@ -1,11 +1,9 @@
 import { asc, eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
-import { db } from "../db/db";
+import { createDb, db } from "../db/db";
 import type { DbConnection } from "../db/db-connection";
 import type { HeapWalkPosition } from "../db/heap-walk";
 import { insertRuns } from "../db/runs";
-import * as schema from "../db/schema";
 import {
 	brands,
 	citations,
@@ -22,6 +20,7 @@ import {
 	runExtractions,
 	runMentions,
 } from "../db/schema";
+import { createOwnerDb } from "../test/integration/owner-db";
 import type { RunMentionAssessments } from "../mentions";
 import { resolveUnpagedCitations, upsertCitedPages } from "./citation-pages";
 import { BUCKET_MS, CLASSIFIER_VERSION } from "./constants";
@@ -35,13 +34,13 @@ import { reclassifyPages } from "./reclassify";
 type TestDb = typeof db;
 
 /** Gives up on a lock quickly, which is how these tests make a rebuild fail. */
-const impatient = drizzle({
-	connection: { connectionString: process.env.DATABASE_URL, options: "-c lock_timeout=50" },
-	schema,
-});
+const impatient = createDb(process.env.DATABASE_URL!, { options: "-c lock_timeout=50" });
+
+const owner = createOwnerDb();
 
 afterAll(async () => {
 	await impatient.$client.end();
+	await owner.$client.end();
 });
 
 const ORG_ID = "org-rollups-test";
@@ -139,7 +138,7 @@ const SEED_CITATIONS = [
 ];
 
 async function reset(db: TestDb): Promise<void> {
-	await db.execute(sql`
+	await owner.execute(sql`
 		TRUNCATE citations, prompt_runs, prompts, competitors, brands, organization,
 			rollup_prompt_runs, rollup_competitor_mentions, rollup_citation_urls, cited_pages, rollup_dirty,
 			rollup_citation_pages, rollup_sentiment_quotes
@@ -287,7 +286,8 @@ async function withRollupRowsLocked<T>(fn: () => Promise<T>): Promise<T> {
 
 async function waitForLockWaiters(count: number): Promise<void> {
 	for (let attempt = 0; attempt < 200; attempt++) {
-		const { rows } = await db.execute(sql`
+		// The app role can't see other sessions' wait events.
+		const { rows } = await owner.execute(sql`
 			SELECT count(*)::int AS waiting FROM pg_stat_activity
 			WHERE datname = current_database() AND wait_event_type = 'Lock'
 		`);
