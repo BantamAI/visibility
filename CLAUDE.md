@@ -2,7 +2,7 @@
 
 ## Visibility Service
 
-This repo is the visibility service: an Elmo fork plus our local layer (ADR-28, ADR-31 in `docs/plan/architecture.md`). Where these rules conflict with `AGENTS.md`, these win.
+This repo is the visibility service: an Elmo fork plus our local layer (ADR-28 and ADR-31 in the platform's architecture doc; this service's own ADRs, from ADR-32, in `docs/plan/architecture.md`). Where these rules conflict with `AGENTS.md`, these win.
 
 - It has its own Postgres and never connects to the platform database. Talk to the platform only through its versioned API and HMAC-signed webhooks.
 - Subjects are prospects or clients. A client subject is linked to the platform by `platform_location_id`, the platform location `account_id`.
