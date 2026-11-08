@@ -6,6 +6,13 @@ export default defineConfig({
 		projects: [
 			{
 				test: {
+					name: "unit",
+					include: ["src/**/*.test.ts"],
+					exclude: ["src/**/*.integration.test.ts"],
+				},
+			},
+			{
+				test: {
 					name: "integration",
 					include: ["src/**/*.integration.test.ts"],
 					globalSetup: ["../lib/src/test/integration/global-setup.ts"],
