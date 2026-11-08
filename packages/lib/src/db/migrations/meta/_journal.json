@@ -239,6 +239,13 @@
       "when": 1794161442980,
       "tag": "0033_subject_tenancy",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794163929534,
+      "tag": "0034_app_role",
+      "breakpoints": true
     }
   ]
 }

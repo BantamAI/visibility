@@ -15,6 +15,8 @@
 	"exports": {
 		"./db/db": "./src/db/db.ts",
 		"./db/db-connection": "./src/db/db-connection.ts",
+		"./db/tenant-pool": "./src/db/tenant-pool.ts",
+		"./test/integration/owner-db": "./src/test/integration/owner-db.ts",
 		"./db/schema": "./src/db/schema.ts",
 		"./db/runs": "./src/db/runs.ts",
 		"./db/heap-walk": "./src/db/heap-walk.ts",
