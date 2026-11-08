@@ -2,6 +2,8 @@
 
 The platform's architecture doc is the source of truth for ADRs that span the platform and this service, including ADR-22, ADR-28 (the visibility service as an Elmo fork) and ADR-31 (its local layer). This file holds the decisions that only concern the visibility service. Where one of them overrides a platform ADR, it says so, and the platform doc carries a matching note.
 
+The local layer extends Elmo's pipeline rather than replacing it: raw answers stay in Postgres with metrics derived from them, and Elmo's mention, sentiment, position, query fan-out, report, API and MCP features stay as they are. These decisions add location and statistical rigor on top.
+
 ## ADR-32: Visibility metrics
 
 **Status:** Accepted, 2026-11-08.
