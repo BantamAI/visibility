@@ -4,23 +4,28 @@
 -- withSubject() or withAgency() switches to one with SET ROLE, and a query outside
 -- both reaches no subject rows. It is created without a password: the deployment
 -- sets one with packages/service/scripts/enable-app-login.mjs.
+
+-- Roles are cluster-wide, so another database on the same server may have made it,
+-- or be making it right now; a lost race shows up as one of the errors caught here.
 DO $$
 BEGIN
-	IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'visibility_app') THEN
+	BEGIN
 		CREATE ROLE visibility_app NOLOGIN NOINHERIT NOBYPASSRLS;
-	ELSIF (SELECT rolinherit FROM pg_roles WHERE rolname = 'visibility_app') THEN
+	EXCEPTION WHEN duplicate_object OR unique_violation THEN
+		NULL;
+	END;
+	IF (SELECT rolinherit FROM pg_roles WHERE rolname = 'visibility_app') THEN
 		ALTER ROLE visibility_app NOINHERIT;
 	END IF;
 	IF (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = 'visibility_app') THEN
 		RAISE EXCEPTION 'visibility_app must not be a superuser or bypass RLS';
 	END IF;
-END $$;
---> statement-breakpoint
-GRANT visibility_subject, visibility_agency TO visibility_app;
---> statement-breakpoint
--- On PostgreSQL 16+ a grant made while the role still inherited keeps inheriting.
-DO $$
-BEGIN
+	BEGIN
+		GRANT visibility_subject, visibility_agency TO visibility_app;
+	EXCEPTION WHEN unique_violation THEN
+		NULL;
+	END;
+	-- On PostgreSQL 16+ a grant made while the role still inherited keeps inheriting.
 	IF pg_has_role('visibility_app', 'visibility_subject', 'USAGE')
 		OR pg_has_role('visibility_app', 'visibility_agency', 'USAGE') THEN
 		RAISE EXCEPTION 'visibility_app inherits a tenancy role; revoke the grants and run this migration again';
@@ -28,7 +33,12 @@ BEGIN
 END $$;
 --> statement-breakpoint
 -- Lets the owner hand pg-boss's schema over below.
-GRANT visibility_app TO CURRENT_USER;
+DO $$
+BEGIN
+	GRANT visibility_app TO CURRENT_USER;
+EXCEPTION WHEN unique_violation THEN
+	NULL;
+END $$;
 --> statement-breakpoint
 GRANT USAGE ON SCHEMA public TO visibility_app;
 --> statement-breakpoint

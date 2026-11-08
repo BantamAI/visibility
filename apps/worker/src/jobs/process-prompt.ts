@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/node";
 import type { Entitlements } from "@workspace/config/entitlements";
+import { getDeploymentModeFromEnv } from "@workspace/config/env";
 import { parseScrapeTargets } from "@workspace/config/scrape-targets";
 import { getDefaultDelayHours } from "@workspace/lib/constants";
 import { db } from "@workspace/lib/db/db";
@@ -21,6 +22,7 @@ import {
 	type TargetPlan,
 } from "@workspace/lib/run-policy";
 import { estimateRunCostUsd } from "@workspace/lib/usage";
+import { withAgency } from "@workspace/service/local/tenancy";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
 import { getBoss } from "../boss";
@@ -90,21 +92,33 @@ async function getPromptContext(promptId: string): Promise<PromptContext | null>
 	return { prompt, brand };
 }
 
+/**
+ * The job runs as its brand, but a cloud plan's limits span the organization's
+ * brands, so those reads step up to agency access. Elsewhere plans are unlimited and
+ * read nothing.
+ */
+function acrossOrg<T>(organizationId: string, what: string, fn: () => Promise<T>): Promise<T> {
+	if (getDeploymentModeFromEnv() !== "cloud") return fn();
+	return withAgency({ actor: PROCESS_PROMPT_QUEUE, reason: `${what} for organization ${organizationId}` }, fn);
+}
+
 /** Outside cloud this reads nothing extra and uses the deployment's fixed run settings. */
 async function resolvePlanForPrompt(
 	context: PromptContext,
 	scrapeTargets: ModelConfig[],
 ): Promise<{ plan: PromptRunPlan; entitlements: Entitlements }> {
 	const { prompt, brand } = context;
-	const entitlements = await getOrgEntitlements(brand.organizationId);
+	const entitlements = await acrossOrg(brand.organizationId, "plan", () => getOrgEntitlements(brand.organizationId));
 
 	const orgPrompts = entitlements.unlimited
 		? []
-		: await db
-				.select({ id: prompts.id, createdAt: prompts.createdAt, premiumModels: prompts.premiumModels })
-				.from(prompts)
-				.innerJoin(brands, eq(prompts.brandId, brands.id))
-				.where(and(eq(brands.organizationId, brand.organizationId), eq(prompts.enabled, true)));
+		: await acrossOrg(brand.organizationId, "plan's prompt pool", () =>
+				db
+					.select({ id: prompts.id, createdAt: prompts.createdAt, premiumModels: prompts.premiumModels })
+					.from(prompts)
+					.innerJoin(brands, eq(prompts.brandId, brands.id))
+					.where(and(eq(brands.organizationId, brand.organizationId), eq(prompts.enabled, true))),
+			);
 
 	const plans = resolveBrandPromptRunPlans({
 		scrapeTargets,
@@ -145,12 +159,14 @@ async function getLastRunsByTargetKey(promptId: string, maxIntervalHours: number
  * index on (organization_id, created_at), so this scan is cheap.
  */
 async function isOrgOverDailyCeiling(organizationId: string, ceiling: number): Promise<boolean> {
-	const [row] = await db
-		.select({ value: sql<number>`COUNT(*)` })
-		.from(usageEvents)
-		.where(
-			and(eq(usageEvents.organizationId, organizationId), gt(usageEvents.createdAt, sql`now() - interval '24 hours'`)),
-		);
+	const [row] = await acrossOrg(organizationId, "daily run ceiling", () =>
+		db
+			.select({ value: sql<number>`COUNT(*)` })
+			.from(usageEvents)
+			.where(
+				and(eq(usageEvents.organizationId, organizationId), gt(usageEvents.createdAt, sql`now() - interval '24 hours'`)),
+			),
+	);
 	return Number(row?.value ?? 0) >= ceiling;
 }
 
