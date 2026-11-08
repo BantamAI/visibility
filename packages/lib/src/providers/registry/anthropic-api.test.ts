@@ -165,4 +165,21 @@ describe("anthropic-api user location", () => {
 			},
 		]);
 	});
+
+	it("tells Claude the approximate location, since a near-me prompt otherwise never searches", async () => {
+		await anthropicApi.run("claude", "emergency plumber near me", {
+			webSearch: true,
+			version: "claude-sonnet-5",
+			location: raleigh,
+			locationTier: "T4",
+		});
+
+		expect(sentArgs().system).toBe("The user's approximate location is Raleigh, NC, US.");
+	});
+
+	it("sends no system prompt without a location", async () => {
+		await anthropicApi.run("claude", "prompt", { webSearch: true, version: "claude-sonnet-5" });
+
+		expect(sentArgs()).not.toHaveProperty("system");
+	});
 });

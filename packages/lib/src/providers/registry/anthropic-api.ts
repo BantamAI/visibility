@@ -37,7 +37,7 @@ function getClient(): Anthropic {
 async function runAnthropic(prompt: string, model: string, options?: ProviderOptions): Promise<ScrapeResult> {
 	const client = getClient();
 	const tools: Anthropic.Messages.ToolUnion[] = [];
-	const location = options?.locationTier === "T4" ? options.location : undefined;
+	const location = options?.webSearch && options.locationTier === "T4" ? options.location : undefined;
 	if (options?.webSearch) {
 		tools.push({
 			type: "web_search_20250305",
@@ -61,6 +61,11 @@ async function runAnthropic(prompt: string, model: string, options?: ProviderOpt
 		client.messages.create({
 			model,
 			max_tokens: API_PROVIDER_MAX_OUTPUT_TOKENS["anthropic-api"],
+			// user_location only steers search results; Claude itself isn't told, so a
+			// "near me" prompt gets no search at all without this line.
+			...(location
+				? { system: `The user's approximate location is ${location.city}, ${location.region}, ${location.country}.` }
+				: {}),
 			messages: [{ role: "user", content: prompt }],
 			...(tools.length > 0 ? { tools } : {}),
 		});
