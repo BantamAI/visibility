@@ -40,11 +40,13 @@ The local layer extends Elmo's pipeline rather than replacing it: raw answers st
 - Engines in scope: Google AI Mode, Google AI Overviews, ChatGPT, Gemini, Perplexity and Claude.
 - Grok is dropped. It has no terms-compatible consumer route, and vendors have discontinued it. Copilot and Grok targets stay as Elmo ships them, with no local work.
 - The route for each engine comes from the SP5-L location fidelity bake-off. Location canaries decide when a route is degraded.
+- Claude is the only engine reached through a model API (T4), because Anthropic's consumer terms allow automated access only through an API key. ChatGPT, Gemini and Perplexity are scraped only, with no API fallback: an API answer isn't what a person sees, so an engine whose scraped routes are all degraded reports no data for that period rather than an approximation.
 - No scraping of logged-in consumer accounts. Any logged-out scraping we run ourselves goes through E53-S31, after legal review.
 
 **Consequences.**
-- Fidelity is visible per run and per report, so an API approximation (T4) is never presented as a consumer-surface result.
+- Fidelity is visible per run and per report, so Claude's API approximation (T4) is never presented as a consumer-surface result.
+- A scraped engine can have gaps when its vendors fail, and reports show them as gaps.
 - We own grid generation and its cost; the run planner (E53-S28) has to keep grids within each subject's budget.
 - Route choices are evidence-based and can change without a new ADR when canaries or the bake-off say so.
 
-**Revisit when** a vendor loses a surface, canaries fail for two weeks, vendor cost for an engine exceeds about 3× the estimate in E53-S28, or Grok gets a vendor-supported consumer route and clients ask for it.
+**Revisit when** a vendor loses a surface, canaries fail for two weeks, vendor cost for an engine exceeds about 3× the estimate in E53-S28, Grok gets a vendor-supported consumer route and clients ask for it, or gaps in a scraped engine last long enough that clients would rather have an API approximation.
