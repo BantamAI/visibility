@@ -7,11 +7,15 @@
 	"scripts": {
 		"check-types": "tsc --noEmit",
 		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs",
+		"load:reference-places": "tsx scripts/load-reference-places.ts",
+		"test": "vitest run --project=unit",
 		"test:integration": "vitest run --project=integration",
 		"test:pgtap": "bash scripts/run-pgtap.sh"
 	},
 	"exports": {
 		"./local/delete-brand": "./src/local/delete-brand.ts",
+		"./local/schema": "./src/local/schema.ts",
+		"./local/service-areas": "./src/local/service-areas/index.ts",
 		"./local/tenancy": "./src/local/tenancy.ts"
 	},
 	"dependencies": {
@@ -20,7 +24,8 @@
 		"pg": "catalog:"
 	},
 	"devDependencies": {
-		"vitest": "catalog:",
-		"typescript": "catalog:"
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	}
 }
