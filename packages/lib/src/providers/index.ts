@@ -15,10 +15,13 @@ import type { ModelConfig, Provider, ProviderAccess } from "./types";
 export { validateScrapeTargets } from "./config";
 export { selectTargetsForBrand } from "./runner";
 export type {
+	FidelityTier,
+	LocationSupport,
 	ModelConfig,
 	Provider,
 	ProviderAccess,
 	ProviderOptions,
+	RunLocation,
 	ScrapeResult,
 	StructuredResearchOptions,
 	StructuredResearchResult,
