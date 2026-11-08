@@ -1,6 +1,5 @@
 import { db } from "@workspace/lib/db/db";
 import { currentTenantScope, runInTenantScope, runOutsideTenantScope } from "@workspace/lib/db/tenant-pool";
-import { sql } from "drizzle-orm";
 
 export type TenantDb = typeof db;
 
@@ -29,7 +28,7 @@ export async function withAgency<T>(access: AgencyAccess, fn: (db: TenantDb) => 
 	if (!access.actor || !access.reason) throw new Error("withAgency needs an actor and a reason");
 	if (currentTenantScope()?.role === "visibility_agency") return fn(db);
 	return runInTenantScope({ role: "visibility_agency" }, async () => {
-		await db.execute(sql`INSERT INTO agency_access_log (actor, reason) VALUES (${access.actor}, ${access.reason})`);
+		await db.$client.query("INSERT INTO agency_access_log (actor, reason) VALUES ($1, $2)", [access.actor, access.reason]);
 		return fn(db);
 	});
 }
@@ -42,13 +41,17 @@ type ConnectedRole = {
 	inherits_tenancy: boolean;
 };
 
+export class UnsafeAppRoleError extends Error {
+	override name = "UnsafeAppRoleError";
+}
+
 /**
  * Refuses to serve as the table owner or any role that gets past row-level
  * security. The web app and worker call it before doing anything else.
  */
 export async function assertAppRole(): Promise<void> {
 	const { rows } = await runOutsideTenantScope(() =>
-		db.execute<ConnectedRole>(sql`
+		db.$client.query<ConnectedRole>(`
 			SELECT r.rolname AS name, r.rolsuper AS superuser, r.rolbypassrls AS bypass_rls,
 				EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tableowner = current_user) AS owns_tables,
 				pg_has_role(current_user, 'visibility_subject', 'USAGE')
@@ -65,7 +68,7 @@ export async function assertAppRole(): Promise<void> {
 		role.inherits_tenancy && "inherits a tenancy role",
 	].filter(Boolean);
 	if (problems.length === 0) return;
-	throw new Error(
+	throw new UnsafeAppRoleError(
 		`The app connects to Postgres as ${role.name}, which ${problems.join(" and ")}. Point DATABASE_URL at the visibility_app login role, and MIGRATION_DATABASE_URL at the owner for migrations.`,
 	);
 }

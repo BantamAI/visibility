@@ -33,6 +33,17 @@ const CLEAR_SCOPE = "RESET ROLE; RESET app.subject_id";
  * login role as is, which reaches no subject rows.
  */
 export class TenantPool extends pg.Pool {
+	constructor(config?: pg.PoolConfig) {
+		super(config);
+		const unscoped = pg.Pool.prototype.query;
+		// Assigned rather than overridden, so the pool keeps pg's query overloads.
+		this.query = ((...args: unknown[]) => {
+			const scope = scopes.getStore();
+			if (!scope || typeof args.at(-1) === "function") return Reflect.apply(unscoped, this, args);
+			return this.queryInScope(scope, args);
+		}) as pg.Pool["query"];
+	}
+
 	override connect(): Promise<pg.PoolClient>;
 	override connect(
 		callback: (err: Error | undefined, client: pg.PoolClient | undefined, done: (release?: unknown) => void) => void,
@@ -41,16 +52,12 @@ export class TenantPool extends pg.Pool {
 		callback?: (err: Error | undefined, client: pg.PoolClient | undefined, done: (release?: unknown) => void) => void,
 	): Promise<pg.PoolClient> | undefined {
 		// pg.Pool's own query() connects with a callback; it only runs unscoped (see query below).
-		if (callback) return super.connect(callback);
+		if (callback) {
+			super.connect(callback);
+			return;
+		}
 		const scope = scopes.getStore();
 		return scope ? this.connectInScope(scope) : super.connect();
-	}
-
-	// `never` satisfies every one of pg.Pool's query overloads, which this passes through untouched.
-	override query(...args: unknown[]): never {
-		const scope = scopes.getStore();
-		if (!scope || typeof args.at(-1) === "function") return Reflect.apply(super.query, this, args) as never;
-		return this.queryInScope(scope, args) as never;
 	}
 
 	private async queryInScope(scope: TenantScope, args: unknown[]): Promise<pg.QueryResult> {

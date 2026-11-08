@@ -11,7 +11,7 @@ import { registerHandlers } from "./handlers";
 import { DERIVE_RUNS_QUEUE } from "./jobs/derive-runs";
 
 vi.mock("./mention-judge", async () => {
-	const { cuedAnalyzer } = await import("./mention-judge/__fixtures__/cued-judge");
+	const { cuedAnalyzer } = await import("./mention-judge/__fixtures__/cued-judge.js");
 	return { mentionAnalyzer: () => ({ ...cuedAnalyzer, concurrency: 1 }) };
 });
 vi.mock("./boss", () => ({ getBoss: () => ({ send: async () => null, insert: async () => null }) }));
