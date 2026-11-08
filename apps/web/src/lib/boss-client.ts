@@ -27,6 +27,8 @@ export async function getBoss(): Promise<PgBoss> {
 		const boss = new PgBoss({
 			connectionString,
 			schema: "pgboss",
+			// The migrations create it, owned by the app role, which can't create schemas.
+			createSchema: false,
 			// Web app only needs to send/schedule jobs, not process them
 			supervise: false, // Let worker handle supervision
 		});
