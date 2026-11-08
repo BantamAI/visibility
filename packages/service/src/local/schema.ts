@@ -1,4 +1,5 @@
-import { brands } from "@workspace/lib/db/schema";
+import { brands, promptRuns } from "@workspace/lib/db/schema";
+import type { RunLocation } from "@workspace/lib/providers";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -9,6 +10,7 @@ import {
 	index,
 	integer,
 	jsonb,
+	numeric,
 	pgEnum,
 	pgTable,
 	smallint,
@@ -137,7 +139,51 @@ export const refUsZctas = pgTable(
 	(table) => [index("ref_us_zctas_lat_lng_idx").on(table.lat, table.lng)],
 ).enableRLS();
 
+export const fidelityTier = pgEnum("fidelity_tier", ["T1", "T2", "T3", "T4", "T5"]);
+export const locationMethod = pgEnum("location_method", [
+	"geo_coordinate",
+	"egress_city",
+	"egress_region",
+	"api_user_location",
+	"prompt_only",
+]);
+export const runCostSource = pgEnum("run_cost_source", ["vendor", "estimate"]);
+
+/**
+ * Where a located run asked to come from and how faithfully it got there, one row per
+ * run; brand-mode runs have none. Kept beside Elmo's `prompt_runs` rather than in it.
+ * The trigger sets `subject_id` from the run. `requested_location` is a snapshot, so
+ * `point_id` has no foreign key and outlives its point.
+ */
+export const runLocations = pgTable(
+	"run_locations",
+	{
+		runId: uuid("run_id")
+			.primaryKey()
+			.references(() => promptRuns.id, { onDelete: "cascade" }),
+		subjectId: text("subject_id").notNull(),
+		pointId: uuid("point_id").notNull(),
+		requestedLocation: jsonb("requested_location").$type<RunLocation>().notNull(),
+		locationMethod: locationMethod("location_method").notNull(),
+		fidelityTier: fidelityTier("fidelity_tier").notNull(),
+		vendorReportedLocation: jsonb("vendor_reported_location").$type<Record<string, unknown>>(),
+		vendorRunId: text("vendor_run_id"),
+		costUsd: numeric("cost_usd", { precision: 12, scale: 6 }),
+		costSource: runCostSource("cost_source"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("run_locations_subject_id_idx").on(table.subjectId),
+		check(
+			"run_locations_method_matches_tier_check",
+			sql`(${table.fidelityTier}, ${table.locationMethod}) IN (('T1', 'geo_coordinate'), ('T2', 'egress_city'), ('T3', 'egress_region'), ('T4', 'api_user_location'), ('T5', 'prompt_only'))`,
+		),
+		check("run_locations_cost_source_check", sql`(${table.costUsd} IS NULL) = (${table.costSource} IS NULL)`),
+	],
+).enableRLS();
+
 export type ServiceArea = typeof subjectServiceAreas.$inferSelect;
 export type SamplePoint = typeof samplePoints.$inferSelect;
 export type RefUsPlace = typeof refUsPlaces.$inferSelect;
 export type RefUsZcta = typeof refUsZctas.$inferSelect;
+export type RunLocationRecord = typeof runLocations.$inferInsert;
