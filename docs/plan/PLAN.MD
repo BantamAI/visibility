@@ -113,16 +113,16 @@ Real users get local answers from the location the engine infers: IP address, de
 | T4 | `api_user_location` | Model API with its own location parameter (not the consumer surface) |
 | T5 | `prompt_only` | City named in the prompt; country-level egress |
 
-Candidate routes per engine. All of these are hypotheses until the bake-off (SP5-L) confirms them:
+Candidate routes per engine. All of these are hypotheses until the bake-off (SP5-L) confirms them. Claude is the only engine reached through a model API; the others are scraped only, with no API fallback (ADR-33):
 
-| Engine | Primary candidate | Secondary | Grid kind | API fallback |
+| Engine | Primary candidate | Secondary | Grid kind | API route |
 |---|---|---|---|---|
 | Google AI Mode | DataForSEO AI Mode SERP with `location_coordinate` (T1) | Cloro AI Mode with `location` (Google canonical name) or `uule` (T1, city-level only) | Coordinate grid | — |
 | Google AI Overviews | DataForSEO organic SERP, `load_async_ai_overview`, `location_coordinate` (T1) | Cloro or SearchApi, if location is supported (verify) | Coordinate grid | — |
-| ChatGPT | Bright Data ChatGPT scraper `geolocation` "lat,lng" field (T1 if it localizes; verify) | Bright Data residential egress by ZIP (T2); DataForSEO LLM Scraper city `location_code` (verify tier); Cloro `state` (T3) | Coordinate grid if T1 holds, else ZIP grid | OpenAI Responses `web_search` `user_location` (T4) |
-| Gemini | DataForSEO Gemini LLM Scraper `location_coordinate` (T1) | Cloro `state` (T3) | Coordinate grid | Gemini API Maps grounding `latLng` + Search grounding (T4) |
-| Perplexity | Cloro `state` (T3) | Bright Data (country) or SearchApi | Centroids only (consumer); API points | Sonar `web_search_options.user_location` with lat/lng, city, region and country (T4) |
-| Claude | — no terms-compatible consumer route | — | API points | Anthropic `web_search` tool `user_location` (city, region, country, timezone) (T4) |
+| ChatGPT | Bright Data ChatGPT scraper `geolocation` "lat,lng" field (T1 if it localizes; verify) | Bright Data residential egress by ZIP (T2); DataForSEO LLM Scraper city `location_code` (verify tier); Cloro `state` (T3) | Coordinate grid if T1 holds, else ZIP grid | — |
+| Gemini | DataForSEO Gemini LLM Scraper `location_coordinate` (T1) | Cloro `state` (T3) | Coordinate grid | — |
+| Perplexity | Cloro `state` (T3) | Bright Data (country) or SearchApi | Centroids only | — |
+| Claude | — no terms-compatible consumer route | — | Centroids | Anthropic `web_search` tool `user_location` (city, region, country, timezone) (T4) |
 
 Facts behind the table:
 - ChatGPT search may use an approximate location from the user's IP address, and device location sharing is off by default. So egress city matters for ChatGPT.
@@ -136,7 +136,7 @@ Facts behind the table:
 - **Our own grid, three kinds of sample point,** all generated from each subject's service areas (no third-party grid product):
   - *Coordinate grid:* N×N lat/lng points (3×3 to 7×7) sent to T1 routes that accept coordinates (DataForSEO AI Mode, AI Overviews and Gemini; Bright Data ChatGPT if its `geolocation` field localizes).
   - *ZIP grid:* the ZIP codes whose centroids fall inside the service area (from public-domain Census ZCTA data), sent to egress-based T2 routes as city/ZIP proxy targets. A ZIP grid is coarser than a coordinate grid but matches how IP-located engines see users.
-  - *Centroids:* one point per city in the service area, for T3–T5 routes. The Perplexity and Gemini APIs also accept lat/lng, so they can take the coordinate grid; Anthropic and OpenAI take only city-level fields. Report all API routes separately as API approximations.
+  - *Centroids:* one point per city in the service area, for T3–T5 routes. Claude's Anthropic API route takes only city-level fields, so it uses centroids and is reported separately as an API approximation.
 - **Grid scan:** one scan = one prompt × one route × every active point in an area, stored as a scan record with one run per point, so we can draw per-point maps and compare scans over time.
 - **Grids only where location is implicit:** "near me" prompts run on the grid; city-named prompts already carry their location, so they run on centroids only. This keeps grid cost to the prompts where it measures something.
 - **Prompt phrasing:** each local prompt runs as both "near me" (location comes from the run) and city-named ("…in Raleigh, NC"). The two measure different things and are reported separately.
@@ -235,16 +235,15 @@ Acceptance criteria:
 - [ ] Scan cost = sum of its runs; shown before a scan is scheduled (E53-S28).
 - [ ] No Local Falcon code, data or comparison anywhere.
 
-### E53-S26 API engines with user location (Claude, Perplexity, OpenAI, Gemini)
-Labels: `story`, `area:providers`, `upstream-touch`, `size:M`, `tag:Pilot`. Milestone L1. Depends on: E53-S22. Split into two issues if it's larger than M.
+### E53-S26 Claude through the Anthropic API with user location
+Labels: `story`, `area:providers`, `upstream-touch`, `size:S`, `tag:Pilot`. Milestone L1. Depends on: E53-S22.
 
 Acceptance criteria:
 - [ ] Anthropic API: `web_search` tool with `user_location` `{type: "approximate", city, region, country, timezone}`.
-- [ ] Perplexity Sonar, called directly (not through OpenRouter, which may drop the field): `web_search_options.user_location` with country, region, city, latitude and longitude.
-- [ ] OpenAI Responses: `web_search` with `user_location`; set explicitly so the API doesn't default to a US location.
-- [ ] Gemini API: Google Search grounding, plus Maps grounding with `toolConfig.retrievalConfig.latLng` for local-intent prompts; place IDs from grounding chunks kept for E53-S30.
-- [ ] All recorded as T4 and labelled "API approximation" in reports.
-- [ ] Perplexity and Gemini take lat/lng, so they accept coordinate-grid points; Anthropic and OpenAI take city-level fields only, so they use city centroids.
+- [ ] Recorded as T4 and labelled "API approximation" in reports.
+- [ ] City-level fields only, so Claude runs on city centroids.
+
+No other engine gets a model-API route: ChatGPT, Gemini and Perplexity are scraped only (ADR-33).
 
 ### E53-S27 Location canaries
 Labels: `story`, `area:location`, `size:M`, `tag:Pilot`. Milestone L1. Depends on: E53-S22 and at least one route.
@@ -332,7 +331,7 @@ Acceptance criteria:
 Labels: `story`, `area:local`, `size:M`, `tag:Pilot`. Milestone L2. Depends on: E53-S23, E53-S24 or E53-S25.
 
 Acceptance criteria:
-- [ ] Normalizes business cards from each vendor (DataForSEO local items, Cloro business data, Bright Data `business_locations`, Gemini Maps grounding chunks) into one `answer_businesses` shape: name, Place ID if any, phone, address, coordinates, rating, position.
+- [ ] Normalizes business cards from each vendor (DataForSEO local items, Cloro business data, Bright Data `business_locations`) into one `answer_businesses` shape: name, Place ID if any, phone, address, coordinates, rating, position.
 - [ ] Card position counts toward average position.
 - [ ] Fixtures per vendor.
 
@@ -457,7 +456,6 @@ Make each one brief: why, trigger, rough size.
 - Census ZCTA gazetteer files (public domain): https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html
 - Perplexity user location filter: https://docs.perplexity.ai/guides/user-location-filter-guide
 - Anthropic web search tool user_location: https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool
-- Gemini API grounding with Google Maps: https://ai.google.dev/gemini-api/docs/maps-grounding
 - Places API policies (Place ID exempt from caching): https://developers.google.com/maps/documentation/places/web-service/policies · Place IDs (refresh guidance): https://developers.google.com/maps/documentation/places/web-service/place-id
 - ChatGPT search and location: https://help.openai.com/en/articles/9237897-chatgpt-search
 - OpenAI terms of use: https://openai.com/policies/terms-of-use/
