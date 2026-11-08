@@ -8,6 +8,7 @@
 		"check-types": "tsc --noEmit",
 		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs",
 		"load:reference-places": "tsx scripts/load-reference-places.ts",
+		"load:reference-zctas": "tsx scripts/load-reference-zctas.ts",
 		"test": "vitest run --project=unit",
 		"test:integration": "vitest run --project=integration",
 		"test:pgtap": "bash scripts/run-pgtap.sh"
@@ -16,6 +17,7 @@
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/schema": "./src/local/schema.ts",
 		"./local/service-areas": "./src/local/service-areas/index.ts",
+		"./local/service-areas/geo": "./src/local/service-areas/geo.ts",
 		"./local/tenancy": "./src/local/tenancy.ts"
 	},
 	"dependencies": {

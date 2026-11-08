@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(16);
+SELECT plan(18);
 
 -- pgTAP records results in session temp tables owned by the test's login role.
 DO $$
@@ -24,6 +24,8 @@ INSERT INTO sample_points (subject_id, area_id, kind, label, lat, lng, city, reg
 	('areas-b', '20000000-0000-0000-0000-00000000000b', 'centroid', 'Durham, NC', 35.98, -78.9, 'Durham', 'NC', 'US', 'America/New_York');
 INSERT INTO ref_us_places (geoid, name, state, lat, lng, land_area_m2, vintage) VALUES
 	('3755000', 'Raleigh', 'NC', 35.831868, -78.641042, 394359593, 2025);
+INSERT INTO ref_us_zctas (zcta, lat, lng, land_area_m2, population, vintage, population_vintage) VALUES
+	('27601', 35.773661, -78.634563, 4709755, 9965, 2025, 2020);
 
 SELECT throws_ok(
 	$$INSERT INTO sample_points (subject_id, area_id, kind, label, lat, lng, country, timezone)
@@ -43,6 +45,7 @@ SET LOCAL app.subject_id = 'areas-a';
 SELECT results_eq('SELECT name FROM subject_service_areas', $$VALUES ('Raleigh')$$, 'subject sees only its own areas');
 SELECT results_eq('SELECT label FROM sample_points', $$VALUES ('Raleigh, NC')$$, 'subject sees only its own points');
 SELECT is((SELECT count(*)::int FROM ref_us_places), 1, 'subject reads the shared reference places');
+SELECT is((SELECT count(*)::int FROM ref_us_zctas), 1, 'subject reads the shared reference ZCTAs');
 
 UPDATE subject_service_areas SET name = 'hijacked' WHERE subject_id = 'areas-b';
 UPDATE sample_points SET active = false WHERE subject_id = 'areas-b';
@@ -79,6 +82,12 @@ SELECT throws_ok(
 	'42501',
 	NULL,
 	'subject can''t change the reference places'
+);
+SELECT throws_ok(
+	$$UPDATE ref_us_zctas SET population = 0$$,
+	'42501',
+	NULL,
+	'subject can''t change the reference ZCTAs'
 );
 
 RESET ROLE;

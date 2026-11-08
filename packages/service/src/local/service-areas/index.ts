@@ -1,4 +1,4 @@
-export { MAX_GRID_SIZE, MIN_GRID_SIZE } from "./geo";
+export { DEFAULT_ZIP_POINTS, MAX_GRID_SIZE, MAX_ZIP_POINTS, MIN_GRID_SIZE } from "./geo";
 export {
 	deleteServiceArea,
 	listServiceAreas,
