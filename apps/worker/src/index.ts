@@ -8,6 +8,7 @@ import { PROCESS_PROMPT_QUEUE, PROMPT_JOB_OPTIONS } from "@workspace/lib/queues/
 import { GENERATE_REPORT_QUEUE, REPORT_JOB_OPTIONS } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
+import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
 import type { PgBoss } from "pg-boss";
 import { startBackfills } from "./backfills";
 import { getBoss } from "./boss";
@@ -43,6 +44,7 @@ async function createOrUpdateQueue(
 async function main() {
 	console.log("Starting pg-boss worker...");
 	assertRequiredEnv();
+	await assertAppRole();
 	const boss = getBoss();
 
 	// Awaited so a stored credential counts toward the validation below.
@@ -137,7 +139,9 @@ async function main() {
 
 	// Before any handler runs, so the stale pass never mistakes a brand that
 	// predates stamping for one whose whole history needs replaying.
-	const adopted = await adoptCurrentStamps();
+	const adopted = await withAgency({ actor: "worker", reason: "startup: adopt analysis stamps" }, () =>
+		adoptCurrentStamps(),
+	);
 	if (adopted > 0) console.log(`Adopted current analysis stamps for ${adopted} brands`);
 
 	await boss.schedule(
@@ -156,20 +160,23 @@ async function main() {
 	);
 	console.log("Scheduled refresh-rollups job (every minute)");
 
-	await initializePipeline(boss);
+	await withAgency({ actor: "worker", reason: "startup: check rollups are current" }, () => initializePipeline(boss));
 
+	// Outside any scope: each handler opens its own (see handlers.ts).
 	await registerHandlers(boss);
 	console.log("All handlers registered, worker is ready");
 
-	await requestUnjudgedRuns(db, boss, { days: 30, limit: 50_000 }).then(
-		(unjudged) => unjudged > 0 && console.log(`Asked again to judge ${unjudged} runs`),
-		(error) => Sentry.captureException(error),
-	);
-	await requestStaleReprocesses(db, boss, mentionAnalyzer(), { everyBrand: true }).catch((error) =>
-		Sentry.captureException(error),
-	);
+	await withAgency({ actor: "worker", reason: "startup: sweep unjudged and stale runs, resume backfills" }, async () => {
+		await requestUnjudgedRuns(db, boss, { days: 30, limit: 50_000 }).then(
+			(unjudged) => unjudged > 0 && console.log(`Asked again to judge ${unjudged} runs`),
+			(error) => Sentry.captureException(error),
+		);
+		await requestStaleReprocesses(db, boss, mentionAnalyzer(), { everyBrand: true }).catch((error) =>
+			Sentry.captureException(error),
+		);
 
-	await startBackfills();
+		await startBackfills();
+	});
 }
 
 main().catch(async (error) => {

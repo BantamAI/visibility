@@ -106,3 +106,10 @@ BEGIN
 		EXECUTE format('ALTER TYPE %s OWNER TO visibility_app', item.name);
 	END LOOP;
 END $$;
+--> statement-breakpoint
+-- The dashboard and the maintenance job read pg-boss's queue and expedite jobs in it.
+GRANT USAGE ON SCHEMA pgboss TO visibility_agency;
+--> statement-breakpoint
+GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA pgboss TO visibility_agency;
+--> statement-breakpoint
+ALTER DEFAULT PRIVILEGES FOR ROLE visibility_app IN SCHEMA pgboss GRANT SELECT, UPDATE ON TABLES TO visibility_agency;

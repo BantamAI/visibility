@@ -28,6 +28,8 @@ import { DERIVE_PRIORITY, sendDeriveRuns } from "./derive-runs";
 
 export interface ProcessPromptData {
 	promptId: string;
+	/** The prompt's brand, which the worker runs the job as; looked up when a job lacks it. */
+	brandId?: string;
 	/** Accepted for queued jobs created by older app versions; the worker resolves cadence from current policy. */
 	cadenceHours?: number;
 	/** Cycles in a row where every run failed, carried forward to size the backoff. */
@@ -39,13 +41,18 @@ interface PromptContext {
 	brand: Brand;
 }
 
-async function scheduleNextRun(promptId: string, delayHours: number, consecutiveFailures: number): Promise<void> {
+async function scheduleNextRun(
+	promptId: string,
+	brandId: string,
+	delayHours: number,
+	consecutiveFailures: number,
+): Promise<void> {
 	const startAfterSeconds = Math.round(delayHours * 60 * 60);
 
 	try {
 		await getBoss().send(
 			PROCESS_PROMPT_QUEUE,
-			{ promptId, consecutiveFailures },
+			{ promptId, brandId, consecutiveFailures },
 			{
 				singletonKey: promptSingletonKey(promptId),
 				singletonSeconds: startAfterSeconds, // Prevent duplicates until the next attempt is due
@@ -374,7 +381,7 @@ async function processPrompt(
 
 	if (action.kind === "stop") return;
 	if (action.kind === "reschedule") {
-		await scheduleNextRun(promptId, action.delayHours, action.consecutiveFailures);
+		await scheduleNextRun(promptId, context.brand.id, action.delayHours, action.consecutiveFailures);
 		return;
 	}
 
@@ -385,7 +392,7 @@ async function processPrompt(
 		rescheduleHours: action.rescheduleHours,
 		consecutiveFailures,
 	});
-	await scheduleNextRun(promptId, next.delayHours, next.consecutiveFailures);
+	await scheduleNextRun(promptId, context.brand.id, next.delayHours, next.consecutiveFailures);
 }
 
 /** After a cycle it schedules the next run: on cadence when anything came back, on a backoff when nothing did. */
