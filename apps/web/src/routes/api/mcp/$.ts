@@ -3,8 +3,10 @@
  * endpoint's own path too, so an exact route would never be reached.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { withAgency } from "@workspace/service/local/tenancy";
+import { completePrincipal, principalActor } from "@/lib/auth/api-auth";
 import { auth } from "@/lib/auth/server";
-import { MCP_RESOURCE_METADATA_PATH, resolveMcpAuth } from "@/lib/mcp/auth";
+import { identifyMcpCaller, MCP_RESOURCE_METADATA_PATH } from "@/lib/mcp/auth";
 import { handleMcpRequest } from "@/lib/mcp/server";
 
 /** From the auth config, not the request: a strict client refuses a challenge
@@ -26,22 +28,24 @@ function unauthorized(message: string): Response {
 const NOT_FOUND = -32601;
 
 async function handleMcp({ request }: { request: Request }): Promise<Response> {
-	const resolved = await resolveMcpAuth(request);
-	if ("failure" in resolved) {
-		if (resolved.failure.status === 429) {
+	const identified = await identifyMcpCaller(request);
+	if ("failure" in identified) {
+		if (identified.failure.status === 429) {
 			return Response.json(
-				{ jsonrpc: "2.0", id: null, error: { code: -32003, message: resolved.failure.message } },
+				{ jsonrpc: "2.0", id: null, error: { code: -32003, message: identified.failure.message } },
 				{
 					status: 429,
-					headers: { "Retry-After": String(resolved.failure.retryAfterSeconds ?? 60) },
+					headers: { "Retry-After": String(identified.failure.retryAfterSeconds ?? 60) },
 				},
 			);
 		}
-		return unauthorized(resolved.failure.message);
+		return unauthorized(identified.failure.message);
 	}
 
 	// The transport answers the methods the protocol defines and refuses the rest.
-	return handleMcpRequest(resolved.auth, request);
+	return withAgency({ actor: principalActor(identified.caller.auth), reason: `MCP ${request.method}` }, async () =>
+		handleMcpRequest(await completePrincipal(identified.caller), request),
+	);
 }
 
 function dispatch({

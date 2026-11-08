@@ -10,7 +10,15 @@
 import { getDeployment } from "@workspace/deployment";
 import { WriteDeniedError } from "@workspace/lib/entitlements";
 import type { z } from "zod";
-import { type ApiAuth, type ApiAuthFailure, principalScopes, resolveApiAuth } from "@/lib/auth/api-auth";
+import { withAgency } from "@workspace/service/local/tenancy";
+import {
+	type ApiAuth,
+	type ApiAuthFailure,
+	completePrincipal,
+	identifyApiCaller,
+	principalActor,
+	principalScopes,
+} from "@/lib/auth/api-auth";
 import type { ApiScope } from "./scopes";
 
 /** A union rather than an enum in the spec, so a generated client does not
@@ -156,23 +164,30 @@ export function createApiHandler<P = Record<string, string>, B = undefined>(opts
 		request: Request;
 		params: Record<string, string>;
 	}): Promise<Response> => {
-		const resolved = await resolveApiAuth(request);
-		if ("failure" in resolved) return authFailureResponse(resolved.failure);
+		const identified = await identifyApiCaller(request);
+		if ("failure" in identified) return authFailureResponse(identified.failure);
 
-		const auth = resolved.auth;
-		const refusal = refuseRequest(auth, request, opts);
+		const refusal = refuseRequest(identified.caller.auth, request, opts);
 		if (refusal) return refusal;
 
-		const parsed = await parseInputs(opts, request, params);
-		if ("response" in parsed) return withRateLimit(parsed.response, auth);
+		// Every API caller is the agency's own, so the request reads across subjects, logged once.
+		const access = {
+			actor: principalActor(identified.caller.auth),
+			reason: `${request.method} ${new URL(request.url).pathname}`,
+		};
+		return withAgency(access, async () => {
+			const auth = await completePrincipal(identified.caller);
+			const parsed = await parseInputs(opts, request, params);
+			if ("response" in parsed) return withRateLimit(parsed.response, auth);
 
-		try {
-			const result = await opts.handle({ params: parsed.params, body: parsed.body, request, auth });
-			const response = result instanceof Response ? result : Response.json(result, { status: opts.status ?? 200 });
-			return withRateLimit(response, auth);
-		} catch (err) {
-			return withRateLimit(errorFromThrow(err, request, opts.mapError), auth);
-		}
+			try {
+				const result = await opts.handle({ params: parsed.params, body: parsed.body, request, auth });
+				const response = result instanceof Response ? result : Response.json(result, { status: opts.status ?? 200 });
+				return withRateLimit(response, auth);
+			} catch (err) {
+				return withRateLimit(errorFromThrow(err, request, opts.mapError), auth);
+			}
+		});
 	};
 
 	return brand(handler, {
