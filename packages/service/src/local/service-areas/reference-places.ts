@@ -77,30 +77,36 @@ export function placeNameWithoutDescription(censusName: string): string {
 	return words.join(" ");
 }
 
-/** Reads a Census gazetteer places file; older vintages are tab-separated, newer ones use pipes. */
-export function parseGazetteerPlaces(text: string): GazetteerPlace[] {
+/**
+ * Reads the named columns of each row of a Census gazetteer file; older vintages are
+ * tab-separated, newer ones use pipes.
+ */
+export function readGazetteer<C extends string>(text: string, columns: readonly C[]): Record<C, string>[] {
 	const lines = text.split(/\r?\n/).filter((line) => line.trim());
 	const header = lines.shift();
 	if (!header) return [];
 	const delimiter = header.includes("|") ? "|" : "\t";
-	const columns = header.split(delimiter).map((column) => column.trim());
-	const at = (name: string) => {
-		const index = columns.indexOf(name);
-		if (index < 0) throw new Error(`The gazetteer file has no ${name} column`);
+	const names = header.split(delimiter).map((column) => column.trim());
+	const indexes = columns.map((column) => {
+		const index = names.indexOf(column);
+		if (index < 0) throw new Error(`The gazetteer file has no ${column} column`);
 		return index;
-	};
-	const [usps, geoid, name, aland, lat, lng] = ["USPS", "GEOID", "NAME", "ALAND", "INTPTLAT", "INTPTLONG"].map(at);
+	});
 	return lines.map((line) => {
 		const fields = line.split(delimiter).map((field) => field.trim());
-		return {
-			geoid: fields[geoid],
-			name: placeNameWithoutDescription(fields[name]),
-			state: fields[usps],
-			lat: Number(fields[lat]),
-			lng: Number(fields[lng]),
-			landAreaM2: Number(fields[aland]),
-		};
+		return Object.fromEntries(columns.map((column, i) => [column, fields[indexes[i]]])) as Record<C, string>;
 	});
+}
+
+export function parseGazetteerPlaces(text: string): GazetteerPlace[] {
+	return readGazetteer(text, ["USPS", "GEOID", "NAME", "ALAND", "INTPTLAT", "INTPTLONG"]).map((row) => ({
+		geoid: row.GEOID,
+		name: placeNameWithoutDescription(row.NAME),
+		state: row.USPS,
+		lat: Number(row.INTPTLAT),
+		lng: Number(row.INTPTLONG),
+		landAreaM2: Number(row.ALAND),
+	}));
 }
 
 function parseCsvLine(line: string): string[] {

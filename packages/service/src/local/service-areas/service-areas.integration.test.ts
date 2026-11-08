@@ -4,9 +4,10 @@ import { brands, organization } from "@workspace/lib/db/schema";
 import { createOwnerDb } from "@workspace/lib/test/integration/owner-db";
 import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { refUsPlaces } from "../schema";
+import { refUsPlaces, refUsZctas } from "../schema";
 import { withSubject } from "../tenancy";
 import { googleCanonicalName, parseGazetteerPlaces, parseUsCityGeotargets } from "./reference-places";
+import { parseGazetteerZctas, parseZctaPopulation } from "./reference-zctas";
 import { deleteServiceArea, listServiceAreas, type ServiceAreaInput, saveServiceArea } from "./service-areas";
 
 const ORG = "service-areas-test-org";
@@ -17,6 +18,8 @@ const owner = createOwnerDb();
 const fixture = (name: string) => readFileSync(new URL(`./__fixtures__/${name}`, import.meta.url), "utf8");
 const cities = parseUsCityGeotargets(fixture("geotargets-excerpt.csv"));
 const places = parseGazetteerPlaces(fixture("gazetteer-places-2025.txt"));
+const zctas = parseGazetteerZctas(fixture("gazetteer-zcta-2025.txt"));
+const population = parseZctaPopulation(fixture("dhc-2020-p1-zcta.json"));
 
 const raleigh: ServiceAreaInput = {
 	name: "Raleigh",
@@ -39,6 +42,17 @@ beforeAll(async () => {
 			places.map((place) => ({ ...place, googleCanonicalName: googleCanonicalName(place, cities), vintage: 2025 })),
 		)
 		.onConflictDoNothing();
+	await owner
+		.insert(refUsZctas)
+		.values(
+			zctas.map((zcta) => ({
+				...zcta,
+				population: population.byZcta.get(zcta.zcta) ?? null,
+				vintage: 2025,
+				populationVintage: 2020,
+			})),
+		)
+		.onConflictDoNothing();
 });
 
 afterAll(async () => {
@@ -56,12 +70,18 @@ async function cleanUp() {
 			places.map((place) => place.geoid),
 		),
 	);
+	await owner.delete(refUsZctas).where(
+		inArray(
+			refUsZctas.zcta,
+			zctas.map((zcta) => zcta.zcta),
+		),
+	);
 }
 
 const areasOf = (subjectId: string) => withSubject(subjectId, () => listServiceAreas(subjectId));
 
 describe("service areas", () => {
-	it("generates grid and centroid points ready for providers", async () => {
+	it("generates grid, centroid and ZIP points ready for providers", async () => {
 		await withSubject(A, () => saveServiceArea(A, raleigh));
 		const [area] = await areasOf(A);
 		expect(area).toMatchObject({ name: "Raleigh", isPrimary: true, gridSize: 3 });
@@ -74,6 +94,16 @@ describe("service areas", () => {
 			country: "US",
 			timezone: "America/New_York",
 			googleCanonicalName: "Raleigh,North Carolina,United States",
+			postalCode: "27609",
+		});
+		const zips = active.filter((point) => point.kind === "zip");
+		expect(zips).toHaveLength(12);
+		expect(zips.find((point) => point.label === "27529")).toMatchObject({
+			postalCode: "27529",
+			city: "Garner",
+			region: "NC",
+			country: "US",
+			timezone: "America/New_York",
 		});
 	});
 
@@ -96,6 +126,7 @@ describe("service areas", () => {
 		);
 		expect(after.samplePoints.find((point) => point.label === "Cary, NC")?.active).toBe(false);
 		expect(after.samplePoints.find((point) => point.label === "Raleigh, NC")?.active).toBe(true);
+		expect(after.samplePoints.find((point) => point.label === "27529")?.active).toBe(false);
 	});
 
 	it("keeps one primary area per subject", async () => {

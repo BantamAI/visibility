@@ -1,12 +1,22 @@
 import { db } from "@workspace/lib/db/db";
 import { and, between, eq, inArray, notInArray, sql } from "drizzle-orm";
-import { type RefUsPlace, refUsPlaces, type SamplePointKind, type ServiceArea, samplePoints } from "../schema";
+import {
+	type RefUsPlace,
+	type RefUsZcta,
+	refUsPlaces,
+	refUsZctas,
+	type SamplePointKind,
+	type ServiceArea,
+	samplePointKind,
+	samplePoints,
+} from "../schema";
 import { boundingBox, coordinateGrid, distanceMeters, insideArea, nearest } from "./geo";
 
 export type ReferencePlace = Pick<RefUsPlace, "geoid" | "name" | "state" | "lat" | "lng" | "googleCanonicalName">;
+export type ReferenceZcta = Pick<RefUsZcta, "zcta" | "lat" | "lng" | "landAreaM2" | "population">;
 
 export type PlannedPoint = {
-	kind: Extract<SamplePointKind, "grid" | "centroid">;
+	kind: SamplePointKind;
 	label: string;
 	lat: number;
 	lng: number;
@@ -22,21 +32,36 @@ export type PlannedPoint = {
 const NEARBY_PLACE_MARGIN_M = 15_000;
 
 /**
- * A grid point takes the city, region and Google name of the nearest Census place,
- * a stand-in for reverse geocoding that needs no lookup at run time.
+ * Most populous first. Without population loaded, larger land area stands in for it,
+ * which at least favours whole neighbourhoods over single-building ZCTAs.
+ */
+const byPopulation = (a: ReferenceZcta, b: ReferenceZcta) =>
+	(b.population ?? -1) - (a.population ?? -1) || b.landAreaM2 - a.landAreaM2 || a.zcta.localeCompare(b.zcta);
+
+/**
+ * A point takes the city, region and Google name of the nearest Census place, and
+ * the ZIP of the nearest ZCTA, a stand-in for reverse geocoding that needs no lookup
+ * at run time.
  */
 export function planSamplePoints(
-	area: Pick<ServiceArea, "centerLat" | "centerLng" | "radiusMeters" | "polygon" | "gridSize" | "timezone" | "country">,
+	area: Pick<
+		ServiceArea,
+		"centerLat" | "centerLng" | "radiusMeters" | "polygon" | "gridSize" | "zipPointLimit" | "timezone" | "country"
+	>,
 	nearbyPlaces: readonly ReferencePlace[],
+	nearbyZctas: readonly ReferenceZcta[],
 ): PlannedPoint[] {
-	const fields = (place: ReferencePlace | undefined) => ({
-		city: place?.name ?? null,
-		region: place?.state ?? null,
-		country: area.country,
-		postalCode: null,
-		timezone: area.timezone,
-		googleCanonicalName: place?.googleCanonicalName ?? null,
-	});
+	const fields = (at: { lat: number; lng: number }, postalCode = nearest(at, nearbyZctas)?.zcta ?? null) => {
+		const place = nearest(at, nearbyPlaces);
+		return {
+			city: place?.name ?? null,
+			region: place?.state ?? null,
+			country: area.country,
+			postalCode,
+			timezone: area.timezone,
+			googleCanonicalName: place?.googleCanonicalName ?? null,
+		};
+	};
 
 	const grid = coordinateGrid(area, area.gridSize).map(
 		(cell): PlannedPoint => ({
@@ -44,7 +69,7 @@ export function planSamplePoints(
 			label: `${area.gridSize}x${area.gridSize} R${cell.row + 1}C${cell.col + 1}`,
 			lat: cell.lat,
 			lng: cell.lng,
-			...fields(nearest(cell, nearbyPlaces)),
+			...fields(cell),
 		}),
 	);
 
@@ -73,21 +98,40 @@ export function planSamplePoints(
 			};
 		});
 
-	return [...grid, ...centroids];
+	// A ZCTA with nobody living in it (a campus, an airport) has no residential IPs to egress from.
+	const populated = nearbyZctas.filter((zcta) => zcta.population !== 0);
+	let zips = populated.filter((zcta) => insideArea(zcta, area));
+	if (zips.length === 0) {
+		const closest = nearest(center, populated);
+		zips = closest ? [closest] : [];
+	}
+	const zipPoints = [...zips]
+		.sort(byPopulation)
+		.slice(0, area.zipPointLimit)
+		.map(
+			(zcta): PlannedPoint => ({
+				kind: "zip",
+				label: zcta.zcta,
+				lat: zcta.lat,
+				lng: zcta.lng,
+				...fields(zcta, zcta.zcta),
+			}),
+		);
+
+	return [...grid, ...centroids, ...zipPoints];
 }
 
-const GENERATED_KINDS = ["grid", "centroid"] as const;
-
 /**
- * Makes the area's grid and centroid points match its current shape. Points are
+ * Makes the area's grid, centroid and ZIP points match its current shape. Points are
  * keyed by label, so an unchanged area keeps its point ids, and points that no
  * longer fit are deactivated rather than deleted. Runs in the caller's tenant scope.
  */
 export async function regenerateSamplePoints(area: ServiceArea): Promise<PlannedPoint[]> {
 	const box = boundingBox(area, NEARBY_PLACE_MARGIN_M);
-	const nearbyPlaces =
-		area.country === "US"
-			? await db
+	const isUs = area.country === "US";
+	const [nearbyPlaces, nearbyZctas] = await Promise.all([
+		isUs
+			? db
 					.select({
 						geoid: refUsPlaces.geoid,
 						name: refUsPlaces.name,
@@ -100,8 +144,21 @@ export async function regenerateSamplePoints(area: ServiceArea): Promise<Planned
 					.where(
 						and(between(refUsPlaces.lat, box.minLat, box.maxLat), between(refUsPlaces.lng, box.minLng, box.maxLng)),
 					)
-			: [];
-	const planned = planSamplePoints(area, nearbyPlaces);
+			: [],
+		isUs
+			? db
+					.select({
+						zcta: refUsZctas.zcta,
+						lat: refUsZctas.lat,
+						lng: refUsZctas.lng,
+						landAreaM2: refUsZctas.landAreaM2,
+						population: refUsZctas.population,
+					})
+					.from(refUsZctas)
+					.where(and(between(refUsZctas.lat, box.minLat, box.maxLat), between(refUsZctas.lng, box.minLng, box.maxLng)))
+			: [],
+	]);
+	const planned = planSamplePoints(area, nearbyPlaces, nearbyZctas);
 
 	await db.transaction(async (tx) => {
 		if (planned.length > 0) {
@@ -124,7 +181,7 @@ export async function regenerateSamplePoints(area: ServiceArea): Promise<Planned
 					},
 				});
 		}
-		for (const kind of GENERATED_KINDS) {
+		for (const kind of samplePointKind.enumValues) {
 			const kept = planned.filter((point) => point.kind === kind).map((point) => point.label);
 			await tx
 				.update(samplePoints)

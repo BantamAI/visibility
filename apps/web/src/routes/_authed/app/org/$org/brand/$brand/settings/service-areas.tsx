@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { MAX_ZIP_POINTS } from "@workspace/service/local/service-areas/geo";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -42,6 +43,7 @@ type Draft = {
 	radiusMiles: string;
 	timezone: string;
 	gridSize: string;
+	zipPointLimit: string;
 	isPrimary: boolean;
 	polygon: string;
 };
@@ -53,6 +55,7 @@ const emptyDraft: Draft = {
 	radiusMiles: "10",
 	timezone: "America/New_York",
 	gridSize: "3",
+	zipPointLimit: "12",
 	isPrimary: false,
 	polygon: "",
 };
@@ -65,6 +68,7 @@ function draftFrom(area: ServiceAreaRow): Draft {
 		radiusMiles: String(Math.round((area.radiusMeters / METERS_PER_MILE) * 10) / 10),
 		timezone: area.timezone,
 		gridSize: String(area.gridSize),
+		zipPointLimit: String(area.zipPointLimit),
 		isPrimary: area.isPrimary,
 		polygon: area.polygon ? JSON.stringify(area.polygon) : "",
 	};
@@ -92,7 +96,7 @@ function ServiceAreasSettingsPage() {
 				<div>
 					<h1 className="text-3xl font-bold">Service Areas</h1>
 					<p className="text-muted-foreground">
-						Where this business works. Local runs sample from the grid and city points made for each area.
+						Where this business works. Local runs sample from the grid, city and ZIP points made for each area.
 					</p>
 				</div>
 				{!editing && <Button onClick={() => setEditing({ draft: emptyDraft })}>Add Service Area</Button>}
@@ -140,6 +144,7 @@ function ServiceAreaCard({
 	const points = area.samplePoints.filter((point) => point.active);
 	const grid = points.filter((point) => point.kind === "grid").length;
 	const centroids = points.filter((point) => point.kind === "centroid").length;
+	const zips = points.filter((point) => point.kind === "zip").length;
 	return (
 		<Card>
 			<CardHeader>
@@ -149,7 +154,7 @@ function ServiceAreaCard({
 				</CardTitle>
 				<CardDescription>
 					{area.centerLat}, {area.centerLng} · {(area.radiusMeters / METERS_PER_MILE).toFixed(1)} mi · {area.timezone} ·{" "}
-					{grid} grid points ({area.gridSize} × {area.gridSize}) · {centroids} cities
+					{grid} grid points ({area.gridSize} × {area.gridSize}) · {centroids} cities · {zips} ZIPs
 					{area.polygon ? " · clipped to boundary" : ""}
 				</CardDescription>
 				<CardAction className="flex gap-2">
@@ -174,6 +179,7 @@ function ServiceAreaCard({
 							<TableHead>Point</TableHead>
 							<TableHead>Kind</TableHead>
 							<TableHead>City</TableHead>
+							<TableHead>ZIP</TableHead>
 							<TableHead>Coordinates</TableHead>
 							<TableHead>Google Location</TableHead>
 						</TableRow>
@@ -184,6 +190,7 @@ function ServiceAreaCard({
 								<TableCell>{point.label}</TableCell>
 								<TableCell className="capitalize">{point.kind}</TableCell>
 								<TableCell>{point.city ? `${point.city}, ${point.region}` : "—"}</TableCell>
+								<TableCell>{point.postalCode ?? "—"}</TableCell>
 								<TableCell className="font-mono text-xs">
 									{point.lat.toFixed(5)}, {point.lng.toFixed(5)}
 								</TableCell>
@@ -239,6 +246,7 @@ function ServiceAreaForm({
 						radiusMeters: Number(draft.radiusMiles) * METERS_PER_MILE,
 						timezone: draft.timezone,
 						gridSize: Number(draft.gridSize),
+						zipPointLimit: Number(draft.zipPointLimit),
 						isPrimary: draft.isPrimary,
 						polygon,
 					},
@@ -331,6 +339,18 @@ function ServiceAreaForm({
 								))}
 							</SelectContent>
 						</Select>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="area-zips">ZIP Points</Label>
+						<Input
+							id="area-zips"
+							type="number"
+							min={1}
+							max={MAX_ZIP_POINTS}
+							value={draft.zipPointLimit}
+							onChange={(e) => set("zipPointLimit", e.target.value)}
+							required
+						/>
 					</div>
 					<div className="flex items-center gap-2 self-end pb-2">
 						<Switch

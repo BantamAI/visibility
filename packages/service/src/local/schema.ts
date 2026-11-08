@@ -40,6 +40,7 @@ export const subjectServiceAreas = pgTable(
 		timezone: text("timezone").notNull(),
 		country: text("country").default("US").notNull(),
 		gridSize: smallint("grid_size").default(3).notNull(),
+		zipPointLimit: smallint("zip_point_limit").default(12).notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true })
 			.defaultNow()
@@ -55,6 +56,7 @@ export const subjectServiceAreas = pgTable(
 		check("subject_service_areas_center_lng_check", sql`${table.centerLng} BETWEEN -180 AND 180`),
 		check("subject_service_areas_radius_check", sql`${table.radiusMeters} BETWEEN 100 AND 200000`),
 		check("subject_service_areas_grid_size_check", sql`${table.gridSize} BETWEEN 3 AND 7`),
+		check("subject_service_areas_zip_point_limit_check", sql`${table.zipPointLimit} BETWEEN 1 AND 50`),
 	],
 ).enableRLS();
 
@@ -117,6 +119,25 @@ export const refUsPlaces = pgTable(
 	(table) => [index("ref_us_places_lat_lng_idx").on(table.lat, table.lng)],
 ).enableRLS();
 
+/**
+ * Census ZCTA gazetteer points (public domain) with 2020 Decennial Census population,
+ * which the gazetteer lacks. ZCTAs approximate USPS ZIP codes.
+ */
+export const refUsZctas = pgTable(
+	"ref_us_zctas",
+	{
+		zcta: text("zcta").primaryKey().notNull(),
+		lat: doublePrecision("lat").notNull(),
+		lng: doublePrecision("lng").notNull(),
+		landAreaM2: bigint("land_area_m2", { mode: "number" }).notNull(),
+		population: integer("population"),
+		vintage: smallint("vintage").notNull(),
+		populationVintage: smallint("population_vintage"),
+	},
+	(table) => [index("ref_us_zctas_lat_lng_idx").on(table.lat, table.lng)],
+).enableRLS();
+
 export type ServiceArea = typeof subjectServiceAreas.$inferSelect;
 export type SamplePoint = typeof samplePoints.$inferSelect;
 export type RefUsPlace = typeof refUsPlaces.$inferSelect;
+export type RefUsZcta = typeof refUsZctas.$inferSelect;

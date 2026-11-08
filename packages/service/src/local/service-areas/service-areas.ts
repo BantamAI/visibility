@@ -2,7 +2,7 @@ import { db } from "@workspace/lib/db/db";
 import { isUniqueViolation } from "@workspace/lib/db/unique-names";
 import { and, asc, eq, ne } from "drizzle-orm";
 import { type ServiceArea, subjectServiceAreas } from "../schema";
-import { MAX_GRID_SIZE, MIN_GRID_SIZE, parseAreaPolygon } from "./geo";
+import { DEFAULT_ZIP_POINTS, MAX_GRID_SIZE, MAX_ZIP_POINTS, MIN_GRID_SIZE, parseAreaPolygon } from "./geo";
 import { listSamplePoints, regenerateSamplePoints } from "./sample-points";
 
 export type ServiceAreaInput = {
@@ -15,6 +15,7 @@ export type ServiceAreaInput = {
 	isPrimary?: boolean;
 	country?: string;
 	gridSize?: number;
+	zipPointLimit?: number;
 };
 
 export class ServiceAreaInputError extends Error {
@@ -69,6 +70,11 @@ export function normalizeServiceAreaInput(input: ServiceAreaInput) {
 		Number.isInteger(gridSize) && gridSize >= MIN_GRID_SIZE && gridSize <= MAX_GRID_SIZE,
 		`The grid size must be from ${MIN_GRID_SIZE} to ${MAX_GRID_SIZE}`,
 	);
+	const zipPointLimit = input.zipPointLimit ?? DEFAULT_ZIP_POINTS;
+	ensure(
+		Number.isInteger(zipPointLimit) && zipPointLimit >= 1 && zipPointLimit <= MAX_ZIP_POINTS,
+		`The ZIP point limit must be from 1 to ${MAX_ZIP_POINTS}`,
+	);
 	const country = (input.country ?? "US").trim().toUpperCase();
 	ensure(/^[A-Z]{2}$/.test(country), "The country must be a two-letter code");
 	const polygon = polygonFrom(input.polygon);
@@ -79,6 +85,7 @@ export function normalizeServiceAreaInput(input: ServiceAreaInput) {
 		radiusMeters,
 		timezone,
 		gridSize,
+		zipPointLimit,
 		country,
 		polygon,
 		isPrimary: input.isPrimary ?? false,

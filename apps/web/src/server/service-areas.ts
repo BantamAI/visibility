@@ -3,6 +3,7 @@ import {
 	deleteServiceArea,
 	listServiceAreas,
 	MAX_GRID_SIZE,
+	MAX_ZIP_POINTS,
 	MIN_GRID_SIZE,
 	saveServiceArea,
 } from "@workspace/service/local/service-areas";
@@ -29,6 +30,7 @@ export const saveServiceAreaFn = createServerFn({ method: "POST" })
 				radiusMeters: z.number(),
 				timezone: z.string(),
 				gridSize: z.number().int().min(MIN_GRID_SIZE).max(MAX_GRID_SIZE),
+				zipPointLimit: z.number().int().min(1).max(MAX_ZIP_POINTS),
 				isPrimary: z.boolean(),
 				polygon: z.unknown().optional(),
 			}),

@@ -14,6 +14,8 @@ const METERS_PER_DEGREE_LAT = 111_320;
 
 export const MIN_GRID_SIZE = 3;
 export const MAX_GRID_SIZE = 7;
+export const DEFAULT_ZIP_POINTS = 12;
+export const MAX_ZIP_POINTS = 50;
 
 const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 
