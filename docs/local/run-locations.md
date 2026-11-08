@@ -12,7 +12,9 @@ A located run asks a provider for an answer as if from one sample point, at a fi
 
 ## Declaring what a provider can serve
 
-A provider lists the tiers below T5 that each model's surface can serve in `locationSupport`, with the location fields it sends at each one. A provider that leaves it out sends nothing below country, which is every provider until its vendor story (E53-S23 to E53-S26) adds a declaration. Every surface can serve T5.
+A provider lists the tiers below T5 that each target can serve in `locationSupport`, with the location fields it sends at each one. A provider that leaves it out sends nothing below country, which is every scraper until its vendor story (E53-S23 to E53-S25) adds a declaration. Every surface can serve T5.
+
+Claude is the only engine reached through a model API (ADR-33). The Anthropic API serves T4 by giving its web search tool the point's city, region, country and timezone, so a Claude target with web search off can't serve it, and Claude runs on city centroids. Claude through OpenRouter declares nothing. Reports label T4 results "API approximation" so they're never read as what a person sees.
 
 Before a run, the worker checks the request against the declaration and refuses, before anything is spent, when the tier isn't listed or the point lacks a field the tier sends (a grid point far from any town has no city or Google canonical name). It never quietly runs at a lower tier. `pickRoute` walks a list of candidate routes and takes the first one that can serve the point, recording why each earlier one couldn't. The run planner (E53-S28) uses it to fall back.
 
