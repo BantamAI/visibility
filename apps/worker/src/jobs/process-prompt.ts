@@ -164,7 +164,10 @@ async function isOrgOverDailyCeiling(organizationId: string, ceiling: number): P
 			.select({ value: sql<number>`COUNT(*)` })
 			.from(usageEvents)
 			.where(
-				and(eq(usageEvents.organizationId, organizationId), gt(usageEvents.createdAt, sql`now() - interval '24 hours'`)),
+				and(
+					eq(usageEvents.organizationId, organizationId),
+					gt(usageEvents.createdAt, sql`now() - interval '24 hours'`),
+				),
 			),
 	);
 	return Number(row?.value ?? 0) >= ceiling;

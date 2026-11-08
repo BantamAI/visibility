@@ -132,9 +132,16 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 	);
 	console.log(`Registered handler: ${DERIVE_RUNS_QUEUE}`);
 
-	await boss.work<ReprocessData>(REPROCESS_QUEUE, { localConcurrency: 1 }, withSentry(REPROCESS_QUEUE, asSubject(brandOf, reprocessJob)));
+	await boss.work<ReprocessData>(
+		REPROCESS_QUEUE,
+		{ localConcurrency: 1 },
+		withSentry(REPROCESS_QUEUE, asSubject(brandOf, reprocessJob)),
+	);
 	console.log(`Registered handler: ${REPROCESS_QUEUE}`);
-	await boss.work(REQUEST_REPROCESSES_QUEUE, withSentry(REQUEST_REPROCESSES_QUEUE, asAgency(REQUEST_REPROCESSES_QUEUE, requestReprocessesJob)));
+	await boss.work(
+		REQUEST_REPROCESSES_QUEUE,
+		withSentry(REQUEST_REPROCESSES_QUEUE, asAgency(REQUEST_REPROCESSES_QUEUE, requestReprocessesJob)),
+	);
 	console.log(`Registered handler: ${REQUEST_REPROCESSES_QUEUE}`);
 
 	if (process.env.DEPLOYMENT_MODE === "whitelabel") {

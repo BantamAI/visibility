@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@workspace/lib/db/db";
-import { runOutsideTenantScope } from "@workspace/lib/db/tenant-pool";
 import { brands, organization, promptRuns, prompts, runMentions } from "@workspace/lib/db/schema";
+import { runOutsideTenantScope } from "@workspace/lib/db/tenant-pool";
 import { REFRESH_ROLLUPS_QUEUE } from "@workspace/lib/rollups/constants";
 import { createOwnerDb } from "@workspace/lib/test/integration/owner-db";
 import { eq, inArray, sql } from "drizzle-orm";
@@ -25,7 +25,10 @@ const B = `brand-${randomUUID()}`;
 const runs: Record<string, string> = {};
 
 async function recordRun(brandId: string): Promise<string> {
-	const [{ id: promptId }] = await db.insert(prompts).values({ brandId, value: "best crm" }).returning({ id: prompts.id });
+	const [{ id: promptId }] = await db
+		.insert(prompts)
+		.values({ brandId, value: "best crm" })
+		.returning({ id: prompts.id });
 	const [{ id }] = await db
 		.insert(promptRuns)
 		.values({

@@ -28,7 +28,10 @@ export async function withAgency<T>(access: AgencyAccess, fn: (db: TenantDb) => 
 	if (!access.actor || !access.reason) throw new Error("withAgency needs an actor and a reason");
 	if (currentTenantScope()?.role === "visibility_agency") return fn(db);
 	return runInTenantScope({ role: "visibility_agency" }, async () => {
-		await db.$client.query("INSERT INTO agency_access_log (actor, reason) VALUES ($1, $2)", [access.actor, access.reason]);
+		await db.$client.query("INSERT INTO agency_access_log (actor, reason) VALUES ($1, $2)", [
+			access.actor,
+			access.reason,
+		]);
 		return fn(db);
 	});
 }

@@ -166,17 +166,20 @@ async function main() {
 	await registerHandlers(boss);
 	console.log("All handlers registered, worker is ready");
 
-	await withAgency({ actor: "worker", reason: "startup: sweep unjudged and stale runs, resume backfills" }, async () => {
-		await requestUnjudgedRuns(db, boss, { days: 30, limit: 50_000 }).then(
-			(unjudged) => unjudged > 0 && console.log(`Asked again to judge ${unjudged} runs`),
-			(error) => Sentry.captureException(error),
-		);
-		await requestStaleReprocesses(db, boss, mentionAnalyzer(), { everyBrand: true }).catch((error) =>
-			Sentry.captureException(error),
-		);
+	await withAgency(
+		{ actor: "worker", reason: "startup: sweep unjudged and stale runs, resume backfills" },
+		async () => {
+			await requestUnjudgedRuns(db, boss, { days: 30, limit: 50_000 }).then(
+				(unjudged) => unjudged > 0 && console.log(`Asked again to judge ${unjudged} runs`),
+				(error) => Sentry.captureException(error),
+			);
+			await requestStaleReprocesses(db, boss, mentionAnalyzer(), { everyBrand: true }).catch((error) =>
+				Sentry.captureException(error),
+			);
 
-		await startBackfills();
-	});
+			await startBackfills();
+		},
+	);
 }
 
 main().catch(async (error) => {

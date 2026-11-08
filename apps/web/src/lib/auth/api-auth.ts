@@ -250,13 +250,13 @@ export async function identifyApiCaller(request: Request): Promise<ApiIdentityRe
 				scopes,
 				// Reaches nothing until completePrincipal checks the restriction.
 				brandIds: [],
-			createdAt: asDate(key.createdAt),
-			lastUsedAt: asDate(key.lastRequest),
-			expiresAt: asDate(key.expiresAt),
-			rateLimit: { limit: key.rateLimitMax ?? API_KEY_RATE_LIMIT_PER_MINUTE, window: "minute" },
-			// The fixed-window counter has already consumed this request by the time
-			// the row is in hand, so this is the honest remainder. Null, and no
-			// header, beats inventing a full window.
+				createdAt: asDate(key.createdAt),
+				lastUsedAt: asDate(key.lastRequest),
+				expiresAt: asDate(key.expiresAt),
+				rateLimit: { limit: key.rateLimitMax ?? API_KEY_RATE_LIMIT_PER_MINUTE, window: "minute" },
+				// The fixed-window counter has already consumed this request by the time
+				// the row is in hand, so this is the honest remainder. Null, and no
+				// header, beats inventing a full window.
 				rateLimitRemaining:
 					typeof key.requestCount === "number" && typeof key.rateLimitMax === "number"
 						? Math.max(0, key.rateLimitMax - key.requestCount)

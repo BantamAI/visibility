@@ -29,7 +29,9 @@ if (decodeURIComponent(username) !== "visibility_app" || !password) {
 const client = new pg.Client({ connectionString: ownerUrl });
 await client.connect();
 try {
-	await client.query(`ALTER ROLE visibility_app WITH LOGIN PASSWORD ${client.escapeLiteral(decodeURIComponent(password))}`);
+	await client.query(
+		`ALTER ROLE visibility_app WITH LOGIN PASSWORD ${client.escapeLiteral(decodeURIComponent(password))}`,
+	);
 } finally {
 	await client.end();
 }

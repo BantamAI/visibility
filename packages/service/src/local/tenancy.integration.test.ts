@@ -1,6 +1,6 @@
 import { db } from "@workspace/lib/db/db";
-import { runOutsideTenantScope } from "@workspace/lib/db/tenant-pool";
 import { brands, competitors, organization, prompts } from "@workspace/lib/db/schema";
+import { runOutsideTenantScope } from "@workspace/lib/db/tenant-pool";
 import { createOwnerDb } from "@workspace/lib/test/integration/owner-db";
 import { eq, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -83,7 +83,9 @@ describe("withSubject", () => {
 	});
 
 	it("rejects writes for another subject", async () => {
-		await expect(withSubject(A, (tx) => tx.insert(competitors).values({ brandId: B, name: "Planted" }))).rejects.toThrow();
+		await expect(
+			withSubject(A, (tx) => tx.insert(competitors).values({ brandId: B, name: "Planted" })),
+		).rejects.toThrow();
 		expect(await db.select().from(competitors).where(eq(competitors.brandId, B))).toEqual([]);
 	});
 
