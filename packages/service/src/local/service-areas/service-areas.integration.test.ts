@@ -35,7 +35,9 @@ beforeAll(async () => {
 	]);
 	await owner
 		.insert(refUsPlaces)
-		.values(places.map((place) => ({ ...place, googleCanonicalName: googleCanonicalName(place, cities), vintage: 2025 })))
+		.values(
+			places.map((place) => ({ ...place, googleCanonicalName: googleCanonicalName(place, cities), vintage: 2025 })),
+		)
 		.onConflictDoNothing();
 });
 
@@ -89,7 +91,9 @@ describe("service areas", () => {
 		const old3x3 = after.samplePoints.filter((point) => point.label.startsWith("3x3"));
 		expect(old3x3).toHaveLength(9);
 		expect(old3x3.every((point) => !point.active)).toBe(true);
-		expect(after.samplePoints.filter((point) => point.active && point.label.startsWith("5x5")).length).toBeGreaterThan(9);
+		expect(after.samplePoints.filter((point) => point.active && point.label.startsWith("5x5")).length).toBeGreaterThan(
+			9,
+		);
 		expect(after.samplePoints.find((point) => point.label === "Cary, NC")?.active).toBe(false);
 		expect(after.samplePoints.find((point) => point.label === "Raleigh, NC")?.active).toBe(true);
 	});
