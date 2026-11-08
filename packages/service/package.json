@@ -5,14 +5,22 @@
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
-		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs"
+		"check-types": "tsc --noEmit",
+		"check:tenant-catalog": "node scripts/check-tenant-catalog.mjs",
+		"test:integration": "vitest run --project=integration",
+		"test:pgtap": "bash scripts/run-pgtap.sh"
 	},
 	"exports": {
-		"./local/delete-brand": "./src/local/delete-brand.ts"
+		"./local/delete-brand": "./src/local/delete-brand.ts",
+		"./local/tenancy": "./src/local/tenancy.ts"
 	},
 	"dependencies": {
 		"@workspace/lib": "workspace:*",
 		"drizzle-orm": "catalog:",
 		"pg": "catalog:"
+	},
+	"devDependencies": {
+		"vitest": "catalog:",
+		"typescript": "catalog:"
 	}
 }
