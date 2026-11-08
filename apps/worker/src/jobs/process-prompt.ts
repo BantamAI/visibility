@@ -22,6 +22,8 @@ import {
 	type TargetPlan,
 } from "@workspace/lib/run-policy";
 import { estimateRunCostUsd } from "@workspace/lib/usage";
+import { type LocationRequest, providerOptionsFor, runLocationRecord } from "@workspace/service/local/locations";
+import { runLocations } from "@workspace/service/local/schema";
 import { withAgency } from "@workspace/service/local/tenancy";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
@@ -183,9 +185,10 @@ async function recordUsageEvent(input: {
 	promptId: string;
 	eventType: "prompt_run" | "prompt_run_failed";
 	config: ModelConfig;
+	vendorCostUsd?: number;
 }): Promise<void> {
 	try {
-		const cost = estimateRunCostUsd(input.config.provider, input.config.webSearch);
+		const cost = input.vendorCostUsd ?? estimateRunCostUsd(input.config.provider, input.config.webSearch);
 		await db.insert(usageEvents).values({
 			organizationId: input.organizationId,
 			brandId: input.brandId,
@@ -209,6 +212,7 @@ async function runModelIteration({
 	config,
 	providerImpl,
 	runIndex,
+	location,
 }: {
 	promptId: string;
 	promptValue: string;
@@ -216,14 +220,14 @@ async function runModelIteration({
 	config: ModelConfig;
 	providerImpl: Provider;
 	runIndex: number;
+	location?: LocationRequest;
 }): Promise<void> {
 	const logPrefix = `[${config.model}_${runIndex}]`;
+	// Throws before anything is spent when the provider can't honour the location's tier.
+	const options = providerOptionsFor(providerImpl, config, location);
 
 	try {
-		const result = await providerImpl.run(config.model, promptValue, {
-			webSearch: config.webSearch,
-			version: config.version,
-		});
+		const result = await providerImpl.run(config.model, promptValue, options);
 
 		// `webQueries` is stored exactly as the provider reported it — engines do
 		// sometimes genuinely search the prompt verbatim, and that's real data. The
@@ -235,19 +239,27 @@ async function runModelIteration({
 
 		// Only the answer is saved here. Its text, citations and mentions are derived in their own
 		// job, so a bug there can neither lose an answer that's been paid for nor ask for it again.
-		const [{ id: promptRunId }] = await db
-			.insert(promptRuns)
-			.values({
-				promptId,
-				brandId: brand.id,
-				model: config.model,
-				provider: config.provider,
-				version: recordedVersion,
-				webSearchEnabled: config.webSearch,
-				rawOutput,
-				webQueries,
-			})
-			.returning({ id: promptRuns.id });
+		const promptRunId = await db.transaction(async (tx) => {
+			const [{ id }] = await tx
+				.insert(promptRuns)
+				.values({
+					promptId,
+					brandId: brand.id,
+					model: config.model,
+					provider: config.provider,
+					version: recordedVersion,
+					webSearchEnabled: config.webSearch,
+					rawOutput,
+					webQueries,
+				})
+				.returning({ id: promptRuns.id });
+			if (location) {
+				await tx
+					.insert(runLocations)
+					.values(runLocationRecord({ runId: id, subjectId: brand.id, config, request: location, result }));
+			}
+			return id;
+		});
 		console.log(`${logPrefix} Saved prompt run ${promptRunId}`);
 		// The answer is saved either way; a job that fails to queue here is picked up by the sweep.
 		await sendDeriveRuns(getBoss(), brand.id, [promptRunId], DERIVE_PRIORITY.new).catch((error) =>
@@ -260,6 +272,7 @@ async function runModelIteration({
 			promptId,
 			eventType: "prompt_run",
 			config,
+			vendorCostUsd: result.costUsd,
 		});
 	} catch (error) {
 		// A single run's failure doesn't fail the job, so report it here to keep
