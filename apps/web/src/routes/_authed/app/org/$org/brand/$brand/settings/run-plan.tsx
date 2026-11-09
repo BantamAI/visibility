@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { useBrandId } from "@/hooks/use-brand-id";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
-import { getRunPlan, previewRunPlanFn, saveRunScheduleFn } from "@/server/run-plan";
+import { getRecentScans, getRunPlan, previewRunPlanFn, saveRunScheduleFn } from "@/server/run-plan";
 
 export const Route = createFileRoute("/_authed/app/org/$org/brand/$brand/settings/run-plan")({
 	staticData: { crumb: "Run Plan" },
@@ -47,6 +47,12 @@ const TIER_LABELS: Record<string, string> = {
 const POINT_KINDS: Record<string, string> = { centroid: "cities", grid: "grid", zip: "ZIPs" };
 
 const usd = (value: number) => `$${value.toFixed(2)}`;
+const cents = (value: number) => `$${value.toFixed(value < 1 ? 3 : 2)}`;
+
+function scanCost(range: { min: number; max: number } | null): string {
+	if (!range) return "Unknown";
+	return range.min === range.max ? cents(range.min) : `${cents(range.min)}–${cents(range.max)}`;
+}
 const whole = (value: number) => Math.round(value).toLocaleString();
 
 function draftFrom(settings: Settings): Draft {
@@ -233,6 +239,7 @@ function RunPlanSettingsPage() {
 										<TableHead>Points</TableHead>
 										<TableHead className="text-right">Prompts</TableHead>
 										<TableHead className="text-right">Every</TableHead>
+										<TableHead className="text-right">Cost a Scan</TableHead>
 										<TableHead className="text-right">Runs a Month</TableHead>
 										<TableHead className="text-right">Cost a Month</TableHead>
 									</TableRow>
@@ -250,6 +257,7 @@ function RunPlanSettingsPage() {
 
 			{shown && <PausedEnginesCard paused={shown.plan.paused} />}
 			{shown && <UncoveredPointsCard uncovered={shown.plan.uncovered} />}
+			<RecentScansCard brandId={brandId} />
 		</div>
 	);
 }
@@ -333,10 +341,86 @@ function SeriesRow({ series }: { series: Series }) {
 			</TableCell>
 			<TableCell className="text-right">{series.prompts}</TableCell>
 			<TableCell className="text-right">{series.intervalDays === 1 ? "day" : `${series.intervalDays} days`}</TableCell>
+			<TableCell className="text-right">{scanCost(series.costPerScanUsd)}</TableCell>
 			<TableCell className="text-right">{whole(series.runsPerMonth)}</TableCell>
 			<TableCell className="text-right">
 				{series.costPerMonthUsd === null ? "Unknown" : usd(series.costPerMonthUsd)}
 			</TableCell>
+		</TableRow>
+	);
+}
+
+type Scan = Awaited<ReturnType<typeof getRecentScans>>[number];
+
+function RecentScansCard({ brandId }: { brandId: string }) {
+	const { data: scans } = useQuery({
+		queryKey: ["run-plan-scans", brandId],
+		queryFn: () => getRecentScans({ data: { brandId } }),
+		enabled: !!brandId,
+		refetchInterval: 30_000,
+	});
+	if (!scans || scans.length === 0) return null;
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Recent Scans</CardTitle>
+				<CardDescription>
+					Each scan runs one prompt on one route across every point of one kind in an area. Coverage is the share of
+					points that answered; points that still failed after retries are gaps.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Started</TableHead>
+							<TableHead>Prompt</TableHead>
+							<TableHead>Engine</TableHead>
+							<TableHead>Area</TableHead>
+							<TableHead className="text-right">Coverage</TableHead>
+							<TableHead className="text-right">Estimate</TableHead>
+							<TableHead className="text-right">Cost</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{scans.map((scan) => (
+							<ScanRow key={scan.id} scan={scan} />
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
+
+function ScanRow({ scan }: { scan: Scan }) {
+	return (
+		<TableRow>
+			<TableCell className="whitespace-nowrap">{new Date(scan.createdAt).toLocaleString()}</TableCell>
+			<TableCell className="max-w-64 truncate" title={scan.prompt}>
+				{scan.prompt}
+			</TableCell>
+			<TableCell>
+				{scan.engine} <span className="text-muted-foreground">via {scan.provider}</span>
+			</TableCell>
+			<TableCell>
+				{scan.areaName ?? "Removed area"}{" "}
+				<span className="text-muted-foreground">({POINT_KINDS[scan.pointKind]})</span>
+			</TableCell>
+			<TableCell className="text-right">
+				{scan.pointsAnswered}/{scan.pointsPlanned}
+				{scan.status === "running" ? (
+					<Badge variant="secondary" className="ml-2">
+						Running
+					</Badge>
+				) : (
+					<span className="text-muted-foreground"> ({Math.round(scan.coverage * 100)}%)</span>
+				)}
+			</TableCell>
+			<TableCell className="text-right">
+				{scan.estimatedCostUsd === null ? "Unknown" : cents(scan.estimatedCostUsd)}
+			</TableCell>
+			<TableCell className="text-right">{scan.costUsd === null ? "—" : cents(scan.costUsd)}</TableCell>
 		</TableRow>
 	);
 }
