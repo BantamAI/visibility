@@ -1,0 +1,28 @@
+{
+	"places": [
+		{
+			"id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+			"types": ["plumber", "point_of_interest", "establishment"],
+			"nationalPhoneNumber": "(614) 555-0142",
+			"internationalPhoneNumber": "+1 614-555-0142",
+			"formattedAddress": "123 Example St, Columbus, OH 43215, USA",
+			"location": { "latitude": 39.9612, "longitude": -82.9988 },
+			"googleMapsUri": "https://maps.google.com/?cid=10281119596374313554",
+			"displayName": { "text": "Acme Plumbing", "languageCode": "en" },
+			"primaryType": "plumber"
+		},
+		{
+			"id": "ChIJrTLr-GyuEmsRBfy61i59si0",
+			"types": ["plumber", "point_of_interest", "establishment"],
+			"formattedAddress": "Columbus, OH, USA",
+			"location": { "latitude": 39.98, "longitude": -83.01 },
+			"googleMapsUri": "https://maps.google.com/?cid=3292117493726583813",
+			"displayName": { "text": "Acme Plumbing & Drain", "languageCode": "en" },
+			"primaryType": "plumber"
+		},
+		{
+			"types": ["plumber"],
+			"displayName": { "text": "No Id Plumbing", "languageCode": "en" }
+		}
+	]
+}
