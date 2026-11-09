@@ -51,16 +51,16 @@ export interface PlannerRoute {
 }
 
 /**
- * The routes an engine can take among the configured targets, best first. Every
- * target can also name the city in the prompt, so that comes last for each.
+ * The one route an engine runs on: the best configured one. It never changes from run
+ * to run, so an engine's results stay one measurement; a different route is a new series.
  */
-export function routesFor(engine: string, targets: readonly ModelConfig[]): PlannerRoute[] {
+export function routeFor(engine: string, targets: readonly ModelConfig[]): PlannerRoute | null {
 	const configured = targets.filter((target) => target.model === engine);
 	const located = (ROUTING_TABLE[engine] ?? []).flatMap((spec) =>
 		configured
 			.filter((config) => config.provider === spec.provider)
 			.map((config) => ({ config, tier: spec.tier, pointKinds: spec.pointKinds })),
 	);
-	const promptOnly = configured.map((config) => ({ config, ...PROMPT_ONLY }));
-	return [...located, ...promptOnly].map((route) => ({ ...route, costPerRunUsd: costPerRunUsd(route.config) }));
+	const route = located[0] ?? configured.map((config) => ({ config, ...PROMPT_ONLY }))[0];
+	return route ? { ...route, costPerRunUsd: costPerRunUsd(route.config) } : null;
 }

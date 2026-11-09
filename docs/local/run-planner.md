@@ -13,7 +13,13 @@ Each engine has its routes listed best first in `ROUTING_TABLE`, as SP5-L chose 
 | Claude | Anthropic API (T4) | Centroids |
 | Every other engine | None below T5 | Centroids |
 
-A route counts only when its target is in `SCRAPE_TARGETS` and among the subject's picked LLMs. Every target can also fall back to T5, which names the city in the prompt and sends no location. For each point, the planner takes the first route that can serve it (`pickRoute`), so a point missing a field the best route sends falls back to the next. A route the canaries have marked degraded (E53-S27) is skipped. A point no route can place is listed on the Run Plan page rather than dropped silently.
+Each engine runs on one route: the first in this order whose target is in `SCRAPE_TARGETS` and among the subject's picked LLMs. An engine with none of these routes configured runs at T5, naming the city in the prompt and sending no location, through its first configured target. The route never changes from run to run, because results from different routes measure different things and can't share a trend line. Configuring a better route later is a deliberate change that starts a new series.
+
+One route can still mix precisions across points. DataForSEO places grid points and city centroids exactly, while Cloro places only centroids, at city level. Every run records its tier and point, so reports can tell them apart.
+
+When the route can't place a point (a centroid with no Google canonical name, for Cloro), the point takes the results of the nearest centroid in its area that the route can place. That centroid is already in the plan, so the point adds no runs, and the Run Plan page lists it with the centroid standing in for it. A point with no such centroid is a gap. No point ever switches to another route or tier.
+
+When the canaries mark an engine's route degraded (E53-S27), the engine pauses: it makes no located runs until the route recovers, and it doesn't switch to another route. Runs that fail are retried on the same route, and those that still fail are recorded as gaps (E53-S3).
 
 ## Which prompts run where
 
@@ -21,7 +27,7 @@ Prompts tagged `near-me` run on grid points and centroids. All other prompts are
 
 ## Cadence
 
-A full scan runs every point on every route, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) also run daily. Both intervals and the number of repeats are set per subject on the Run Plan page. They apply only to located runs; brand-mode runs keep Elmo's cadence.
+A full scan runs every point of every engine, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) also run daily. Both intervals and the number of repeats are set per subject on the Run Plan page. They apply only to located runs; brand-mode runs keep Elmo's cadence.
 
 Grid size is set per service area. SP5-L found AI Mode answers 3 miles apart overlap nearly as much as repeats at one point, so 3×3 (points about 5–6 miles apart on a 10-mile radius) is the default. Use 5×5 only for areas wider than about 20 miles.
 

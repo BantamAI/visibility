@@ -1,10 +1,11 @@
 import type { FidelityTier, ModelConfig, Provider } from "@workspace/lib/providers";
 import { PROJECTION_DAYS_PER_MONTH } from "@workspace/lib/usage";
-import { pickRoute } from "../locations/route";
+import { whyNotHonoured } from "../locations/route";
 import { toRunLocation } from "../locations/run-location";
 import type { SamplePoint, SamplePointKind } from "../schema";
+import { distanceMeters } from "../service-areas/geo";
 import { NEAR_ME_TAG } from "./constants";
-import { type PlannerRoute, routesFor } from "./routes";
+import { type PlannerRoute, routeFor } from "./routes";
 
 export interface RunCadence {
 	/** Days between full scans: every point of every route. */
@@ -17,6 +18,7 @@ export interface RunCadence {
 export type PlannerPoint = Pick<
 	SamplePoint,
 	| "id"
+	| "areaId"
 	| "kind"
 	| "label"
 	| "lat"
@@ -37,7 +39,7 @@ export interface PlanInput {
 	points: readonly PlannerPoint[];
 	cadence: RunCadence;
 	getProvider: (id: string) => Provider;
-	/** Routes the canaries have marked degraded; the planner falls back past them. */
+	/** Routes the canaries have marked degraded. Their engine pauses rather than switching routes. */
 	isDegraded?: (route: PlannerRoute) => boolean;
 }
 
@@ -55,16 +57,29 @@ export interface PlannedSeries {
 	costPerMonthUsd: number | null;
 }
 
+/**
+ * A point the engine's route can't place. It takes the results of the nearest city
+ * centroid in its area that the route can place, which is already in the plan, so it
+ * adds no runs. With no such centroid, `standIn` is null and the point is a gap.
+ */
 export interface UncoveredPoint {
 	engine: string;
 	pointId: string;
 	pointLabel: string;
-	reasons: string[];
+	reason: string;
+	standIn: { pointId: string; pointLabel: string } | null;
+}
+
+export interface PausedEngine {
+	engine: string;
+	config: ModelConfig;
+	tier: FidelityTier;
 }
 
 export interface RunPlan {
 	series: PlannedSeries[];
 	uncovered: UncoveredPoint[];
+	paused: PausedEngine[];
 	runsPerMonth: number;
 	/** Of the runs that have a cost estimate. */
 	costPerMonthUsd: number;
@@ -81,11 +96,6 @@ function promptsFor(tier: FidelityTier, kind: SamplePointKind, input: PlanInput)
 	return input.prompts.map((p) => p.id);
 }
 
-function routeKey(engine: string, route: PlannerRoute, kind: SamplePointKind): string {
-	const { provider, version, webSearch } = route.config;
-	return [engine, provider, version ?? "", webSearch, route.tier, kind].join("|");
-}
-
 interface RouteGroup {
 	engine: string;
 	route: PlannerRoute;
@@ -93,27 +103,51 @@ interface RouteGroup {
 	pointIds: string[];
 }
 
-/** Each point takes the best route that can serve it, so a point missing a field the best route sends falls back. */
-function assignRoutes(input: PlanInput): { groups: RouteGroup[]; uncovered: UncoveredPoint[] } {
-	const groups = new Map<string, RouteGroup>();
+function nearestStandIn(point: PlannerPoint, served: readonly PlannerPoint[]): PlannerPoint | null {
+	let best: { point: PlannerPoint; meters: number } | null = null;
+	for (const candidate of served) {
+		if (candidate.kind !== "centroid" || candidate.areaId !== point.areaId) continue;
+		const meters = distanceMeters(point, candidate);
+		if (!best || meters < best.meters) best = { point: candidate, meters };
+	}
+	return best?.point ?? null;
+}
+
+function assignRoutes(input: PlanInput) {
+	const groups: RouteGroup[] = [];
 	const uncovered: UncoveredPoint[] = [];
+	const paused: PausedEngine[] = [];
 	for (const engine of new Set(input.targets.map((target) => target.model))) {
-		const routes = routesFor(engine, input.targets).filter((route) => !input.isDegraded?.(route));
-		for (const point of input.points) {
-			const eligible = routes.filter((route) => route.pointKinds.includes(point.kind));
-			if (eligible.length === 0) continue;
-			const { route, refused } = pickRoute(eligible, toRunLocation(point), input.getProvider);
-			if (!route) {
-				uncovered.push({ engine, pointId: point.id, pointLabel: point.label, reasons: refused.map((r) => r.reason) });
-				continue;
-			}
-			const key = routeKey(engine, route, point.kind);
-			const group = groups.get(key) ?? { engine, route, kind: point.kind, pointIds: [] };
-			group.pointIds.push(point.id);
-			groups.set(key, group);
+		const route = routeFor(engine, input.targets);
+		if (!route) continue;
+		if (input.isDegraded?.(route)) {
+			paused.push({ engine, config: route.config, tier: route.tier });
+			continue;
+		}
+		const provider = input.getProvider(route.config.provider);
+		const served: PlannerPoint[] = [];
+		const refused: { point: PlannerPoint; reason: string }[] = [];
+		for (const point of input.points.filter((p) => route.pointKinds.includes(p.kind))) {
+			const reason = whyNotHonoured(provider, route.config, { location: toRunLocation(point), tier: route.tier });
+			if (reason) refused.push({ point, reason });
+			else served.push(point);
+		}
+		for (const kind of new Set(served.map((point) => point.kind))) {
+			const pointIds = served.filter((point) => point.kind === kind).map((point) => point.id);
+			groups.push({ engine, route, kind, pointIds });
+		}
+		for (const { point, reason } of refused) {
+			const standIn = nearestStandIn(point, served);
+			uncovered.push({
+				engine,
+				pointId: point.id,
+				pointLabel: point.label,
+				reason,
+				standIn: standIn && { pointId: standIn.id, pointLabel: standIn.label },
+			});
 		}
 	}
-	return { groups: [...groups.values()], uncovered };
+	return { groups, uncovered, paused };
 }
 
 function cheapestT1Engines(groups: readonly RouteGroup[]): Set<string> {
@@ -125,9 +159,12 @@ function cheapestT1Engines(groups: readonly RouteGroup[]): Set<string> {
 	return new Set([...new Set(engines)].slice(0, CHEAP_T1_ROUTES));
 }
 
-/** Expands a subject's prompts × engines × points × repeats into the series a schedule runs. */
+/**
+ * Expands a subject's prompts × engines × points × repeats into the series a schedule
+ * runs. Each engine runs on one route, so its results stay comparable over time.
+ */
 export function planRuns(input: PlanInput): RunPlan {
-	const { groups, uncovered } = assignRoutes(input);
+	const { groups, uncovered, paused } = assignRoutes(input);
 	const cheapT1Engines = cheapestT1Engines(groups);
 	const { cadence } = input;
 
@@ -157,6 +194,7 @@ export function planRuns(input: PlanInput): RunPlan {
 	return {
 		series,
 		uncovered,
+		paused,
 		runsPerMonth: series.reduce((sum, s) => sum + s.runsPerMonth, 0),
 		costPerMonthUsd: series.reduce((sum, s) => sum + (s.costPerMonthUsd ?? 0), 0),
 		unpricedRunsPerMonth: series.reduce((sum, s) => sum + (s.costPerMonthUsd === null ? s.runsPerMonth : 0), 0),

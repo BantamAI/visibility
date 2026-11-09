@@ -248,39 +248,75 @@ function RunPlanSettingsPage() {
 				</Card>
 			)}
 
-			{shown && shown.plan.uncovered.length > 0 && (
-				<Card>
-					<CardHeader>
-						<CardTitle>Points Without a Route</CardTitle>
-						<CardDescription>No configured route can place these, so they're left out of the plan.</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Engine</TableHead>
-									<TableHead>Point</TableHead>
-									<TableHead>Why</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{shown.plan.uncovered.map((u) => (
-									<TableRow key={u.key}>
-										<TableCell>{u.engine}</TableCell>
-										<TableCell>{u.point}</TableCell>
-										<TableCell className="text-muted-foreground">{u.reason}</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</CardContent>
-				</Card>
-			)}
+			{shown && <PausedEnginesCard paused={shown.plan.paused} />}
+			{shown && <UncoveredPointsCard uncovered={shown.plan.uncovered} />}
 		</div>
 	);
 }
 
-type Series = Awaited<ReturnType<typeof getRunPlan>>["plan"]["series"][number];
+type Plan = Awaited<ReturnType<typeof getRunPlan>>["plan"];
+type Series = Plan["series"][number];
+
+function PausedEnginesCard({ paused }: { paused: Plan["paused"] }) {
+	if (paused.length === 0) return null;
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Paused Engines</CardTitle>
+				<CardDescription>
+					Canaries marked these routes degraded. Their engines make no located runs until the route recovers or you
+					configure a different one, which starts a new series.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<ul className="list-disc space-y-1 pl-5">
+					{paused.map((p) => (
+						<li key={p.key}>
+							{p.engine} through {p.provider} ({TIER_LABELS[p.tier] ?? p.tier})
+						</li>
+					))}
+				</ul>
+			</CardContent>
+		</Card>
+	);
+}
+
+function UncoveredPointsCard({ uncovered }: { uncovered: Plan["uncovered"] }) {
+	if (uncovered.length === 0) return null;
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Points the Route Can't Place</CardTitle>
+				<CardDescription>
+					Each takes the results of the nearest city in its area that the same route can place, so it adds no runs.
+					Points with no such city are gaps.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Engine</TableHead>
+							<TableHead>Point</TableHead>
+							<TableHead>Covered By</TableHead>
+							<TableHead>Why</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{uncovered.map((u) => (
+							<TableRow key={u.key}>
+								<TableCell>{u.engine}</TableCell>
+								<TableCell>{u.point}</TableCell>
+								<TableCell>{u.standIn ?? <span className="text-muted-foreground">Gap</span>}</TableCell>
+								<TableCell className="text-muted-foreground">{u.reason}</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</CardContent>
+		</Card>
+	);
+}
 
 function SeriesRow({ series }: { series: Series }) {
 	return (

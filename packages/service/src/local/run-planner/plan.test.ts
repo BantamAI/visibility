@@ -35,6 +35,7 @@ function point(kind: PlannerPoint["kind"], fields: Partial<PlannerPoint> = {}): 
 	nextPoint += 1;
 	return {
 		id: `point-${nextPoint}`,
+		areaId: "raleigh",
 		kind,
 		label: `${kind} ${nextPoint}`,
 		lat: 35.78,
@@ -113,57 +114,66 @@ describe("planRuns", () => {
 		]);
 	});
 
-	it("falls back to the next route for a point the best route can't serve", () => {
-		const unnamed = point("centroid", { googleCanonicalName: null });
-		const result = plan({ targets: [target("google-ai-mode:cloro")], points: [centroid, unnamed] });
+	it("runs each engine on its best configured route only", () => {
+		const result = plan({ targets: [target("google-ai-mode:cloro"), target("google-ai-mode:dataforseo")] });
+		expect(new Set(result.series.map((s) => s.config.provider))).toEqual(new Set(["dataforseo"]));
+	});
+
+	it("lets a point the route can't place take the nearest city it can, without another route", () => {
+		const near = point("centroid", { lat: 35.8 });
+		const far = point("centroid", { lat: 36.5 });
+		const unnamed = point("centroid", { lat: 35.79, googleCanonicalName: null });
+		const result = plan({ targets: [target("google-ai-mode:cloro")], points: [far, near, unnamed] });
 		expect(seriesOf(result, "google-ai-mode")).toEqual([
 			{
 				provider: "cloro",
 				tier: "T1",
 				kind: "centroid",
-				points: 1,
+				points: 2,
 				prompts: [nearMe.id, cityNamed.id],
 				intervalDays: 1,
 			},
-			{ provider: "cloro", tier: "T5", kind: "centroid", points: 1, prompts: [cityNamed.id], intervalDays: 7 },
+		]);
+		expect(result.uncovered).toEqual([
+			{
+				engine: "google-ai-mode",
+				pointId: unnamed.id,
+				pointLabel: unnamed.label,
+				reason: expect.stringContaining("googleCanonicalName"),
+				standIn: { pointId: near.id, pointLabel: near.label },
+			},
 		]);
 	});
 
-	it("falls back past a degraded route", () => {
+	it("leaves a gap when no city in the area can stand in", () => {
+		const result = plan({
+			targets: [target("claude:anthropic-api:claude-sonnet-5")],
+			points: [point("centroid", { city: null }), point("centroid", { areaId: "durham" })],
+		});
+		expect(result.uncovered).toEqual([expect.objectContaining({ engine: "claude", standIn: null })]);
+		expect(seriesOf(result, "claude")).toEqual([
+			expect.objectContaining({ provider: "anthropic-api", tier: "T4", points: 1 }),
+		]);
+	});
+
+	it("pauses an engine whose route is degraded instead of switching routes", () => {
 		const result = plan({
 			targets: [target("google-ai-mode:dataforseo"), target("google-ai-mode:cloro")],
 			isDegraded: (route) => route.config.provider === "dataforseo",
 		});
-		expect(seriesOf(result, "google-ai-mode")).toEqual([
-			{
-				provider: "cloro",
-				tier: "T1",
-				kind: "centroid",
-				points: 1,
-				prompts: [nearMe.id, cityNamed.id],
-				intervalDays: 1,
-			},
-		]);
+		expect(result.series).toEqual([]);
+		expect(result.paused).toEqual([expect.objectContaining({ engine: "google-ai-mode", tier: "T1" })]);
 	});
 
-	it("falls back to a city-named prompt when a centroid has no city to send", () => {
-		const result = plan({
-			targets: [target("claude:anthropic-api:claude-sonnet-5")],
-			points: [point("centroid", { city: null })],
-		});
-		expect(seriesOf(result, "claude")).toEqual([
-			{ provider: "anthropic-api", tier: "T5", kind: "centroid", points: 1, prompts: [cityNamed.id], intervalDays: 7 },
-		]);
-	});
-
-	it("reports grid points no configured route can place", () => {
+	it("reports grid points the route can't place", () => {
 		const result = plan({ targets: [target("google-ai-overview:searchapi")], points: [grid[0] as PlannerPoint] });
 		expect(result.uncovered).toEqual([
 			{
 				engine: "google-ai-overview",
 				pointId: grid[0]?.id,
 				pointLabel: grid[0]?.label,
-				reasons: [expect.stringMatching(/doesn't place/)],
+				reason: expect.stringMatching(/doesn't place/),
+				standIn: null,
 			},
 		]);
 		expect(result.series).toEqual([]);
