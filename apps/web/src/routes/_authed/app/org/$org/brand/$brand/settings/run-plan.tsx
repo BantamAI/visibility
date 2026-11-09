@@ -145,7 +145,8 @@ function RunPlanSettingsPage() {
 				<CardHeader>
 					<CardTitle>Schedule</CardTitle>
 					<CardDescription>
-						Full scans cover every point. City centroids on the two cheapest exact-point routes can run more often, such as daily.
+						Full scans cover every point. City centroids on the two cheapest exact-point routes can run more often, such
+						as daily.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
