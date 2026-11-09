@@ -1,6 +1,6 @@
 # Run planner
 
-The run planner turns a subject's prompts, picked engines, active sample points and repeats into the located runs a schedule makes, and prices them before the schedule can be enabled. It doesn't run anything; grid scans (E53-S3) run what it plans.
+The run planner turns a subject's prompts, picked engines, active sample points and repeats into the located runs a schedule makes, and prices them before the schedule can be enabled. It doesn't run anything; grid scans run what it plans (`docs/local/grid-scans.md`).
 
 ## Routes
 
@@ -19,7 +19,7 @@ One route can still mix precisions across points. DataForSEO places grid points 
 
 When the route can't place a point (a centroid with no Google canonical name, for Cloro), the point takes the results of the nearest centroid in its area that the route can place. That centroid is already in the plan, so the point adds no runs, and the Run Plan page lists it with the centroid standing in for it. A point with no such centroid is a gap. No point ever switches to another route or tier.
 
-When the canaries mark an engine's route degraded (E53-S27), the engine pauses: it makes no located runs until the route recovers, and it doesn't switch to another route. Runs that fail are retried on the same route, and those that still fail are recorded as gaps (E53-S3).
+When the canaries mark an engine's route degraded (E53-S27), the engine pauses: it makes no located runs until the route recovers, and it doesn't switch to another route. Runs that fail are retried on the same route, and those that still fail are recorded as gaps (`docs/local/grid-scans.md`).
 
 ## Which prompts run where
 
@@ -35,4 +35,4 @@ Grid size is set per service area. SP5-L found AI Mode answers 3 miles apart ove
 
 The monthly cost is points × prompts × repeats × runs a month for each series, priced per run. DataForSEO's Google surfaces ($0.004) and Claude through the Anthropic API ($0.04) use SP5-L's measured costs. Other routes use the per-provider estimates in `packages/lib/src/usage/cost.ts`.
 
-A schedule can't be enabled without a monthly budget, or when the plan costs more than the budget or includes a route with no cost estimate. A disabled schedule can be saved at any cost, so the plan can be tried out before it's enabled. The budget is checked when the schedule is saved. Adding prompts or areas later can push an enabled plan over budget, so the scan job has to check it again before it spends anything (E53-S3, E53-S35).
+A schedule can't be enabled without a monthly budget, or when the plan costs more than the budget or includes a route with no cost estimate. A disabled schedule can be saved at any cost, so the plan can be tried out before it's enabled. The budget is checked when the schedule is saved. Adding prompts or areas later can push an enabled plan over budget, so the scan job checks it again before it starts any scan.
