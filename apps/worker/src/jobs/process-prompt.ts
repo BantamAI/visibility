@@ -25,6 +25,7 @@ import { estimateRunCostUsd } from "@workspace/lib/usage";
 import { type LocationRequest, providerOptionsFor, runLocationRecord } from "@workspace/service/local/locations";
 import { runLocations } from "@workspace/service/local/schema";
 import { withAgency } from "@workspace/service/local/tenancy";
+import { assertVendorRunning } from "@workspace/service/local/vendor-spend";
 import { and, eq, gt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
 import { getBoss } from "../boss";
@@ -230,6 +231,7 @@ export async function runModelIteration({
 	const logPrefix = `[${config.model}_${runIndex}]`;
 	// Throws before anything is spent when the provider can't honour the location's tier.
 	const options = providerOptionsFor(providerImpl, config, location);
+	await assertVendorRunning(config.provider);
 
 	try {
 		const result = await providerImpl.run(config.model, promptValue, options);

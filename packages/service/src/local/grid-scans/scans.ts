@@ -6,6 +6,7 @@ import type { LocationRequest } from "../locations";
 import { toRunLocation } from "../locations/run-location";
 import { getRunSchedule, MAX_INTERVAL_DAYS, previewRunPlan } from "../run-planner";
 import { gridScanRuns, gridScans, runLocations } from "../schema";
+import { stoppedVendors } from "../vendor-spend/stops";
 import { dueScans, type ScanSpec, scanKey, scansFor } from "./plan-scans";
 
 export interface QueuedScanRun {
@@ -85,7 +86,8 @@ async function insertScans(subjectId: string, specs: readonly ScanSpec[]): Promi
 /**
  * Starts every scan the subject's enabled schedule has due, after checking the plan
  * still fits the budget: prompts or areas added since the schedule was saved can push
- * it over. The caller queues the returned runs.
+ * it over. A stopped vendor's scans wait until it's resumed. The caller queues the
+ * returned runs.
  */
 export async function startDueScans(
 	subjectId: string,
@@ -99,7 +101,10 @@ export async function startDueScans(
 
 	const { plan, refusal, points } = await previewRunPlan(subjectId, schedule, scrapeTargets);
 	if (refusal) return { ...NOTHING, refusal };
-	const due = dueScans(scansFor(plan, points), await lastScanStarts(subjectId, now), now);
+	const stopped = await stoppedVendors();
+	const due = dueScans(scansFor(plan, points), await lastScanStarts(subjectId, now), now).filter(
+		(spec) => !stopped.has(spec.config.provider),
+	);
 	if (due.length === 0) return NOTHING;
 	return insertScans(subjectId, due);
 }

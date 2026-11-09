@@ -22,7 +22,9 @@
 		"./local/schema": "./src/local/schema.ts",
 		"./local/service-areas": "./src/local/service-areas/index.ts",
 		"./local/service-areas/geo": "./src/local/service-areas/geo.ts",
-		"./local/tenancy": "./src/local/tenancy.ts"
+		"./local/tenancy": "./src/local/tenancy.ts",
+		"./local/vendor-spend": "./src/local/vendor-spend/index.ts",
+		"./local/vendor-spend/limits": "./src/local/vendor-spend/limits.ts"
 	},
 	"dependencies": {
 		"@workspace/lib": "workspace:*",

@@ -10,7 +10,7 @@ A scan stores its prompt, route, tier, point kind, repeats and an estimated cost
 
 ## When scans start
 
-The `start-grid-scans` job runs every 15 minutes. For each subject with an enabled schedule, it checks the plan against the budget again, because prompts or areas added since the schedule was saved can push it over. A plan over budget starts nothing and raises a Sentry warning. Otherwise it starts each scan whose series has never run, or last started at least its interval ago. A scan may start up to an hour early, so a weekly scan doesn't slip a tick later each week. A new route for an engine is a new series, so it starts at once.
+The `start-grid-scans` job runs every 15 minutes. For each subject with an enabled schedule, it checks the plan against the budget again, because prompts or areas added since the schedule was saved can push it over. A plan over budget starts nothing and raises a Sentry warning. Otherwise it starts each scan whose series has never run, or last started at least its interval ago. A scan may start up to an hour early, so a weekly scan doesn't slip a tick later each week. A new route for an engine is a new series, so it starts at once. A vendor stopped for overspending starts no scans until it's resumed (`docs/local/vendor-spend.md`).
 
 ## Running
 

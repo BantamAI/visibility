@@ -18,6 +18,7 @@ import {
 import { LocationNotHonouredError } from "@workspace/service/local/locations";
 import { subjectRunSchedules } from "@workspace/service/local/schema";
 import { withSubject } from "@workspace/service/local/tenancy";
+import { VendorStoppedError } from "@workspace/service/local/vendor-spend";
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { getBoss } from "../boss";
@@ -102,8 +103,11 @@ async function runScanPoint({ brandId, scanRunId }: GridScanRunData): Promise<vo
 			onSaved: (tx, promptRunId) => markScanRunAnswered(tx, claim.id, promptRunId),
 		});
 	} catch (error) {
-		// A refused location won't change on a retry, and nothing was spent on it.
-		const final = error instanceof LocationNotHonouredError || claim.attempts >= MAX_RUN_ATTEMPTS;
+		// Neither a refused location nor a stopped vendor changes on a retry, and nothing was spent on either.
+		const final =
+			error instanceof LocationNotHonouredError ||
+			error instanceof VendorStoppedError ||
+			claim.attempts >= MAX_RUN_ATTEMPTS;
 		await recordScanRunFailure(claim.id, failureMessage(error), final);
 		if (!final) throw error;
 	}

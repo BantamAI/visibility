@@ -12,7 +12,9 @@ import {
 	START_GRID_SCANS_QUEUE,
 	VENDOR_CONCURRENCY,
 } from "@workspace/service/local/grid-scans";
+import { BRAND_MODE_RUNS } from "@workspace/service/local/run-planner/constants";
 import { withAgency, withSubject } from "@workspace/service/local/tenancy";
+import { CHECK_VENDOR_SPEND_QUEUE } from "@workspace/service/local/vendor-spend";
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { type AnalyzeBrandData, analyzeBrandJob } from "./jobs/analyze-brand";
@@ -32,6 +34,7 @@ import { type RollupCatchUpData, rollupCatchUpJob } from "./jobs/rollup-catch-up
 import { type ScheduleMaintenanceData, scheduleMaintenanceJob } from "./jobs/schedule-maintenance";
 import { type SuggestPromptsData, type SuggestPromptsResult, suggestPromptsJob } from "./jobs/suggest-prompts";
 import { type SyncAuth0MembershipsData, syncAuth0MembershipsJob } from "./jobs/sync-auth0-memberships";
+import { checkVendorSpendJob } from "./jobs/vendor-spend";
 import { mentionAnalyzer } from "./mention-judge";
 
 /** Passes the handler's return value through: pg-boss stores it as the job output. */
@@ -91,11 +94,16 @@ async function brandOfPrompt(data: ProcessPromptData): Promise<string | null> {
 	});
 }
 
+/** Completing the job without running it ends the prompt's chain, since each cycle queues the next. */
+async function dropBrandModeJobs(jobs: Job<ProcessPromptData>[]): Promise<void> {
+	console.log(`Dropped ${jobs.length} brand-mode prompt job(s): brand-mode runs are off`);
+}
+
 export async function registerHandlers(boss: PgBoss): Promise<void> {
 	await boss.work<ProcessPromptData>(
 		PROCESS_PROMPT_QUEUE,
 		{ localConcurrency: 10 },
-		withSentry(PROCESS_PROMPT_QUEUE, asSubject(brandOfPrompt, processPromptJob)),
+		withSentry(PROCESS_PROMPT_QUEUE, BRAND_MODE_RUNS ? asSubject(brandOfPrompt, processPromptJob) : dropBrandModeJobs),
 	);
 	console.log(`Registered handler: ${PROCESS_PROMPT_QUEUE}`);
 
@@ -174,6 +182,13 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 		withSentry(GRID_SCAN_RUN_QUEUE, asSubject(brandOf, gridScanRunJob)),
 	);
 	console.log(`Registered handler: ${GRID_SCAN_RUN_QUEUE}`);
+
+	await boss.work(
+		CHECK_VENDOR_SPEND_QUEUE,
+		{ localConcurrency: 1 },
+		withSentry(CHECK_VENDOR_SPEND_QUEUE, asAgency(CHECK_VENDOR_SPEND_QUEUE, checkVendorSpendJob)),
+	);
+	console.log(`Registered handler: ${CHECK_VENDOR_SPEND_QUEUE}`);
 
 	await boss.work<RefreshRollupsData>(
 		REFRESH_ROLLUPS_QUEUE,

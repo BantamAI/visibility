@@ -15,7 +15,7 @@ export const DEFAULT_RUN_SCHEDULE: RunScheduleSettings = {
 	enabled: false,
 	monthlyBudgetUsd: null,
 	scanIntervalDays: 7,
-	centroidIntervalDays: 1,
+	centroidIntervalDays: 7,
 	repeats: 1,
 };
 

@@ -1,4 +1,4 @@
-export { MAX_INTERVAL_DAYS, MAX_REPEATS, NEAR_ME_TAG } from "./constants";
+export { BRAND_MODE_RUNS, MAX_INTERVAL_DAYS, MAX_REPEATS, NEAR_ME_TAG } from "./constants";
 export {
 	budgetRefusal,
 	type PausedEngine,

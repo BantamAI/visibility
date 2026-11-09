@@ -29,6 +29,7 @@ import { Route as DotwellKnownOauthProtectedResourceSplatRouteImport } from './r
 import { Route as AuthedAcceptInvitationInvitationIdRouteImport } from './routes/_authed/accept-invitation/$invitationId'
 import { Route as AuthedAdminIndexRouteImport } from './routes/_authed/admin/index'
 import { Route as AuthedAdminToolsRouteImport } from './routes/_authed/admin/tools'
+import { Route as AuthedAdminVendorSpendRouteImport } from './routes/_authed/admin/vendor-spend'
 import { Route as AuthedAdminWorkflowsRouteImport } from './routes/_authed/admin/workflows'
 import { Route as AuthedAppIndexRouteImport } from './routes/_authed/app/index'
 import { Route as AuthedAppNewRouteImport } from './routes/_authed/app/new'
@@ -203,6 +204,11 @@ const AuthedAdminIndexRoute = AuthedAdminIndexRouteImport.update({
 const AuthedAdminToolsRoute = AuthedAdminToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => AuthedAdminRoute,
+} as any)
+const AuthedAdminVendorSpendRoute = AuthedAdminVendorSpendRouteImport.update({
+  id: '/vendor-spend',
+  path: '/vendor-spend',
   getParentRoute: () => AuthedAdminRoute,
 } as any)
 const AuthedAdminWorkflowsRoute = AuthedAdminWorkflowsRouteImport.update({
@@ -614,6 +620,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/admin/tools': typeof AuthedAdminToolsRoute
+  '/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/admin/workflows': typeof AuthedAdminWorkflowsRoute
   '/app/new': typeof AuthedAppNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -702,6 +709,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/admin/tools': typeof AuthedAdminToolsRoute
+  '/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/admin/workflows': typeof AuthedAdminWorkflowsRoute
   '/app/new': typeof AuthedAppNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -792,6 +800,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/_authed/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
   '/_authed/admin/tools': typeof AuthedAdminToolsRoute
+  '/_authed/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/_authed/admin/workflows': typeof AuthedAdminWorkflowsRoute
   '/_authed/app/new': typeof AuthedAppNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -885,6 +894,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/$'
     | '/accept-invitation/$invitationId'
     | '/admin/tools'
+    | '/admin/vendor-spend'
     | '/admin/workflows'
     | '/app/new'
     | '/api/auth/$'
@@ -973,6 +983,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/$'
     | '/accept-invitation/$invitationId'
     | '/admin/tools'
+    | '/admin/vendor-spend'
     | '/admin/workflows'
     | '/app/new'
     | '/api/auth/$'
@@ -1062,6 +1073,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource/$'
     | '/_authed/accept-invitation/$invitationId'
     | '/_authed/admin/tools'
+    | '/_authed/admin/vendor-spend'
     | '/_authed/admin/workflows'
     | '/_authed/app/new'
     | '/api/auth/$'
@@ -1317,6 +1329,13 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/admin/tools'
       preLoaderRoute: typeof AuthedAdminToolsRouteImport
+      parentRoute: typeof AuthedAdminRoute
+    }
+    '/_authed/admin/vendor-spend': {
+      id: '/_authed/admin/vendor-spend'
+      path: '/vendor-spend'
+      fullPath: '/admin/vendor-spend'
+      preLoaderRoute: typeof AuthedAdminVendorSpendRouteImport
       parentRoute: typeof AuthedAdminRoute
     }
     '/_authed/admin/workflows': {
@@ -1814,12 +1833,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthedAdminRouteChildren {
   AuthedAdminToolsRoute: typeof AuthedAdminToolsRoute
+  AuthedAdminVendorSpendRoute: typeof AuthedAdminVendorSpendRoute
   AuthedAdminWorkflowsRoute: typeof AuthedAdminWorkflowsRoute
   AuthedAdminIndexRoute: typeof AuthedAdminIndexRoute
 }
 
 const AuthedAdminRouteChildren: AuthedAdminRouteChildren = {
   AuthedAdminToolsRoute: AuthedAdminToolsRoute,
+  AuthedAdminVendorSpendRoute: AuthedAdminVendorSpendRoute,
   AuthedAdminWorkflowsRoute: AuthedAdminWorkflowsRoute,
   AuthedAdminIndexRoute: AuthedAdminIndexRoute,
 }

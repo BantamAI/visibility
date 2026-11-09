@@ -27,7 +27,9 @@ Prompts tagged `near-me` run on grid points and centroids. All other prompts are
 
 ## Cadence
 
-A full scan runs every point of every engine, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) also run daily. Both intervals and the number of repeats are set per subject on the Run Plan page. They apply only to located runs; brand-mode runs keep Elmo's cadence.
+Nothing runs until a subject's schedule is enabled on its Run Plan page, and every schedule starts disabled. A full scan runs every point of every engine, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) can run more often; they default to weekly too, and daily is a per-subject opt-in. Both intervals and the number of repeats are set per subject on the Run Plan page.
+
+Elmo's brand-mode runs (every prompt on every engine, with no location, on its own cadence) are off: they'd spend outside every subject's budget, and a "near me" prompt with no location measures nothing.
 
 Grid size is set per service area. SP5-L found AI Mode answers 3 miles apart overlap nearly as much as repeats at one point, so 3×3 (points about 5–6 miles apart on a 10-mile radius) is the default. Use 5×5 only for areas wider than about 20 miles.
 
@@ -35,4 +37,4 @@ Grid size is set per service area. SP5-L found AI Mode answers 3 miles apart ove
 
 The monthly cost is points × prompts × repeats × runs a month for each series, priced per run. DataForSEO's Google surfaces ($0.004) and Claude through the Anthropic API ($0.04) use SP5-L's measured costs. Other routes use the per-provider estimates in `packages/lib/src/usage/cost.ts`.
 
-A schedule can't be enabled without a monthly budget, or when the plan costs more than the budget or includes a route with no cost estimate. A disabled schedule can be saved at any cost, so the plan can be tried out before it's enabled. The budget is checked when the schedule is saved. Adding prompts or areas later can push an enabled plan over budget, so the scan job checks it again before it starts any scan.
+A schedule can't be enabled without a monthly budget, or when the plan costs more than the budget or includes a route with no cost estimate. A disabled schedule can be saved at any cost, so the plan can be tried out before it's enabled. The budget is checked when the schedule is saved. Adding prompts or areas later can push an enabled plan over budget, so the scan job checks it again before it starts any scan. A vendor whose spend for the day runs past twice its plan is stopped until staff resume it (`docs/local/vendor-spend.md`).
