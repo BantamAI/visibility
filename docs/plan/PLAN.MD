@@ -113,19 +113,19 @@ Real users get local answers from the location the engine infers: IP address, de
 | T4 | `api_user_location` | Model API with its own location parameter (not the consumer surface) |
 | T5 | `prompt_only` | City named in the prompt; country-level egress |
 
-Candidate routes per engine. All of these are hypotheses until the bake-off (SP5-L) confirms them. Claude is the only engine reached through a model API; the others are scraped only, with no API fallback (ADR-33):
+Routes per engine, as the SP5-L bake-off settled them (`docs/local/sp5-l-results.md`). Claude is the only engine reached through a model API; the others are scraped only, with no API fallback (ADR-33):
 
-| Engine | Primary candidate | Secondary | Grid kind | API route |
+| Engine | Route | Fallback | Grid kind | API route |
 |---|---|---|---|---|
-| Google AI Mode | DataForSEO AI Mode SERP with `location_coordinate` (T1) | Cloro AI Mode with `location` (Google canonical name) or `uule` (T1, city-level only) | Coordinate grid | — |
-| Google AI Overviews | DataForSEO organic SERP, `load_async_ai_overview`, `location_coordinate` (T1) | Cloro or SearchApi, if location is supported (verify) | Coordinate grid | — |
-| ChatGPT | Bright Data ChatGPT scraper `geolocation` "lat,lng" field (T1 if it localizes; verify) | Bright Data residential egress by ZIP (T2); DataForSEO LLM Scraper city `location_code` (verify tier); Cloro `state` (T3) | Coordinate grid if T1 holds, else ZIP grid | — |
-| Gemini | DataForSEO Gemini LLM Scraper `location_coordinate` (T1) | Cloro `state` (T3) | Coordinate grid | — |
-| Perplexity | Cloro `state` (T3) | Bright Data (country) or SearchApi | Centroids only | — |
+| Google AI Mode | DataForSEO AI Mode SERP with `location_coordinate` (T1, point level) | Cloro AI Mode with `location` (Google canonical name) (T1, city level) | Coordinate grid | — |
+| Google AI Overviews | DataForSEO organic SERP, `load_async_ai_overview`, `location_coordinate` (T1, point level) | SearchApi `latitude`/`longitude` (T1); Cloro `location` (city level) | Coordinate grid | — |
+| ChatGPT | None below state: every vendor's location field is ignored, and the app misplaces even a real home IP | City-named prompts only (T5) | Centroids | — |
+| Gemini | None: vendor location fields are ignored, and residential exits don't reach most small towns | City-named prompts only (T5) | Centroids | — |
+| Perplexity | None working: Cloro's endpoint was down, Bright Data and Oxylabs time out, SearchApi retired its API | City-named prompts only (T5) | Centroids | — |
 | Claude | — no terms-compatible consumer route | — | Centroids | Anthropic `web_search` tool `user_location` (city, region, country, timezone) (T4) |
 
 Facts behind the table:
-- ChatGPT search may use an approximate location from the user's IP address, and device location sharing is off by default. So egress city matters for ChatGPT.
+- ChatGPT, Gemini and Perplexity locate a logged-out user from the IP address, not from fields a vendor forwards. Gemini places a home IP exactly; ChatGPT misplaced one by about 140 miles.
 - Grok is out of scope: grok.com puts a sign-up wall in front of logged-out visitors, Cloro discontinued its Grok endpoint on Oct 15, 2026, and Bright Data lists its Grok scraper as unavailable.
 - Claude.ai has no consumer scraper among Elmo's vendors. Anthropic's consumer terms forbid automated access except through an API key.
 - OpenAI's terms forbid programmatically extracting data or output. Vendors take on the operating burden of logged-out scraping, but they don't remove the terms risk. **We don't scrape logged-in consumer accounts.** Any scraper we run ourselves is logged-out only and gated by `legal-review`.
@@ -134,7 +134,7 @@ Facts behind the table:
 
 - **Sample unit:** prompt × engine × sample point × repeat.
 - **Our own grid, three kinds of sample point,** all generated from each subject's service areas (no third-party grid product):
-  - *Coordinate grid:* N×N lat/lng points (3×3 to 7×7) sent to T1 routes that accept coordinates (DataForSEO AI Mode, AI Overviews and Gemini; Bright Data ChatGPT if its `geolocation` field localizes).
+  - *Coordinate grid:* N×N lat/lng points (3×3 to 7×7) sent to T1 routes that accept coordinates (DataForSEO AI Mode and AI Overviews). SP5-L found 3-mile neighbours overlap almost as much as repeats, so the default is 3×3 with points about 5–6 miles apart.
   - *ZIP grid:* the ZIP codes whose centroids fall inside the service area (from public-domain Census ZCTA data), sent to egress-based T2 routes as city/ZIP proxy targets. A ZIP grid is coarser than a coordinate grid but matches how IP-located engines see users.
   - *Centroids:* one point per city in the service area, for T3–T5 routes. Claude's Anthropic API route takes only city-level fields, so it uses centroids and is reported separately as an API approximation.
 - **Grid scan:** one scan = one prompt × one route × every active point in an area, stored as a scan record with one run per point, so we can draw per-point maps and compare scans over time.
