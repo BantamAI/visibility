@@ -12,7 +12,9 @@ A located run asks a provider for an answer as if from one sample point, at a fi
 
 ## Declaring what a provider can serve
 
-A provider lists the tiers below T5 that each target can serve in `locationSupport`, with the location fields it sends at each one. A provider that leaves it out sends nothing below country, which is every scraper until its vendor story (E53-S23 to E53-S25) adds a declaration. Every surface can serve T5.
+A provider lists the tiers below T5 that each target can serve in `locationSupport`, with the location fields it sends at each one. A provider that leaves it out sends nothing below country. Every surface can serve T5.
+
+DataForSEO serves T1 on its two Google surfaces, the only routes that place a run at the sample point itself (`docs/local/sp5-l-results.md`). AI Mode sends the point as `location_coordinate` with a map zoom (`lat,lng,15z`); AI Overviews send it to the organic SERP with a 200-meter radius (`lat,lng,200`), and a located overview gets five tries instead of three because Google's async overview load fails far more often on near-me searches. DataForSEO moves the point by about 70 meters before asking Google, so each run records the point Google actually got, read from the `uule` in the result's `check_url`, as the vendor-reported location. Its ChatGPT and Gemini scrapers declare nothing: they accept coordinates and ignore them.
 
 Claude is the only engine reached through a model API (ADR-33). The Anthropic API serves T4 by giving its web search tool the point's city, region, country and timezone, and by telling Claude the city, region and country in a system prompt. The tool's location only steers search results, and without the system prompt Claude answers a "near me" prompt by saying it doesn't know where the user is, without searching. Because Claude then names the city in its own search queries, T4 behaves partly like a city-named prompt. A Claude target with web search off can't serve T4, and Claude runs on city centroids. Claude through OpenRouter declares nothing. Reports label T4 results "API approximation" so they're never read as what a person sees.
 

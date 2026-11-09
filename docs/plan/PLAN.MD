@@ -197,13 +197,14 @@ Acceptance criteria:
 
 Design notes: keep the interface change small and generic. Elmo may want country localization upstream, and its contributor agreement applies only if we send changes there.
 
-### E53-S23 DataForSEO with coordinates (AI Mode, AI Overviews, Gemini, ChatGPT)
-Labels: `story`, `area:providers`, `needs-spike`, `upstream-touch`, `size:M`, `tag:Pilot`. Milestone L1. Depends on: E53-S22.
+### E53-S23 DataForSEO with coordinates (AI Mode, AI Overviews)
+Labels: `story`, `area:providers`, `upstream-touch`, `size:M`, `tag:Pilot`. Milestone L1. Depends on: E53-S22. SP5-L said build, for the two Google surfaces only.
 
 Acceptance criteria:
-- [ ] AI Mode SERP and organic SERP (with `load_async_ai_overview`) send `location_coordinate` from the sample point, replacing the hard-coded 2840 when a location is given.
-- [ ] Gemini LLM Scraper sends `location_coordinate`.
-- [ ] ChatGPT LLM Scraper resolves the city to a `location_code` from the cached locations list (download it once a week; the lists are large) and records the tier the spike found.
+- [ ] AI Mode SERP (`lat,lng,15z`) and organic SERP with `load_async_ai_overview` (`lat,lng,200`) send `location_coordinate` from the sample point at T1, replacing the hard-coded 2840 when a location is given.
+- [ ] Located AI Overview runs get more retry headroom for `40101 Internal SE Server Error`.
+- [ ] Each run reports DataForSEO's task id, cost and the point Google was asked from.
+- [ ] The ChatGPT and Gemini LLM Scrapers declare no location: SP5-L found both ignore it.
 - [ ] Map or local-pack items in the response are kept in `rawOutput` for E53-S29.
 - [ ] Fixture tests per surface.
 

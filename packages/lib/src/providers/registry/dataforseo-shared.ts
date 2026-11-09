@@ -1,6 +1,7 @@
 import * as client from "dataforseo-client";
 import { getCredential } from "../../secrets";
 import { configuredWhen } from "../config";
+import type { ScrapeResult } from "../types";
 import { type Attempt, nonEmptyStrings } from "./scrape-shared";
 
 /**
@@ -24,13 +25,59 @@ const DFS_STATUS_OK = 20000;
 // a generic task type makes a union of two endpoints' responses unassignable.
 // The caller names the handful of fields it reads instead.
 interface DfsTask {
+	id?: string;
 	status_code?: number;
 	status_message?: string;
 	result?: unknown[] | null;
 }
 
 export interface DfsResponse {
+	cost?: number;
 	tasks?: DfsTask[];
+}
+
+/** The SERP endpoints' `location_coordinate`: AI Mode takes a map zoom, the organic SERP a radius in meters. */
+export function dfsLocationCoordinate(
+	point: { latitude: number; longitude: number },
+	scale: "ai-mode" | "organic",
+): string {
+	// DataForSEO rejects more than 7 decimals. 200 m is the smallest radius it accepts, so the point stays a point.
+	return `${point.latitude.toFixed(7)},${point.longitude.toFixed(7)},${scale === "ai-mode" ? "15z" : "200"}`;
+}
+
+/**
+ * The point Google was asked from, read from the `uule` in the result's
+ * `check_url`. DataForSEO jitters the point it was sent, by about 70 meters
+ * typically and under 150, so this is the location the answer really reflects.
+ */
+export function googleReportedPoint(checkUrl: unknown): { latitude: number; longitude: number } | undefined {
+	if (typeof checkUrl !== "string") return undefined;
+	let uule: string | null;
+	try {
+		uule = new URL(checkUrl).searchParams.get("uule");
+	} catch {
+		return undefined;
+	}
+	// "a " marks the text-protobuf form that carries a lat/lng; other forms name a place.
+	if (!uule?.startsWith("a ")) return undefined;
+	const decoded = Buffer.from(uule.slice(2), "base64").toString("utf8");
+	const latitude = /latitude_e7:\s*(-?\d+)/.exec(decoded)?.[1];
+	const longitude = /longitude_e7:\s*(-?\d+)/.exec(decoded)?.[1];
+	if (!latitude || !longitude) return undefined;
+	return { latitude: Number(latitude) / 1e7, longitude: Number(longitude) / 1e7 };
+}
+
+/** The vendor's run id, cost and reported location for a successful SERP response. */
+export function dfsRunDetails(
+	response: DfsResponse | null,
+): Pick<ScrapeResult, "vendorRunId" | "costUsd" | "vendorReportedLocation"> {
+	const task = response?.tasks?.[0];
+	const point = googleReportedPoint((task?.result?.[0] as { check_url?: unknown } | undefined)?.check_url);
+	return {
+		...(task?.id ? { vendorRunId: task.id } : {}),
+		...(typeof response?.cost === "number" ? { costUsd: response.cost } : {}),
+		...(point ? { vendorReportedLocation: point } : {}),
+	};
 }
 
 export function dfsResultOrError<T>(response: DfsResponse | undefined | null): Attempt<T> {

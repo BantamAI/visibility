@@ -5,7 +5,15 @@ import {
 	extractCitationsFromGoogle,
 } from "../../text-extraction";
 import { reportedWebQueries } from "../config";
-import type { ModelConfig, Provider, ProviderAccess, ProviderOptions, ScrapeResult } from "../types";
+import type {
+	LocationSupport,
+	ModelConfig,
+	Provider,
+	ProviderAccess,
+	ProviderOptions,
+	RunLocation,
+	ScrapeResult,
+} from "../types";
 import {
 	assertPromptLength,
 	createDfsAiApi,
@@ -13,7 +21,9 @@ import {
 	DFS_LANGUAGE_CODE,
 	DFS_LOCATION_CODE,
 	dfsFirstResult,
+	dfsLocationCoordinate,
 	dfsResultOrError,
+	dfsRunDetails,
 	fanOutQueries,
 	isDataforseoConfigured,
 } from "./dataforseo-shared";
@@ -63,6 +73,16 @@ const SCRAPER_CALLS = {
 const AI_OVERVIEW_MODEL = "google-ai-overview";
 const SUPPORTED_MODELS = new Set([...SERP_MODELS, AI_OVERVIEW_MODEL, ...Object.keys(LLM_MODELS)]);
 
+/**
+ * Only the Google SERP surfaces place a run at the point. The ChatGPT and Gemini
+ * scrapers accept coordinates but answer from DataForSEO's own egress (SP5-L).
+ */
+const SERP_POINT: readonly LocationSupport[] = [{ tier: "T1", reads: ["latitude", "longitude"] }];
+
+// Located near-me searches fail async overview loads with 40101 far more often
+// than brand prompts do (SP5-L), so they get more tries before giving up.
+const LOCATED_AI_OVERVIEW_ATTEMPTS = 5;
+
 /** Must agree with `run()`'s dispatch: the settings page labels targets from it. */
 function dataforseoAccess({ model, version }: ModelConfig): ProviderAccess {
 	if (SERP_MODELS.has(model) || model === AI_OVERVIEW_MODEL) return "scraped";
@@ -84,12 +104,14 @@ const LLM_CALLS = {
 		api.geminiLlmResponsesLive(body.map((b) => new client.AiOptimizationGeminiLlmResponsesLiveRequestInfo(b))),
 } as const;
 
-async function runGoogleAiMode(prompt: string): Promise<ScrapeResult> {
+async function runGoogleAiMode(prompt: string, point: RunLocation | undefined): Promise<ScrapeResult> {
 	assertPromptLength(prompt);
 	const api = createDfsSerpApi();
 	const requestInfo = new client.SerpGoogleAiModeLiveAdvancedRequestInfo({
 		keyword: prompt,
-		location_code: DFS_LOCATION_CODE,
+		...(point
+			? { location_coordinate: dfsLocationCoordinate(point, "ai-mode") }
+			: { location_code: DFS_LOCATION_CODE }),
 		language_code: DFS_LANGUAGE_CODE,
 		depth: 10,
 	});
@@ -105,15 +127,18 @@ async function runGoogleAiMode(prompt: string): Promise<ScrapeResult> {
 		rawOutput: sanitizeForJson(response),
 		webQueries: reportedWebQueries([], { searchProven: citations.length > 0 }),
 		modelVersion: "dataforseo",
+		...dfsRunDetails(response),
 	};
 }
 
-function runGoogleAiOverview(prompt: string): Promise<ScrapeResult> {
+function runGoogleAiOverview(prompt: string, point: RunLocation | undefined): Promise<ScrapeResult> {
 	assertPromptLength(prompt);
 	const api = createDfsSerpApi();
 	const requestInfo = new client.SerpGoogleOrganicLiveAdvancedRequestInfo({
 		keyword: prompt,
-		location_code: DFS_LOCATION_CODE,
+		...(point
+			? { location_coordinate: dfsLocationCoordinate(point, "organic") }
+			: { location_code: DFS_LOCATION_CODE }),
 		language_code: DFS_LANGUAGE_CODE,
 		depth: 10,
 		// AI Overviews are generated on demand; without this DataForSEO only
@@ -126,6 +151,7 @@ function runGoogleAiOverview(prompt: string): Promise<ScrapeResult> {
 	return retryTransient(
 		() => attemptGoogleAiOverview(api, requestInfo),
 		(lastError) => `DataForSEO API Error: ${lastError}`,
+		point ? LOCATED_AI_OVERVIEW_ATTEMPTS : undefined,
 	);
 }
 
@@ -144,6 +170,7 @@ async function attemptGoogleAiOverview(
 				rawOutput: sanitizeForJson(response),
 				webQueries: reportedWebQueries([], { searchProven: citations.length > 0 }),
 				modelVersion: "dataforseo",
+				...dfsRunDetails(response),
 			},
 		};
 	} catch (error) {
@@ -245,6 +272,10 @@ export const dataforseo: Provider = {
 
 	isConfigured: isDataforseoConfigured,
 
+	locationSupport(config: ModelConfig) {
+		return SERP_MODELS.has(config.model) || config.model === AI_OVERVIEW_MODEL ? SERP_POINT : [];
+	},
+
 	validateTarget(config: ModelConfig) {
 		if (!SUPPORTED_MODELS.has(config.model)) {
 			return `DataForSEO only supports: ${[...SUPPORTED_MODELS].join(", ")}`;
@@ -260,11 +291,12 @@ export const dataforseo: Provider = {
 
 	async run(model: string, prompt: string, options?: ProviderOptions): Promise<ScrapeResult> {
 		assertPromptLength(prompt);
+		const point = options?.locationTier === "T1" ? options.location : undefined;
 		if (SERP_MODELS.has(model)) {
-			return runGoogleAiMode(prompt);
+			return runGoogleAiMode(prompt, point);
 		}
 		if (model === AI_OVERVIEW_MODEL) {
-			return runGoogleAiOverview(prompt);
+			return runGoogleAiOverview(prompt, point);
 		}
 		if (!options?.version && model in SCRAPER_CALLS) {
 			return runLlmScraper(model as keyof typeof SCRAPER_CALLS, prompt);

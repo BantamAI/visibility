@@ -1,0 +1,73 @@
+{
+	"version": "0.1.20261103",
+	"status_code": 20000,
+	"status_message": "Ok.",
+	"cost": 0.004,
+	"tasks_count": 1,
+	"tasks_error": 0,
+	"tasks": [
+		{
+			"id": "11090212-3073-0139-0000-18f44fb798a7",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"cost": 0.004,
+			"result_count": 1,
+			"path": ["v3", "serp", "google", "ai_mode", "live", "advanced"],
+			"data": {
+				"api": "serp",
+				"function": "live",
+				"se": "google",
+				"se_type": "ai_mode",
+				"keyword": "I have a burst pipe, who's an emergency plumber near me?",
+				"language_code": "en",
+				"location_coordinate": "35.7796000,-78.5310100,15z",
+				"device": "desktop",
+				"os": "windows"
+			},
+			"result": [
+				{
+					"keyword": "I have a burst pipe, who's an emergency plumber near me?",
+					"type": "ai_mode",
+					"se_domain": "google.com",
+					"location_code": 2840,
+					"language_code": "en",
+					"check_url": "https://www.google.com/search?q=I%20have%20a%20burst%20pipe%2C%20who%27s%20an%20emergency%20plumber%20near%20me%3F&hl=en&gl=US&udm=50&uule=a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNzk0MTkwNjA4ODc3MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDM1Nzc5MjU2NwogIGxvbmdpdHVkZV9lNzogLTc4NTMxMzc2Nwp9CnJhZGl1czogMTAwMDAKcHJvdmVuYW5jZTogNgo%3D",
+					"datetime": "2026-11-09 02:12:52 +00:00",
+					"item_types": ["ai_overview"],
+					"items_count": 1,
+					"items": [
+						{
+							"type": "ai_overview",
+							"rank_group": 1,
+							"rank_absolute": 1,
+							"markdown": "**First: Shut off your main water valve immediately** to stop the flooding and minimize water damage to your home.\n\nHere are 24/7 local emergency plumbers serving the Knightdale, NC area:\n\n\n\n---\n\n![](https://api.dataforseo.com/cdn/i/11090212-3073-0139-0000-18f44fb798a7:4)\nBennie Bittle Plumbing, Inc.4.9 (175)  \nPlumber  \nOpen  \nCall[Directions](https://www.google.com/maps/dir//''/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x282d1ae9263f09fb:0xbbd86e49aa374e3b?entry=s&ved=1t:269504&ictx=111) [Website](https://benniebittleplumbing.com/) \n\n- **Phone:** 919-817-4535\n- **Hours:** Open 24 Hours (Mon–Sun)\n- **Details:** Frequently praised by local reviewers for rapid emergency response times (often on-site within 20–30 minutes) and leak/pipe repairs. Check out Bennie Bittle Plumbing.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXN3Z255NnczGAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLcjuldMfIdq3nEXNPbI32K8ICrRPkFugBCnJ0x27MyhxAD0A8DrpPbuxs5GcDTWbMuvlZ8yMob2o8tSbBKR_1mAO0yf1yUdZp-VVpjmMC3yrEvtJJuVkaOWIzRblmZ39-v-9EZy=s192-w192-h144-n-k-no)\nA.H. Plumbing 4.9 (316)  \nPlumber  \nOpen  \nCall[Directions](https://www.google.com/maps/dir//''/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac68a102f526d1:0x4339cbf304e85b89?entry=s&ved=1t:269504&ictx=111) [Website](https://ahplumbing-nc.com/) \n\n- **Phone:** 919-622-0559\n- **Hours:** Open 24 Hours (Mon–Sun)\n- **Details:** Licensed residential and commercial repair team with strong local ratings. Learn more on A.H. Plumbing.[[1]](https://www.google.com/searchviewer/10?svid=CCYSECoOCgwvZy8xMTl2NTdnMDAYCg)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLezyyyQw0FOfvqD44X00-D1P7_mOefT0BcvV_FbMJwljQJ9SNdjWlv4NZdsMofpwBqeWtnfse9WE9XhTuy2-AMVmwU_w0-V5dYHKFdRSKHY8mTukstdwXzO7Kc7SHO5cYrkBi4pBnYdXtk=s108-w108-h144-n-k-no)\nRest Assured Plumbing 5.0 (94)  \nPlumber  \nOpen  \nCall[Directions](https://www.google.com/maps/dir//''/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac5d883c0c893f:0xce2d8d63d0962559?entry=s&ved=1t:269504&ictx=111) [Website](http://www.restassuredplumbingnc.com/) \n\n- **Phone:** 910-551-7928\n- **Hours:** Open 24 Hours (Mon–Sun)\n- **Details:** Known for fast emergency responsiveness and general residential plumbing. See details on Rest Assured Plumbing.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWo2cmp4eWtrGAo)\n\nWhile you are calling them, let me know:\n\n- **Where is the pipe located** (under the sink, in the crawlspace, in the ceiling)?\n- **Can you reach the main shut-off valve** , or do you need help locating it?",
+							"references": [
+								{
+									"type": "ai_overview_reference",
+									"source": "Google",
+									"domain": "www.google.com",
+									"url": "https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXN3Z255NnczGAo",
+									"title": "Bennie Bittle Plumbing, Inc."
+								},
+								{
+									"type": "ai_overview_reference",
+									"source": "Google",
+									"domain": "www.google.com",
+									"url": "https://www.google.com/searchviewer/10?svid=CCYSECoOCgwvZy8xMTl2NTdnMDAYCg",
+									"title": "A.H. Plumbing"
+								},
+								{
+									"type": "ai_overview_reference",
+									"source": "Google",
+									"domain": "www.google.com",
+									"url": "https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWo2cmp4eWtrGAo",
+									"title": "Rest Assured Plumbing"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}
