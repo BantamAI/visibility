@@ -22,6 +22,7 @@ import { VendorStoppedError } from "@workspace/service/local/vendor-spend";
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { getBoss } from "../boss";
+import { deriveNewRunBusinesses } from "./answer-businesses";
 import { runModelIteration } from "./process-prompt";
 
 function reportOverBudget(subjectId: string, refusal: string): void {
@@ -92,7 +93,7 @@ async function runScanPoint({ brandId, scanRunId }: GridScanRunData): Promise<vo
 	if (!brand) return;
 
 	try {
-		await runModelIteration({
+		const runId = await runModelIteration({
 			promptId: claim.promptId,
 			promptValue: claim.promptValue,
 			brand,
@@ -102,6 +103,8 @@ async function runScanPoint({ brandId, scanRunId }: GridScanRunData): Promise<vo
 			location: claim.request,
 			onSaved: (tx, promptRunId) => markScanRunAnswered(tx, claim.id, promptRunId),
 		});
+		// Never throws: a run whose cards fail here is picked up by the sweep, not retried and paid for again.
+		await deriveNewRunBusinesses(brandId, runId);
 	} catch (error) {
 		// Neither a refused location nor a stopped vendor changes on a retry, and nothing was spent on either.
 		const final =

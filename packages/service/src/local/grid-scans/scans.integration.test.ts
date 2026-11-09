@@ -1,9 +1,11 @@
+import { readFileSync } from "node:fs";
 import { db } from "@workspace/lib/db/db";
 import { brands, organization, promptRuns, prompts } from "@workspace/lib/db/schema";
 import type { ModelConfig } from "@workspace/lib/providers";
 import { createOwnerDb } from "@workspace/lib/test/integration/owner-db";
 import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { deriveAnswerBusinesses } from "../answer-businesses";
 import { DEFAULT_RUN_SCHEDULE, NEAR_ME_TAG, saveRunSchedule } from "../run-planner";
 import { gridScanRuns, gridScans, runLocations, subjectRunSchedules } from "../schema";
 import { saveServiceArea } from "../service-areas";
@@ -27,6 +29,9 @@ const subjects = [A, B];
 const owner = createOwnerDb();
 const targets: ModelConfig[] = [{ model: "google-ai-mode", provider: "dataforseo", webSearch: true }];
 const COST_PER_RUN = 0.004;
+const AI_MODE_ANSWER = JSON.parse(
+	readFileSync(new URL("../answer-businesses/__fixtures__/dataforseo-ai-mode.json", import.meta.url), "utf8"),
+);
 
 beforeAll(async () => {
 	await cleanUp();
@@ -66,11 +71,11 @@ async function cleanUp() {
 
 const asA = <T>(fn: () => Promise<T>) => withSubject(A, fn);
 
-/** What the worker does when a vendor answers: save the run and its location, and settle the scan run. */
+/** What the worker does when a vendor answers: save the run and its location, settle the scan run, and read its cards. */
 async function answer(scanRunId: string) {
 	const claim = await claimScanRun(scanRunId);
 	if (!claim) throw new Error(`run ${scanRunId} isn't pending`);
-	await db.transaction(async (tx) => {
+	const runId = await db.transaction(async (tx) => {
 		const [run] = await tx
 			.insert(promptRuns)
 			.values({
@@ -80,7 +85,7 @@ async function answer(scanRunId: string) {
 				provider: claim.config.provider,
 				version: "test",
 				webSearchEnabled: true,
-				rawOutput: {},
+				rawOutput: AI_MODE_ANSWER,
 			})
 			.returning({ id: promptRuns.id });
 		await tx.insert(runLocations).values({
@@ -94,7 +99,9 @@ async function answer(scanRunId: string) {
 			costSource: "estimate",
 		});
 		await markScanRunAnswered(tx, claim.id, run.id);
+		return run.id;
 	});
+	await deriveAnswerBusinesses([runId]);
 	return claim;
 }
 
@@ -151,6 +158,10 @@ describe("grid scans", () => {
 		const answered = results?.points.find((p) => p.runs[0].status === "answered");
 		expect(answered?.runs[0].runId).toEqual(expect.any(String));
 		expect(answered?.label).toEqual(expect.any(String));
+		expect(answered?.runs[0].businesses.map((card) => card.name).slice(0, 2)).toEqual([
+			"Bee Quick Plumbing & Sewer",
+			"Wiz Plumbing Inc.",
+		]);
 	});
 
 	it("completes a scan whose runs were lost, failing what never settled", async () => {

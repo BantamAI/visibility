@@ -6,6 +6,7 @@ import type { OnboardingSuggestion } from "@workspace/lib/onboarding";
 import { PROCESS_PROMPT_QUEUE } from "@workspace/lib/queues/prompt-jobs";
 import { GENERATE_REPORT_QUEUE } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
+import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
 import {
 	GRID_SCAN_RUN_QUEUE,
 	type GridScanRunData,
@@ -18,6 +19,7 @@ import { CHECK_VENDOR_SPEND_QUEUE } from "@workspace/service/local/vendor-spend"
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { type AnalyzeBrandData, analyzeBrandJob } from "./jobs/analyze-brand";
+import { deriveAnswerBusinessesJob } from "./jobs/answer-businesses";
 import { DERIVE_RUNS_QUEUE, type DeriveRunsData, deriveRunsJob } from "./jobs/derive-runs";
 import { type GenerateReportData, generateReportJob } from "./jobs/generate-report";
 import { gridScanRunJob, startGridScansJob } from "./jobs/grid-scans";
@@ -189,6 +191,13 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 		withSentry(CHECK_VENDOR_SPEND_QUEUE, asAgency(CHECK_VENDOR_SPEND_QUEUE, checkVendorSpendJob)),
 	);
 	console.log(`Registered handler: ${CHECK_VENDOR_SPEND_QUEUE}`);
+
+	await boss.work(
+		DERIVE_ANSWER_BUSINESSES_QUEUE,
+		{ localConcurrency: 1 },
+		withSentry(DERIVE_ANSWER_BUSINESSES_QUEUE, asAgency(DERIVE_ANSWER_BUSINESSES_QUEUE, deriveAnswerBusinessesJob)),
+	);
+	console.log(`Registered handler: ${DERIVE_ANSWER_BUSINESSES_QUEUE}`);
 
 	await boss.work<RefreshRollupsData>(
 		REFRESH_ROLLUPS_QUEUE,

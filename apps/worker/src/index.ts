@@ -8,6 +8,7 @@ import { PROCESS_PROMPT_QUEUE, PROMPT_JOB_OPTIONS } from "@workspace/lib/queues/
 import { GENERATE_REPORT_QUEUE, REPORT_JOB_OPTIONS } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
+import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
 import {
 	GRID_SCAN_RUN_QUEUE,
 	GRID_SCAN_RUN_QUEUE_OPTIONS,
@@ -136,6 +137,7 @@ async function main() {
 	await createOrUpdateQueue(boss, GRID_SCAN_RUN_QUEUE, GRID_SCAN_RUN_QUEUE_OPTIONS);
 	await boss.createQueue(START_GRID_SCANS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 10 });
 	await boss.createQueue(CHECK_VENDOR_SPEND_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
+	await boss.createQueue(DERIVE_ANSWER_BUSINESSES_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	console.log("Queues created");
 
 	await boss.schedule("schedule-maintenance", "*/5 * * * *", { source: "scheduled" }, { tz: "UTC" });
@@ -171,6 +173,14 @@ async function main() {
 		{ tz: "UTC", singletonKey: CHECK_VENDOR_SPEND_QUEUE },
 	);
 	console.log("Scheduled check-vendor-spend job (every 5 minutes)");
+
+	await boss.schedule(
+		DERIVE_ANSWER_BUSINESSES_QUEUE,
+		"*/5 * * * *",
+		{},
+		{ tz: "UTC", singletonKey: DERIVE_ANSWER_BUSINESSES_QUEUE },
+	);
+	console.log("Scheduled derive-answer-businesses job (every 5 minutes)");
 
 	await boss.schedule(
 		REFRESH_ROLLUPS_QUEUE,

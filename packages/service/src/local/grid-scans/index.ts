@@ -7,7 +7,14 @@ export {
 	START_GRID_SCANS_QUEUE,
 	VENDOR_CONCURRENCY,
 } from "./queue";
-export { getScanResults, listScans, type ScanPointResult, type ScanRunResult, type ScanSummary } from "./results";
+export {
+	getScanResults,
+	listScans,
+	type ScanBusiness,
+	type ScanPointResult,
+	type ScanRunResult,
+	type ScanSummary,
+} from "./results";
 export {
 	type ClaimedScanRun,
 	claimScanRun,
