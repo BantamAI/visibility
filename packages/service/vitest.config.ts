@@ -16,6 +16,8 @@ export default defineConfig({
 					name: "integration",
 					include: ["src/**/*.integration.test.ts"],
 					globalSetup: ["../lib/src/test/integration/global-setup.ts"],
+					// A vendor stop holds for every subject, so one file's stop would hold up another's scans.
+					fileParallelism: false,
 					// Its own variable rather than DATABASE_URL, which in a dev checkout
 					// points at data these tests would write into.
 					env: {

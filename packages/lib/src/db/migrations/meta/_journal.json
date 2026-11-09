@@ -288,6 +288,13 @@
       "when": 1794246104290,
       "tag": "0040_weekly_city_runs",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794246215043,
+      "tag": "0041_vendor_spend_stops",
+      "breakpoints": true
     }
   ]
 }

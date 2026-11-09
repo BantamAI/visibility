@@ -14,6 +14,7 @@ import {
 	START_GRID_SCANS_QUEUE,
 } from "@workspace/service/local/grid-scans";
 import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
+import { CHECK_VENDOR_SPEND_QUEUE } from "@workspace/service/local/vendor-spend";
 import type { PgBoss } from "pg-boss";
 import { startBackfills } from "./backfills";
 import { getBoss } from "./boss";
@@ -134,6 +135,7 @@ async function main() {
 	});
 	await createOrUpdateQueue(boss, GRID_SCAN_RUN_QUEUE, GRID_SCAN_RUN_QUEUE_OPTIONS);
 	await boss.createQueue(START_GRID_SCANS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 10 });
+	await boss.createQueue(CHECK_VENDOR_SPEND_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	console.log("Queues created");
 
 	await boss.schedule("schedule-maintenance", "*/5 * * * *", { source: "scheduled" }, { tz: "UTC" });
@@ -161,6 +163,14 @@ async function main() {
 
 	await boss.schedule(START_GRID_SCANS_QUEUE, "*/15 * * * *", {}, { tz: "UTC", singletonKey: START_GRID_SCANS_QUEUE });
 	console.log("Scheduled start-grid-scans job (every 15 minutes)");
+
+	await boss.schedule(
+		CHECK_VENDOR_SPEND_QUEUE,
+		"*/5 * * * *",
+		{},
+		{ tz: "UTC", singletonKey: CHECK_VENDOR_SPEND_QUEUE },
+	);
+	console.log("Scheduled check-vendor-spend job (every 5 minutes)");
 
 	await boss.schedule(
 		REFRESH_ROLLUPS_QUEUE,

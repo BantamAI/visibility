@@ -314,3 +314,27 @@ export type RunLocationRecord = typeof runLocations.$inferInsert;
 export type RunSchedule = typeof subjectRunSchedules.$inferSelect;
 export type GridScan = typeof gridScans.$inferSelect;
 export type GridScanRun = typeof gridScanRuns.$inferSelect;
+
+/**
+ * A vendor whose day's spend ran past twice its plan. It runs nothing until agency staff
+ * resume it, and spend before the resume no longer counts against it that day.
+ */
+export const vendorSpendStops = pgTable(
+	"vendor_spend_stops",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		provider: text("provider").notNull(),
+		spendUsd: numeric("spend_usd", { precision: 12, scale: 6, mode: "number" }).notNull(),
+		planUsd: numeric("plan_usd", { precision: 12, scale: 6, mode: "number" }).notNull(),
+		stoppedAt: timestamp("stopped_at", { withTimezone: true }).defaultNow().notNull(),
+		resumedAt: timestamp("resumed_at", { withTimezone: true }),
+		resumedBy: text("resumed_by"),
+	},
+	(table) => [
+		uniqueIndex("vendor_spend_stops_active_provider_idx").on(table.provider).where(sql`${table.resumedAt} IS NULL`),
+		index("vendor_spend_stops_provider_resumed_at_idx").on(table.provider, table.resumedAt),
+		check("vendor_spend_stops_resumed_check", sql`(${table.resumedAt} IS NULL) = (${table.resumedBy} IS NULL)`),
+	],
+).enableRLS();
+
+export type VendorSpendStop = typeof vendorSpendStops.$inferSelect;
