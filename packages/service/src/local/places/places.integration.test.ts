@@ -7,7 +7,14 @@ import type { PlaceCandidate, PlaceIdCheck, PlacesProvider, SearchArea } from ".
 import { placeAnchors } from "../schema";
 import { saveServiceArea } from "../service-areas";
 import { withSubject } from "../tenancy";
-import { confirmAnchor, findPlaces, geocodeAddress, listAnchorTargets, PlaceAnchorError, removeAnchor } from "./anchors";
+import {
+	confirmAnchor,
+	findPlaces,
+	geocodeAddress,
+	listAnchorTargets,
+	PlaceAnchorError,
+	removeAnchor,
+} from "./anchors";
 import { dueAnchors, refreshAnchors } from "./refresh";
 
 const ORG = "places-test-org";

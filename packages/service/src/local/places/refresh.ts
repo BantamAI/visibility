@@ -15,7 +15,10 @@ export async function dueAnchors(limit: number, now = new Date()): Promise<Map<s
 		.select()
 		.from(placeAnchors)
 		.where(
-			and(lt(placeAnchors.checkedAt, new Date(now.getTime() - PLACE_ID_MAX_AGE_DAYS * DAY_MS)), isNull(placeAnchors.obsoleteAt)),
+			and(
+				lt(placeAnchors.checkedAt, new Date(now.getTime() - PLACE_ID_MAX_AGE_DAYS * DAY_MS)),
+				isNull(placeAnchors.obsoleteAt),
+			),
 		)
 		.orderBy(asc(placeAnchors.checkedAt))
 		.limit(limit);

@@ -415,7 +415,10 @@ export const placeAnchors = pgTable(
 			.on(table.subjectId, sql`lower(${table.competitorName})`)
 			.where(sql`${table.competitorName} IS NOT NULL`),
 		index("place_anchors_checked_at_idx").on(table.checkedAt),
-		check("place_anchors_competitor_name_check", sql`${table.competitorName} IS NULL OR btrim(${table.competitorName}) <> ''`),
+		check(
+			"place_anchors_competitor_name_check",
+			sql`${table.competitorName} IS NULL OR btrim(${table.competitorName}) <> ''`,
+		),
 	],
 ).enableRLS();
 

@@ -58,9 +58,7 @@ async function searchArea(subjectId: string, areaId?: string) {
 	const [area] = await db
 		.select()
 		.from(subjectServiceAreas)
-		.where(
-			and(eq(subjectServiceAreas.subjectId, subjectId), areaId ? eq(subjectServiceAreas.id, areaId) : undefined),
-		)
+		.where(and(eq(subjectServiceAreas.subjectId, subjectId), areaId ? eq(subjectServiceAreas.id, areaId) : undefined))
 		.orderBy(desc(subjectServiceAreas.isPrimary), asc(subjectServiceAreas.createdAt))
 		.limit(1);
 	if (areaId && !area) throw new PlaceAnchorError("That service area doesn't belong to this subject");
@@ -101,7 +99,13 @@ const CID = /^\d{1,20}$/;
 /** Anchors the subject, or one of its tracked competitors, on a Place ID, replacing any earlier one. */
 export async function confirmAnchor(
 	subjectId: string,
-	input: { competitorName: string | null; placeId: string; cid: string | null; searchQuery: string; confirmedBy: string },
+	input: {
+		competitorName: string | null;
+		placeId: string;
+		cid: string | null;
+		searchQuery: string;
+		confirmedBy: string;
+	},
 ): Promise<PlaceAnchor> {
 	if (!PLACE_ID.test(input.placeId)) throw new PlaceAnchorError("That isn't a Google Place ID");
 	if (input.cid !== null && !CID.test(input.cid)) throw new PlaceAnchorError("That isn't a Google Maps CID");

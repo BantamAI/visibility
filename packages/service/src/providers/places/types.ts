@@ -1,8 +1,4 @@
-export type PlacesSku =
-	| "text_search_enterprise"
-	| "place_details_ids_only"
-	| "place_details_pro"
-	| "geocoding";
+export type PlacesSku = "text_search_enterprise" | "place_details_ids_only" | "place_details_pro" | "geocoding";
 
 /** A circle the search leans toward without excluding what's outside it. */
 export interface SearchArea {
