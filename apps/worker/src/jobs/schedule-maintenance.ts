@@ -21,6 +21,7 @@ import {
 	resolveBrandPromptRunPlans,
 	slowestIntervalHours,
 } from "@workspace/lib/run-policy";
+import { BRAND_MODE_RUNS } from "@workspace/service/local/run-planner/constants";
 import { and, eq, gt, inArray, lt, sql } from "drizzle-orm";
 import type { Job } from "pg-boss";
 import { getBoss } from "../boss";
@@ -44,7 +45,7 @@ export async function scheduleMaintenanceJob(jobs: Job<ScheduleMaintenanceData>[
 		console.log(`[schedule-maintenance] Starting maintenance check (source: ${source})`);
 
 		try {
-			await runMaintenanceCheck();
+			if (BRAND_MODE_RUNS) await runMaintenanceCheck();
 		} catch (error) {
 			console.error("[schedule-maintenance] Maintenance check failed:", error);
 			throw error; // Will trigger retry

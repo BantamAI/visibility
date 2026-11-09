@@ -12,6 +12,7 @@ import {
 	START_GRID_SCANS_QUEUE,
 	VENDOR_CONCURRENCY,
 } from "@workspace/service/local/grid-scans";
+import { BRAND_MODE_RUNS } from "@workspace/service/local/run-planner/constants";
 import { withAgency, withSubject } from "@workspace/service/local/tenancy";
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
@@ -91,11 +92,16 @@ async function brandOfPrompt(data: ProcessPromptData): Promise<string | null> {
 	});
 }
 
+/** Completing the job without running it ends the prompt's chain, since each cycle queues the next. */
+async function dropBrandModeJobs(jobs: Job<ProcessPromptData>[]): Promise<void> {
+	console.log(`Dropped ${jobs.length} brand-mode prompt job(s): brand-mode runs are off`);
+}
+
 export async function registerHandlers(boss: PgBoss): Promise<void> {
 	await boss.work<ProcessPromptData>(
 		PROCESS_PROMPT_QUEUE,
 		{ localConcurrency: 10 },
-		withSentry(PROCESS_PROMPT_QUEUE, asSubject(brandOfPrompt, processPromptJob)),
+		withSentry(PROCESS_PROMPT_QUEUE, BRAND_MODE_RUNS ? asSubject(brandOfPrompt, processPromptJob) : dropBrandModeJobs),
 	);
 	console.log(`Registered handler: ${PROCESS_PROMPT_QUEUE}`);
 

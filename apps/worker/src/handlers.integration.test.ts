@@ -14,7 +14,8 @@ vi.mock("./mention-judge", async () => {
 	const { cuedAnalyzer } = await import("./mention-judge/__fixtures__/cued-judge.js");
 	return { mentionAnalyzer: () => ({ ...cuedAnalyzer, concurrency: 1 }) };
 });
-vi.mock("./boss", () => ({ getBoss: () => ({ send: async () => null, insert: async () => null }) }));
+const sent = vi.hoisted(() => vi.fn(async () => null));
+vi.mock("./boss", () => ({ getBoss: () => ({ send: sent, insert: async () => null }) }));
 
 type Handler = (jobs: Job<unknown>[]) => Promise<unknown>;
 const handlers = new Map<string, Handler>();
@@ -100,5 +101,15 @@ describe("registered handlers", () => {
 			runOutsideTenantScope(() => handlers.get("process-prompt")?.([job({ promptId: gone })])),
 		).resolves.toBeUndefined();
 		expect(await db.select().from(promptRuns).where(eq(promptRuns.promptId, gone))).toEqual([]);
+	});
+
+	it("run no brand-mode prompt and queue no next cycle for it", async () => {
+		const [prompt] = await db.select({ id: prompts.id }).from(prompts).where(eq(prompts.brandId, A));
+		sent.mockClear();
+		await runOutsideTenantScope(() => handlers.get("process-prompt")?.([job({ promptId: prompt.id, brandId: A })]));
+
+		const promptRunsAfter = await db.select().from(promptRuns).where(eq(promptRuns.promptId, prompt.id));
+		expect(promptRunsAfter.map((run) => run.id)).toEqual([runs[A]]);
+		expect(sent).not.toHaveBeenCalled();
 	});
 });

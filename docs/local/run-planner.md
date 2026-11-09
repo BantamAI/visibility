@@ -27,7 +27,9 @@ Prompts tagged `near-me` run on grid points and centroids. All other prompts are
 
 ## Cadence
 
-A full scan runs every point of every engine, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) also run daily. Both intervals and the number of repeats are set per subject on the Run Plan page. They apply only to located runs; brand-mode runs keep Elmo's cadence.
+Nothing runs until a subject's schedule is enabled on its Run Plan page, and every schedule starts disabled. A full scan runs every point of every engine, weekly by default. Centroids on the two cheapest T1 engines (DataForSEO's AI Mode and AI Overviews, when both are configured) can run more often; they default to weekly too, and daily is a per-subject opt-in. Both intervals and the number of repeats are set per subject on the Run Plan page.
+
+Elmo's brand-mode runs (every prompt on every engine, with no location, on its own cadence) are off: they'd spend outside every subject's budget, and a "near me" prompt with no location measures nothing.
 
 Grid size is set per service area. SP5-L found AI Mode answers 3 miles apart overlap nearly as much as repeats at one point, so 3×3 (points about 5–6 miles apart on a 10-mile radius) is the default. Use 5×5 only for areas wider than about 20 miles.
 
