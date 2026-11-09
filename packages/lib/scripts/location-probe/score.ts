@@ -6,7 +6,7 @@
  *
  *   pnpm --filter @workspace/lib location-probe:score
  *
- * Needs ANTHROPIC_API_KEY (naming) and SEARCHAPI_API_KEY (Maps). Every lookup is
+ * Needs ANTHROPIC_API_KEY (naming) and DataForSEO credentials (Maps). Every lookup is
  * cached in out/, so rescoring after a rule change costs nothing.
  */
 import { createHash } from "node:crypto";
@@ -118,14 +118,41 @@ interface MapsPlace {
 	gps_coordinates?: { latitude: number; longitude: number };
 }
 
+/** DataForSEO's Google Maps SERP: $0.002 a lookup, from the balance the routes already use. */
 async function searchMaps(q: string, at: LatLng, zoom: number): Promise<MapsPlace[]> {
-	const params = new URLSearchParams({ engine: "google_maps", q, ll: `@${at.latitude},${at.longitude},${zoom}z` });
-	const res = await fetch(`https://www.searchapi.io/api/v1/search?${params}`, {
-		headers: { Authorization: `Bearer ${process.env.SEARCHAPI_API_KEY}` },
+	const token = btoa(`${process.env.DATAFORSEO_LOGIN}:${process.env.DATAFORSEO_PASSWORD}`);
+	const res = await fetch("https://api.dataforseo.com/v3/serp/google/maps/live/advanced", {
+		method: "POST",
+		headers: { Authorization: `Basic ${token}`, "Content-Type": "application/json" },
+		body: JSON.stringify([
+			{ keyword: q, location_coordinate: `${at.latitude},${at.longitude},${zoom}z`, language_code: "en", depth: 20 },
+		]),
 	});
-	if (!res.ok) throw new Error(`SearchApi maps "${q}" failed: ${res.status}`);
-	const body = (await res.json()) as { local_results?: MapsPlace[]; place_result?: MapsPlace };
-	return body.local_results ?? (body.place_result ? [body.place_result] : []);
+	if (!res.ok) throw new Error(`DataForSEO maps "${q}" failed: ${res.status}`);
+	const body = (await res.json()) as {
+		tasks?: { status_code?: number; status_message?: string; result?: { items?: DfsMapsItem[] | null }[] }[];
+	};
+	const task = body.tasks?.[0];
+	if (task?.status_message === "No Search Results.") return [];
+	if (task?.status_code !== 20000) throw new Error(`DataForSEO maps "${q}" failed: ${task?.status_message}`);
+	return (task.result?.[0]?.items ?? [])
+		.filter((item) => item.type === "maps_search")
+		.map((item) => ({
+			title: item.title,
+			place_id: item.place_id,
+			gps_coordinates:
+				item.latitude !== undefined && item.longitude !== undefined
+					? { latitude: item.latitude, longitude: item.longitude }
+					: undefined,
+		}));
+}
+
+interface DfsMapsItem {
+	type?: string;
+	title?: string;
+	place_id?: string;
+	latitude?: number;
+	longitude?: number;
 }
 
 type Placed = { placeId?: string; latitude?: number; longitude?: number };
@@ -305,7 +332,8 @@ async function main() {
 
 	const anthropicKey = process.env.ANTHROPIC_API_KEY;
 	if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY is needed to read the answers");
-	if (!process.env.SEARCHAPI_API_KEY) throw new Error("SEARCHAPI_API_KEY is needed for Maps lookups");
+	if (!process.env.DATAFORSEO_LOGIN)
+		throw new Error("DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD are needed for Maps lookups");
 	const model = createAnthropic({ apiKey: anthropicKey })(NAMING_MODEL);
 
 	const texts = answered.map((row) => row.text ?? "").filter((text) => text.trim());
@@ -414,9 +442,14 @@ async function main() {
 		"",
 		"## Where answers said the user was",
 		"",
+		"From the full run where a route had one, otherwise from the screen.",
+		"",
 		"| Route | Places named (most common first) |",
 		"| --- | --- |",
-		...summaries.map((s) => `| ${s.route} | ${cell(s.statedTop) || "–"} |`),
+		...screen.map((s) => {
+			const full = summaries.find((m) => m.route === s.route && m.attempted > 0);
+			return `| ${s.route} | ${cell((full ?? s).statedTop) || "–"} |`;
+		}),
 		"",
 		'## Calibration: "what city am I in right now?"',
 		"",

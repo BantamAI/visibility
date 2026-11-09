@@ -25,8 +25,8 @@ export interface PlanOptions {
 	done: ReadonlySet<string>;
 }
 
-/** Grid sensitivity: AI Mode and Gemini are the T1 coordinate engines; ChatGPT's coordinate route rides along. */
-export const GRID_ROUTES = ["google-ai-mode:dataforseo", "gemini:dataforseo", "chatgpt:brightdata"];
+/** Grid sensitivity: only the Google surfaces passed the screen at the point level. */
+export const GRID_ROUTES = ["google-ai-mode:dataforseo", "google-ai-overview:dataforseo"];
 const GRID_PROMPTS = ["N1", "N2"];
 const GRID_REPS = 2;
 
