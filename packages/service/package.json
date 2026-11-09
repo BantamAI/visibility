@@ -16,6 +16,7 @@
 	"exports": {
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/locations": "./src/local/locations/index.ts",
+		"./local/run-planner": "./src/local/run-planner/index.ts",
 		"./local/schema": "./src/local/schema.ts",
 		"./local/service-areas": "./src/local/service-areas/index.ts",
 		"./local/service-areas/geo": "./src/local/service-areas/geo.ts",

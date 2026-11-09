@@ -182,8 +182,37 @@ export const runLocations = pgTable(
 	],
 ).enableRLS();
 
+/** A subject's located-run schedule. The run planner refuses to enable one whose plan costs more than its budget. */
+export const subjectRunSchedules = pgTable(
+	"subject_run_schedules",
+	{
+		subjectId: text("subject_id")
+			.primaryKey()
+			.references(() => brands.id, { onDelete: "cascade" }),
+		enabled: boolean("enabled").default(false).notNull(),
+		monthlyBudgetUsd: numeric("monthly_budget_usd", { precision: 10, scale: 2, mode: "number" }),
+		scanIntervalDays: smallint("scan_interval_days").default(7).notNull(),
+		centroidIntervalDays: smallint("centroid_interval_days").default(1).notNull(),
+		repeats: smallint("repeats").default(1).notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("subject_run_schedules_subject_id_idx").on(table.subjectId),
+		check("subject_run_schedules_budget_check", sql`${table.monthlyBudgetUsd} >= 0`),
+		check("subject_run_schedules_enabled_needs_budget_check", sql`NOT ${table.enabled} OR ${table.monthlyBudgetUsd} IS NOT NULL`),
+		check("subject_run_schedules_scan_interval_check", sql`${table.scanIntervalDays} BETWEEN 1 AND 31`),
+		check("subject_run_schedules_centroid_interval_check", sql`${table.centroidIntervalDays} BETWEEN 1 AND 31`),
+		check("subject_run_schedules_repeats_check", sql`${table.repeats} BETWEEN 1 AND 5`),
+	],
+).enableRLS();
+
 export type ServiceArea = typeof subjectServiceAreas.$inferSelect;
 export type SamplePoint = typeof samplePoints.$inferSelect;
 export type RefUsPlace = typeof refUsPlaces.$inferSelect;
 export type RefUsZcta = typeof refUsZctas.$inferSelect;
 export type RunLocationRecord = typeof runLocations.$inferInsert;
+export type RunSchedule = typeof subjectRunSchedules.$inferSelect;
