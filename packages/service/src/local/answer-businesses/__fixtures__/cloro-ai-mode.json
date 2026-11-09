@@ -1,0 +1,126 @@
+{
+	"markdown": "**Stop the water immediately** at your main shutoff valve (usually located near the water meter, the front exterior wall, or in the crawlspace/basement) to minimize water damage.\n\nSeveral 24/7 or emergency-responsive local plumbers in the Raleigh area can help right now:\n\n* * *\n\nWestover Plumbing LLC\n\n  * **Address:** 5211 Hillsborough St, Raleigh, NC 27606\n  * **Phone:** 919-532-6676\n  * **Details:** Open 24 hours daily with strong local reviews for same-day emergency leak and pipe repairs. Visit their site at [Westover Plumbing](https://westoverplumbing.com/). [Westover Plumbing LLC](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXQzdF9tOXk1GAo)\n\n* * *\n\nModern Plumbing and Backflow\n\n  * **Address:** 313 Sherwee Dr, Raleigh, NC 27603\n  * **Phone:** 919-341-1911\n  * **Details:** Open 24 hours daily and handles emergency residential plumbing across the Raleigh-Durham-Cary area. Check out _Modern Plumbing and Backflow_. [Modern Plumbing and Backflow](https://www.google.com/searchviewer/10?svid=CCYSECoOCgwvZy8xaGh3eXQxN2wYCg)\n\n* * *\n\nRoto-Rooter Plumbing & Water Cleanup\n\n  * **Address:** 8820 Midway West Rd, Raleigh, NC\n  * **Phone:** 919-714-8770\n  * **Details:** Offers 24/7 emergency pipe repair and water cleanup for copper, PVC, iron, and PEX lines. Schedule via [Roto-Rooter](https://www.rotorooter.com/schedule-service/?zipCode=27617). [Plumbing Pipe Repair](https://www.rotorooter.com/schedule-service/?zipCode=27617)\n\n* * *\n\nCK’s Plumbing & Backflow, LLC\n\n  * **Address:** 3800 Greywood Dr, Raleigh, NC 27604\n  * **Phone:** 919-995-8854\n  * **Details:** Known for rapid same-day response to emergency burst pipes and leak isolation. Learn more at [CK’s Plumbing](https://cksplumbing.com/?utm_source=gmb&utm_medium=organic). [CK's Plumbing & Backflow, LLC](https://www.google.com/searchviewer/10?svid=CCYSDyoNCgsvZy8xdHIxOGZndhgK)\n\nHave you **shut off the main water valve**, and do you need help locating it or figuring out **where the pipe is leaking**?\n\nTo get more features, update your settings",
+	"places": [
+		{
+			"title": "Westover Plumbing LLC",
+			"index": 0,
+			"placeId": "/g/11t3t_m9y5",
+			"link": "https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXQzdF9tOXk1GAo",
+			"rating": 4.9,
+			"reviews": 228,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "5211 Hillsborough St, Raleigh, NC 27606",
+			"phone": "+19195326676",
+			"website": "https://westoverplumbing.com/"
+		},
+		{
+			"title": "Modern Plumbing and Backflow",
+			"index": 1,
+			"placeId": "/g/1hhwyt17l",
+			"link": "https://www.google.com/searchviewer/10?svid=CCYSECoOCgwvZy8xaGh3eXQxN2wYCg",
+			"rating": 4.6,
+			"reviews": 2000,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "313 Sherwee Dr, Raleigh, NC 27603",
+			"phone": "+19193411911",
+			"website": "https://www.modernbackflow.com/"
+		},
+		{
+			"title": "Roto-Rooter Plumbing & Water Cleanup",
+			"index": 2,
+			"placeId": "/g/1tctmnrv",
+			"rating": 4.8,
+			"reviews": 3000,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "8820 Midway West Rd, Raleigh, NC 27617",
+			"phone": "+19197148770",
+			"website": "https://www.rotorooter.com/raleigh/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website"
+		},
+		{
+			"title": "CK’s Plumbing & Backflow, LLC",
+			"index": 3,
+			"placeId": "/g/1tr18fgv",
+			"link": "https://www.google.com/searchviewer/10?svid=CCYSDyoNCgsvZy8xdHIxOGZndhgK",
+			"rating": 4.9,
+			"reviews": 852,
+			"type": "Plumber",
+			"status": "Closed",
+			"address": "3800 Greywood Dr, Raleigh, NC 27604",
+			"phone": "+19199958854",
+			"website": "https://cksplumbing.com/?utm_source=gmb&utm_medium=organic"
+		}
+	],
+	"map": [
+		{
+			"title": "Westover Plumbing LLC",
+			"placeId": "/g/11t3t_m9y5",
+			"link": "https://maps.google.com/?cid=3476671629390006170",
+			"index": 0,
+			"gpsCoordinates": {
+				"latitude": 35.7910006,
+				"longitude": -78.7138516
+			},
+			"rating": 4.9,
+			"reviews": 228,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "5211 Hillsborough St, Raleigh, NC 27606",
+			"phone": "+19195326676",
+			"website": "https://westoverplumbing.com/"
+		},
+		{
+			"title": "Modern Plumbing and Backflow",
+			"placeId": "/g/1hhwyt17l",
+			"link": "https://maps.google.com/?cid=13862166372138855551",
+			"index": 1,
+			"gpsCoordinates": {
+				"latitude": 35.733133599999995,
+				"longitude": -78.64631159999999
+			},
+			"rating": 4.6,
+			"reviews": 2000,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "313 Sherwee Dr, Raleigh, NC 27603",
+			"phone": "+19193411911",
+			"website": "https://www.modernbackflow.com/"
+		},
+		{
+			"title": "Roto-Rooter Plumbing & Water Cleanup",
+			"placeId": "/g/1tctmnrv",
+			"link": "https://maps.google.com/?cid=5580638247373228201",
+			"index": 2,
+			"gpsCoordinates": {
+				"latitude": 35.9064654,
+				"longitude": -78.7565109
+			},
+			"rating": 4.8,
+			"reviews": 3000,
+			"type": "Plumber",
+			"status": "Open",
+			"address": "8820 Midway West Rd, Raleigh, NC 27617",
+			"phone": "+19197148770",
+			"website": "https://www.rotorooter.com/raleigh/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website"
+		},
+		{
+			"title": "CK’s Plumbing & Backflow, LLC",
+			"placeId": "/g/1tr18fgv",
+			"link": "https://maps.google.com/?cid=7465747223205616566",
+			"index": 3,
+			"gpsCoordinates": {
+				"latitude": 35.8317967,
+				"longitude": -78.5855948
+			},
+			"rating": 4.9,
+			"reviews": 852,
+			"type": "Plumber",
+			"status": "Closed",
+			"address": "3800 Greywood Dr, Raleigh, NC 27604",
+			"phone": "+19199958854",
+			"website": "https://cksplumbing.com/?utm_source=gmb&utm_medium=organic"
+		}
+	]
+}

@@ -1,0 +1,126 @@
+{
+	"version": "0.1.20261103",
+	"status_code": 20000,
+	"cost": 0.004,
+	"tasks": [
+		{
+			"id": "11090214-3073-0139-0000-bef99e9df0d4",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"cost": 0.004,
+			"data": {
+				"se_type": "organic",
+				"keyword": "who are the best-reviewed plumbers near me?",
+				"location_coordinate": "35.7796000,-78.6382000,200"
+			},
+			"result": [
+				{
+					"keyword": "who are the best-reviewed plumbers near me?",
+					"type": "organic",
+					"check_url": "https://www.google.com/search?q=who%20are%20the%20best-reviewed%20plumbers%20near%20me%3F&hl=en&gl=US&ie=UTF-8&uule=a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNzk0MTkxOTUxMjQ5MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDM1Nzc5NTc4MQogIGxvbmdpdHVkZV9lNzogLTc4NjM3NTM1Mwp9CnJhZGl1czogMTAwMDAKcHJvdmVuYW5jZTogNgo%3D",
+					"item_types": ["ai_overview", "local_pack", "local_pack", "local_pack", "local_pack", "organic"],
+					"items": [
+						{
+							"type": "ai_overview",
+							"rank_group": 1,
+							"rank_absolute": 1,
+							"markdown": "Top-rated and best-reviewed plumbers in the Raleigh, NC area include:\n\n### Top-Rated Local Plumbers\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLcgQEV_RKIhc2ZTIO3uJDJ4aA_afFldjcDKdWdQADQDc7svkQxDGjqFBPbsCd9sV9d8iWRx0XMw75ea2Pp-dkJ8GGTueUsGYZGRrv6T0lZJCv-hZcSBeU6ZOKE1e2-lnbidQCYjAQ=s108-w108-h144-n-k-no)\nWilliam Parrish Plumbing 4.9 (2.1K)  \nPlumber  \nClosed 235 New Bern Pl #301 0.1 mi  \nCall[Directions](https://www.google.com/maps/dir//235+New+Bern+Pl+%23301,+Raleigh,+NC+27601/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac934fdfec8079:0x139ffb4617307bbb?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESZAHEIkXXEZcPcmHnUd-X0I7YHLgVDulg3yoWcLzTtqhjg_X1j15dyEsiy1MNWwWdgQCjv4TRDnmGemquUHe75V1TMyqrvnlqVjhgV7jpTziEY81byRyASE1wUTE_FJZBGLQXs-U) \n\n- **Rating:** 4.9/5 (2,107+ reviews)\n- **Address:** 235 New Bern Pl #301, Raleigh, NC 27601\n- **Phone:** (919) 343-0783\n- **Specialties:** Water heater installation and general home/business plumbing repairs.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdgElqqSJm6ZoSBdXkQXP63JjPegqxK70bKXvM3YVe3JZXU43Wd2jnYV6YLzD9xBnwKkzWoIxCP7gPLU8feEC2hohDbduI8iwcbljFBn10vxnPyHLJMK6Ho9-C8vN2Vaism6SEPTQz9mfZh=s192-w192-h144-n-k-no)\nCrossroads Plumbing and Drain 5.0 (50)  \nPlumber  \nOpen  \nCall[Directions](https://www.google.com/maps/dir//''/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x28186306b1c50ee3:0x4e33dac4568a702f?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESTwHEIkXX__vb1gf9f5WBNlmLRMbOspQgOOSQ3eVkSQ59YyG8m9LdXSCpdVvy_Pwk8en44TSn3TW7Xiiy6jO7Bus_Qj9XtrzU7nUEXzywwGE) \n\n- **Rating:** 5.0/5 (50+ reviews)\n- **Phone:** (919) 971-1803\n- **Specialties:** 24/7 emergency plumbing, drain cleaning, leak detection, and camera inspections.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdTDczi1lftfnXj0Vq54rHITWLnzF0opkQI0aTijrZgeKCYomOHsmBrI1LhZ6AxmW-mt-m0QuSS1_GOTiazYeoa3jtPQcWcGnA5TGwGZU_vO7dIhXsSVv0_1yuGjdbqziX3DjYM36zjif8=s192-w192-h144-n-k-no)\nPoseidon Plumbing LLC 4.9 (157)  \nPlumber  \nOpen 209 Fayetteville St Ste 002 0.1 mi  \nCall[Directions](https://www.google.com/maps/dir//209+Fayetteville+St+Ste+002,+Raleigh,+NC+27601/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac5ff12e1885e3:0xf1b0b333d35d6bd?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESngEBxCJF15aGmg5nDS6Z9ilF_3I7n0ahrS1y_6sXvz3-NVpDO7fTxsureJtDOKhU5th2tRv1XQcux_AuGtA63UPO-dPodDsd66E8CqF1Whutqjms6gnHtaMgqRht_T0sv50uy8B5QPK8OlRZ583euHSls9llvfZbjHMGZwJzq6QohWHWWeNOP-1PwSghb95gAXAH25cUP2nOJ0YnqiG7Ug) \n\n- **Rating:** 4.9/5 (157+ reviews)\n- **Address:** 209 Fayetteville St Ste 002, Raleigh, NC 27601\n- **Phone:** (336) 770-6766\n- **Specialties:** Residential repairs, 24-hour emergency service, and maintenance.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdgZfbckEBO1CDbVAIPY7UZy13tqaTQAlG6ComlZNoVt4awPZA9iiBQ6x7dbIp5MbzApPFgbKf9wE_keEGbBtcZco-7hZUFrfTrYCLBPGYg7FGgb2yYjVBbflziBcEQlHWcGZej5g=s192-w192-h144-n-k-no)\nCK’s Plumbing & Backflow, LLC 4.9 (852)  \nPlumber  \nClosed 3800 Greywood Dr 4.6 mi  \nCall[Directions](https://www.google.com/maps/dir//3800+Greywood+Dr,+Raleigh,+NC+27604/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac5be47e91f37b:0x679ba98b56079bb6?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESdwHEIkXX70Syf7dOTkTrCVOC2HzlAsUu8UnEoU7ZCk7YXRldd648dilcEucjUzYtSodmc-LgMCStsBNB6FuE5eg1R_QTl8MgObggYLYPQ6CPKVIYdSyTlWJgn16rrj6tn9UUWhzA3qMJ_evR0icu3_6ucuERb-QS) \n\n- **Rating:** 4.9/5 (852+ reviews)\n- **Address:** 3800 Greywood Dr, Raleigh, NC 27604\n- **Specialties:** General plumbing repairs and backflow prevention.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n\n\n---\n\nBizzy Bee Plumbing, Inc. (Cary/Raleigh)\n\n- **Rating:** 4.9/5 (1,055+ reviews)\n- **Specialties:** 24-hour emergency repairs, tankless water heaters, slab leaks, and sewer camera inspections.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLebnTVeQqKqBuc3lby_cDJf2jyr6zZ4haTuN6_vAISWSeETYiLnSS4PfS_52AVmlFvDF-lGZ8hxclvrYCceVPFLlzFLaTE7O1Tp1K71ovmZMNuhzHhALv1jfGJ7_yJz3BERT7vOug=s108-w108-h144-n-k-no)\nMatthew’s Plumbing Solutions 4.9 (1.0K)  \nPlumber  \nClosed 515 S New Hope Rd #106 4.4 mi  \nCall[Directions](https://www.google.com/maps/dir//515+S+New+Hope+Rd+%23106,+Raleigh,+NC+27610/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac5f92db0053cf:0x39a45e9c7535bdc1?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAEShQEBxCJF1zj2nRJ4WFYA4HW4UITaHGLKXwcqn9qaP9l_jcfg0dJKi-lKbKMWj7UVoMEtHxDIVdPpsfN8in3xD0sYLgZW0PDmpp_kwvooIUsupWOPr3rjyeHidjFThd2ZYNEzmG8tlwPtUye6V4T6zUBiq84FF8uzEjAPa9ZTDwKq5aBq8M2y) \n\n- **Rating:** 4.9/5 (1,022+ reviews)\n- **Address:** 515 S New Hope Rd #106, Raleigh, NC 27610\n- **Specialties:** Fast, honest residential plumbing and repairs.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWdnYmYyeTk4GAo)\n\n### Community Recommendations\nAccording to local discussions on [Reddit](https://google.com/goto?url=CAESlgEBxCJF15w-AaO9zKdx183mrS_q5MO03ftNRGKNc2JPM6hNDFk6gxV91WTnT5WjbblGX01Z4GoJQUmftSZyWhEuI8cwM1HyKVIsH5k-3mtlx7dm-XNEgHVF2Lqfz0ZZ7gy3g5EQ-FW2uFC4RinykJZEFuBSMbd9Ui03st18rpysBvkk7YhQKpSMbIHSunWEEi9BeUn2rso) , residents generally **consensus** that smaller local and independent operators—such as CK’s Plumbing, Fasco Plumbing (for well and septic), and local independent shops—tend to offer more transparent and honest pricing compared to massive chain or franchise operations.[[1]](https://google.com/goto?url=CAESlgEBxCJF15w-AaO9zKdx183mrS_q5MO03ftNRGKNc2JPM6hNDFk6gxV91WTnT5WjbblGX01Z4GoJQUmftSZyWhEuI8cwM1HyKVIsH5k-3mtlx7dm-XNEgHVF2Lqfz0ZZ7gy3g5EQ-FW2uFC4RinykJZEFuBSMbd9Ui03st18rpysBvkk7YhQKpSMbIHSunWEEi9BeUn2rso)To help narrow down the best option, could you let me know:\n\n- **What specific issue** you are dealing with (e.g., clogged drain, water heater, leak, new fixture)?\n- **Are you looking for 24/7 emergency service** or a scheduled repair?"
+						},
+						{
+							"type": "local_pack",
+							"page": 1,
+							"position": "left",
+							"rank_group": 1,
+							"rank_absolute": 2,
+							"title": "William Parrish Plumbing",
+							"description": "20+ years in business · Raleigh, NC \nClosed · Opens 5 AM Mon \n\" The plumber that came out was so thorough and professional.\" \n",
+							"domain": "google.com",
+							"phone": "(919) 343-0783",
+							"booking_url": "https://www.google.com/maps/reserve/appt/place/ChIJeYDs30-TrIkRu3swF0b7nxM/mid/%2Fg%2F11ggbf2y98?sourceurl=https://www.google.com/search?q%3Dwho%2Bare%2Bthe%2Bbest-reviewed%2Bplumbers%2Bnear%2Bme?%26hl%3Den%26gl%3DUS%26ie%3DUTF-8&source=cat&sa=X&ved=2ahUKEwiRhKGj6PmXAxXrSvEDHVPgGZ4Q3YkLegQIKxAN",
+							"url": "https://google.com/goto?url=CAESZAHEIkXX6olDb4Ky65wIo30fbkXKzKsumzaR5B47ifHSN0RpRNnC0GvN0SZ1fo64ncrs7gEstTNVRQFOrE-KPKWIyrbEaO7tgt4X-jHDylZihaEHMYCMVz6s0s60r-PJ-_WSw08",
+							"is_paid": false,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 4.9,
+								"votes_count": 2100,
+								"rating_max": 5
+							},
+							"cid": "1414125086472960955"
+						},
+						{
+							"type": "local_pack",
+							"page": 1,
+							"position": "left",
+							"rank_group": 2,
+							"rank_absolute": 3,
+							"title": "Poseidon Plumbing LLC",
+							"description": "Raleigh, NC \nOpen 24 hours \nOnsite services \n",
+							"domain": "google.com",
+							"phone": "(336) 770-6766",
+							"booking_url": null,
+							"url": "https://google.com/goto?url=CAESngEBxCJF17r9PK9_ID6fV3QRmgl7u-vbyfKKf3Xq9xJ3XI7r-UwLfEWf3O4rbtRSUZdK4Mdanru3Klqim6aGgTiZSEXn4rlZNbEs_iyhdpu_4-IcM4_xYOsAJhMHBab5rKzygAHr-Bz4g094oKYNsAIUA08d7ML0p9CK5HyhV3CMRpQ1cLsk6A7vPpUe6P4Ukd-SpcW8iabHjFdM-bJS8w",
+							"is_paid": false,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 4.9,
+								"votes_count": 157,
+								"rating_max": 5
+							},
+							"cid": "1088476049638282941"
+						},
+						{
+							"type": "local_pack",
+							"page": 1,
+							"position": "left",
+							"rank_group": 3,
+							"rank_absolute": 4,
+							"title": "Crossroads Plumbing and Drain",
+							"description": "Open 24 hours \nOnline estimates \n",
+							"domain": "google.com",
+							"phone": "(919) 971-1803",
+							"booking_url": null,
+							"url": "https://google.com/goto?url=CAESTwHEIkXXJL4wZXOG6tzMsSGqEXD0E323hcEobCF4hl0_QXLJzVriAsG3HPQdbdEOh2a-NR0ePe-JmYY5uiMeC9hXXkMJ5P5iSxaDJdDjJEs",
+							"is_paid": false,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 5,
+								"votes_count": 50,
+								"rating_max": 5
+							},
+							"cid": "5635088095570980911"
+						},
+						{
+							"type": "local_pack",
+							"page": 1,
+							"position": "left",
+							"rank_group": 4,
+							"rank_absolute": 5,
+							"title": "ARS / Rescue Rooter        My Ad Center",
+							"description": "Sponsored \n15+ years in business · 641 South New Hope Road \nOpen 24 hours \nRaleigh Plumbers - We Offer Service 7 Days A Week, 365 Days A Year. Certified Technicians, Service Guarantee. \n",
+							"domain": "google.com",
+							"phone": "(984) 272-4760",
+							"booking_url": null,
+							"url": "https://google.com/aclk?sa=L&ai=DChsSEwihi6aj6PmXAxXBmoMHHdJcHqAYACICCAEQERoCZWY",
+							"is_paid": true,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 4.5,
+								"votes_count": 7400,
+								"rating_max": 5
+							},
+							"cid": "13487984261001067353"
+						},
+						{
+							"type": "organic",
+							"rank_group": 1,
+							"rank_absolute": 6,
+							"domain": "google.com",
+							"title": "THE BEST 10 PLUMBING IN RALEIGH, NC - (2026 GUIDE)",
+							"url": "https://google.com/goto?url=CAESfQHEIkXXCHst9gimo6f3_367DwnE8SK_f2ChNK3EWjxCEip3NLc6_ZPcLHmm6GHQ8M8CYeLT3uh-pd3_3Ak1NaRAPFKe9W4t7SAY9jn7s1HzTfJT_7J6qdbXV2IBVT4qbC1H5lr5ISAghqkb0oAt8JnbYrRhpdhQ4jCnCNET"
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,88 @@
+{
+	"ai_overview": {
+		"markdown": "- Address: 1130 S Cherokee St, Denver, CO\n- Services: Pipe bursts, active water leaks, and urgent shutoffs.\n\n- Address: Rosenstock Place, 1240 E Colfax Ave, Denver, CO\n- Services: Fast 24/7 response to burst pipes and major leaks in Denver.\n\n- Address: 12601 E 38th Ave, Denver, CO\n- Phone: 1-303-551-0339\n- Rating: 4.7/5.0 (2,953 reviews)\n- Website: Schedule service directly via the Roto-Rooter Plumbing Pipe Repair Booking Page.\n\n- Address: 2908 E Weaver Ave, Centennial, CO\n- Phone: 1-720-439-9849\n- Rating: 5.0/5.0 (237 reviews)\n- Website: Book an emergency call via the TCF Emergency Plumbing Service Call Page.\n\n- Address: 1487 W Byers Pl, Denver, CO 80223\n- Phone: 1-720-586-7286\n- Website: Book via the Aguilera Lopez Leak Detection Repair Page.\n\n[[0] - Free Estimate for Emergency Plumbing](https://www.hyperflowservice.com/plumbing/emergency-plumbing/)\n[[1] - Free Estimate for Emergency Plumbing Repair](https://plumbersdenver.net/)\n[[2] - Plumbing Pipe Repair](https://www.rotorooter.com/schedule-service/?zipCode=80239)\n[[3] - Plumbing Service Call](https://book.housecallpro.com/book/TCF-Emergency-Plumbing--Heating/3516436778e845cead2669b5a3d284e9?v2=true&lead_source=google&merchant_id=a473aec9-c8ba-4f1c-acfa-ff0b70e3350c)\n[[4] - Leak Detection Repair](https://book.housecallpro.com/book/Aguilera-Lopez-services-plumbing-and-painting-LLC/95288c03746040d68eeec7cc9d90b805?v2=true&lead_source=google&merchant_id=62a35f68-9ea9-4247-923e-cbbdee60c81c)",
+		"local_results": [
+			{
+				"position": 1,
+				"title": "Hyper Flow Service (Plumber)",
+				"link": "https://www.google.com/viewer/place?mid=%2Fg%2F11fd7j6q7f",
+				"kgmid": "/g/11fd7j6q7f",
+				"data_id": "0x876b7d851f4d32d1:0xa61490a6359f4a33",
+				"place_id": "ChIJ0TJNH4V9a4cRM0qfNaaQFKY",
+				"ludocid": "11967349153368853043",
+				"rating": 4.9,
+				"reviews": 621,
+				"type": "Plumber",
+				"address": "1130 S Cherokee St",
+				"distance": "3.0 mi",
+				"gps_coordinates": {
+					"latitude": 39.6960038,
+					"longitude": -104.9910988
+				},
+				"open_state": "Closed",
+				"is_closed": true,
+				"description": "Address: 1130 S Cherokee St, Denver, CO Services:0;104c;0;7d5; Pipe bursts, active water leaks, and urgent shutoffs. 0;d01;"
+			},
+			{
+				"position": 2,
+				"title": "Golden Hands Plumbing & Heating",
+				"link": "https://www.google.com/viewer/place?mid=%2Fg%2F11w1s6pbmb",
+				"kgmid": "/g/11w1s6pbmb",
+				"data_id": "0x876c7f0ddd57211b:0xba41458bf8aeee21",
+				"place_id": "ChIJGyFX3Q1_bIcRIe6u-ItFQbo",
+				"ludocid": "13421084832015773217",
+				"rating": 5,
+				"reviews": 19,
+				"type": "Plumber",
+				"address": "Cheesman Park",
+				"distance": "1.0 mi",
+				"gps_coordinates": {
+					"latitude": 39.7398693,
+					"longitude": -104.971039
+				},
+				"open_state": "Open",
+				"description": "Address: Rosenstock Place, 1240 E Colfax Ave, Denver, CO Services:0;7f7; Fast 24/7 response to burst pipes and major leaks in Denver. 0;d11;"
+			},
+			{
+				"position": 3,
+				"title": "Roto-Rooter Plumbing & Water Cleanup",
+				"link": "https://www.google.com/viewer/place?mid=%2Fg%2F1tq8k11h",
+				"kgmid": "/g/1tq8k11h",
+				"data_id": "0x876b7bbfffffffff:0xbee3b8357f2de87b",
+				"place_id": "ChIJ_____797a4cRe-gtfzW4474",
+				"ludocid": "13755040226826119291",
+				"rating": 4.7,
+				"reviews": 3000,
+				"type": "Plumber",
+				"address": "12601 E 38th Ave",
+				"distance": "8.4 mi",
+				"gps_coordinates": {
+					"latitude": 39.7691896,
+					"longitude": -104.8365876
+				},
+				"open_state": "Open",
+				"description": "Address: 12601 E 38th Ave, Denver, CO Phone:0;40a; 1-303-551-0339 Rating: 4.7/5.0 (2,953 reviews) Website:0;709;0;506; Schedule service directly via the Roto-Rooter Plumbing Pipe Repair Booking Page0;4a8;0;7a3;. 0;d06;"
+			},
+			{
+				"position": 4,
+				"title": "TCF Emergency Plumbing & Heating",
+				"link": "https://www.google.com/viewer/place?mid=%2Fg%2F11fsm48zzq",
+				"kgmid": "/g/11fsm48zzq",
+				"data_id": "0x876b8579edb7d4f9:0x885fd5a804cdf84d",
+				"place_id": "ChIJ-dS37XmFa4cRTfjNBKjVX4g",
+				"ludocid": "9826807829557540941",
+				"rating": 5,
+				"reviews": 237,
+				"type": "Plumber",
+				"address": "Centennial, CO",
+				"distance": "9.8 mi",
+				"gps_coordinates": {
+					"latitude": 39.6006742,
+					"longitude": -104.9548382
+				},
+				"open_state": "Open",
+				"description": "Address: 2908 E Weaver Ave, Centennial, CO Phone:0;408; 1-720-439-9849 Rating: 5.0/5.0 (237 reviews) Website:0;63c; Book an emergency call via the TCF Emergency Plumbing Service Call Page0;647;0;7a3;. 0;901;"
+			}
+		]
+	}
+}

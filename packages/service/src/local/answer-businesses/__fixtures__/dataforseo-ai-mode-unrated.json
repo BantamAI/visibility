@@ -1,0 +1,34 @@
+{
+	"version": "0.1.20261103",
+	"status_code": 20000,
+	"cost": 0.004,
+	"tasks": [
+		{
+			"id": "11090213-3073-0139-0000-fd0d90983337",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"cost": 0.004,
+			"data": {
+				"se_type": "ai_mode",
+				"keyword": "plumbing company near me that does sewer line repair",
+				"location_coordinate": "39.6522400,-104.9903000,15z"
+			},
+			"result": [
+				{
+					"keyword": "plumbing company near me that does sewer line repair",
+					"type": "ai_mode",
+					"check_url": "https://www.google.com/search?q=plumbing%20company%20near%20me%20that%20does%20sewer%20line%20repair&hl=en&gl=US&udm=50&uule=a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNzk0MTkwODM4OTQ4MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDM5NjUxODc3MgogIGxvbmdpdHVkZV9lNzogLTEwNDk5MDE3MjYKfQpyYWRpdXM6IDEwMDAwCnByb3ZlbmFuY2U6IDYK",
+					"item_types": ["ai_overview"],
+					"items": [
+						{
+							"type": "ai_overview",
+							"rank_group": 1,
+							"rank_absolute": 1,
+							"markdown": "Here are top plumbing companies serving the Englewood, CO area that specialize in sewer line repair and replacement:\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLet-GAsgXuv-XfEpipIsaMIS1Y-WBrZ5OmuIyZk7vDVLPlcqeFV1pAepMKSr-FC41VyE8trvuOPiqHkh9AZYQO0fAjviNHQiQm6koW2G9Q-3pZZcCM0oURg9yZEnPy-2qqzj_2Z3WxkdFY=s192-w192-h144-n-k-no)\nColorado Water Works Plumber  \nOpen 3275 S Santa Fe Dr 0.7 mi  \nCall[Directions](https://www.google.com/maps/dir//3275+S+Santa+Fe+Dr,+Englewood,+CO+80110/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x65cc36d363908cb7:0x57ec147635f2f498?entry=s&ved=1t:269504&ictx=111) [Website](https://www.coloradowaterworks.com/?utm_source=GOOGLE&utm_medium=GBP&utm_campaign=GBP&utm_content=GBP&utm_term=GBP) \n\n- **Location:** 3275 S Santa Fe Dr, Englewood, CO\n- **Services:** Offers trusted local sewer line repair and free quotes.[[1]](https://www.coloradowaterworks.com/sewer-lines-denver-co)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLeJayLcV1F4_PHpCWZrFtgJN37U0__bh_Kq11Nls19XUsftqyEC8QCOfbzkybkTDXX2cwDaSHgKSpSRXrqCnw0NtaNeMrFCTedXjBxsvh2YjUst-mJKO3NosYNYZc9Dcm6_g7M_Pk5sr-4f=s192-w192-h144-n-k-no)\nRoto-Rooter Plumbing & Drain 4.8 (117)  \nPlumber  \nOpen 14101 E Otero Ave 10.5 mi  \nCall[Directions](https://www.google.com/maps/dir//14101+E+Otero+Ave,+Englewood,+CO+80112/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x876c8f264df90457:0x6b6842b67acd6513?entry=s&ved=1t:269504&ictx=111) [Website](https://www.rotorooter.com/englewoodco/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website) \n\n- **Details:** Provides 24/7 emergency service, camera diagnostics, trenchless sewer repair to protect landscaping, and full-scale sewer line excavation for collapsed or root-damaged pipes.\n- **Website & Booking:** Schedule or read more on the [Roto-Rooter Englewood Page](https://www.rotorooter.com/englewoodco/).[[1]](https://www.rotorooter.com/englewoodco/)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdhmCY04RKBD8TiOm4SMmmlMLmrNKiGJlXUQqPRqbXic1RduAkcWE08namFOE3abc--XQ1-WT8QHj464xDXJlq4Za20sFjBIw8DZDUMKrIP_fTLVefUuPu9r9eH9KIUgMP3wmbBUpDCNZsr=s192-w192-h144-n-k-no)\nCopperhead Plumbing Services Inc.4.7 (63)  \nPlumber  \nClosed 1395 W Radcliff Ave 1.2 mi  \nCall[Directions](https://www.google.com/maps/dir//1395+W+Radcliff+Ave,+Englewood,+CO+80110/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x876c81ad0f249e67:0x88d2f51e366e8b78?entry=s&ved=1t:269504&ictx=111) [Website](https://copperheadplumbinginc.com/) \n\n- **Location:** 1395 W Radcliff Ave, Englewood, CO\n- **Services:** Local plumbing and free estimates for sewer and drain-related needs.[[1]](https://www.copperheadplumbinginc.com/castle-rock-co-plumbers/sewer-line-repair-replacement/)\n\nWould you like me to look up **customer reviews and ratings** for one of these options, or do you need help finding out if they offer **trenchless repair vs. traditional excavation** for your specific issue?"
+						}
+					]
+				}
+			]
+		}
+	]
+}

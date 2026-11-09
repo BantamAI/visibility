@@ -1,0 +1,60 @@
+{
+	"status_code": 20000,
+	"cost": 0.004,
+	"tasks": [
+		{
+			"id": "11090217-3073-0629-0000-abfb82a34584",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"result": [
+				{
+					"keyword": "I have a burst pipe, who's an emergency plumber near me?",
+					"model": "gpt-6",
+					"markdown": "A burst pipe needs an emergency plumber, ideally someone offering **24/7 emergency callouts**\\.\n\n(Urgent) **While you're arranging help\\:**\n\n1. Turn off your home's main water supply.\n2. Turn off your water heater if the water supply is shut off.\n3. Open cold taps to help drain remaining water.\n4. Keep away from electrical outlets or appliances affected by water.\n\n## Emergency plumbers near Leesburg, VA\n\nThese are the strongest options I found advertising 24/7 emergency service.\n\n![Plumbing Logo Ideas: Make Your Own Plumbing Logo - Looka](https://images.openai.com/static-rsc-4/ZHbW1FqUdaGPI1ThAJMNY9veVR4JtYBKFe0iZ96yPyCtYz1VMlvinv9ENHTutTjnZm44AQEi3n5AaCE37--4BSA6-tTZTb4WhisukXeqBQxWqwkTjU971yeo-K7ptOfFv_msP9eEF6-Ojns8PI3vsJQEfzIqmR9sZVfGoSHAI1Df69p-ZSBVL4CmOx9WEChc?purpose=fullsize)\n\n**1\\. Priority 1 Plumbing and Drain Services**\n\n(Open 24/7)\n\n**5.0/5 · 19 reviews**\n\n722 E Market Street, Leesburg\n\n**\\(703) 777-7940**\n\nLocally based emergency plumbing service.\n\n---\n\n![Letter S Plumber Logo Design. Plumbing Water with Letter S Logo Template](https://images.openai.com/static-rsc-4/tucEYh0hm3ZzIG74vEWgaOJLjGvWIMyMhBPR_41GTLc3w4YViO6MdvBrOLW4Lfohqofaook5pDXOl7Q-yJzbM--4KXV_0s4_b5UG8w-WmR_322rnS9N9F-QW82i7dCvVaIsWqjqBgI2oeB0j5ZdEPcPwO2sGxW5mXcUGbhLIydxWIDk99xchJhT0cwAn-nwt?purpose=fullsize)\n\n**2\\. Stoney's Plumbing**\n\n(Open 24/7)\n\nLeesburg-based, serves Loudoun County\n\n**\\(703) 794-5592**\n\nSpecifically advertises burst-pipe emergency repairs.\n\n[Emergency service details](https://stoneysplumb.com/emergency-plumber-leesburg-va/?utm_source=chatgpt.com)\n\n---\n\n![Professional, Elegant, Plumbing Logo Design for Artisan Plumbing by Pro_DesignMaster | Design #19719640](https://images.openai.com/static-rsc-4/0_0CV2KpzLM47rG1rTqQEZI1jdwHWIzEk_HhdMD-ghpj6gjgM9hsOQOfuicnYJDxsoRJsYisGREjMZ4eorpG7zpX3Ldhhghujr9QaYwtJL35oGcqezXQbQW6anBwNx43HBUfs8z0CT7_MAEXX6st1oSLfARt0MCmliukdna2lXqMWKr927upAU3_GIJPHzHt?purpose=fullsize)\n\n**3\\. Artisan Plumbing**\n\n(Advertises 24/7)\n\nLeesburg and Loudoun County\n\n**\\(540) 868-0661**\n\nHandles burst pipes, major leaks and flooding.\n\n[Emergency service details](https://artisanplumbinginc.com/emergency-plumber-leesburg-va/?utm_source=chatgpt.com)\n\n---\n\n![Roto-Rooter Plumbing & Water Cleanup Reviews - St Paul, MN | Angi](https://images.openai.com/static-rsc-4/9VcPMH0aOHzqnyCmMI_QSyms_fHxz8ljoMrjL-oSNiBtl2J56pnGByi-NrZDpnsOkAg4yH-7GfNEriu8Uh9fyc0C98diczG7spu-MLIU3izPj6wi-5iV91_JiKl0hQIDBgjGEnndWzxmifFRW_mXhEmzbpOhntzvNpegYltthS1Q1p6NI8R_L3igWtN42hTS?purpose=fullsize)\n\n**4\\. Roto-Rooter Plumbing & Water Cleanup**\n\n(Open 24/7)\n\n222 Catoctin Cir SE, Leesburg\n\n**703-444-3050**\n\nEmergency plumbing and water damage restoration.\n\nLocal listing rating: 2.5/5 (4 reviews).\n\n[Emergency service details](https://www.rotorooter.com/leesburgva/emergency-plumber/?utm_source=chatgpt.com)\n\n\n\n## What I'd do right now\n\nI'd start by calling Priority 1 and Stoney's. Ask whether they can dispatch someone immediately.\n\nTell them\\:\n\n\"I'm dealing with a burst pipe and active water leak. I need emergency service as soon as possible. Can you send someone today, and what is your emergency callout fee?\"\n\n**One important question\\:** Have you managed to shut off the main water supply, or is water still actively pouring out?\n\nIf water is near your electrical panel or outlets, stay clear and don't enter standing water.",
+					"items": [
+						{
+							"type": "chat_gpt_local_businesses",
+							"rank_group": 1,
+							"rank_absolute": 10,
+							"markdown": null,
+							"items": [
+								{
+									"type": "chat_gpt_local_businesses_element",
+									"title": "Priority 1 Plumbing and Drain Services",
+									"description": "Plumber",
+									"address": "722 E Market Street, VM13 Ste 102, Leesburg, VA 20176, United States",
+									"phone": "+1 703-777-7940",
+									"reviews_count": 19,
+									"url": "https://www.priority1plumbing.com/",
+									"domain": "www.priority1plumbing.com",
+									"rating": {
+										"rating_type": "Max5",
+										"value": 5,
+										"votes_count": 19,
+										"rating_max": 5
+									}
+								},
+								{
+									"type": "chat_gpt_local_businesses_element",
+									"title": "Roto-Rooter Plumbing & Water Cleanup",
+									"description": "Plumber",
+									"address": "222 Catoctin Cir SE Ste 227, Leesburg, VA 20175, United States",
+									"phone": "+1 703-444-3050",
+									"reviews_count": 4,
+									"url": "https://www.rotorooter.com/leesburgva/?utm_source=Google&utm_medium=organic&utm_campaign=gmb&utm_content=website",
+									"domain": "www.rotorooter.com",
+									"rating": {
+										"rating_type": "Max5",
+										"value": 2.5,
+										"votes_count": 4,
+										"rating_max": 5
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

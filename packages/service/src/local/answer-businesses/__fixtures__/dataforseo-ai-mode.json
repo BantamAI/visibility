@@ -1,0 +1,34 @@
+{
+	"version": "0.1.20261103",
+	"status_code": 20000,
+	"cost": 0.004,
+	"tasks": [
+		{
+			"id": "11090213-3073-0139-0000-4bf4a6024b61",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"cost": 0.004,
+			"data": {
+				"se_type": "ai_mode",
+				"keyword": "who are the best-reviewed plumbers in Naperville, IL?",
+				"location_coordinate": "41.7508000,-88.1535000,15z"
+			},
+			"result": [
+				{
+					"keyword": "who are the best-reviewed plumbers in Naperville, IL?",
+					"type": "ai_mode",
+					"check_url": "https://www.google.com/search?q=who%20are%20the%20best-reviewed%20plumbers%20in%20Naperville%2C%20IL%3F&hl=en&gl=US&udm=50&uule=a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNzk0MTkyNjAxNjg0MDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDQxNzUxNTgwMAogIGxvbmdpdHVkZV9lNzogLTg4MTUyOTYwNAp9CnJhZGl1czogMTAwMDAKcHJvdmVuYW5jZTogNgo%3D",
+					"item_types": ["ai_overview"],
+					"items": [
+						{
+							"type": "ai_overview",
+							"rank_group": 1,
+							"rank_absolute": 1,
+							"markdown": "Here are some of the highest-rated and best-reviewed local plumbing companies serving the Naperville, IL area, based on customer ratings and feedback volumes on [Google Maps](https://www.google.com/maps) and Yelp:\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLfw_yHrUCROyU8QGiZa5tqdWCJ1XRsBSTuC-kFZAjZn5ZMC7Aeu3ssOr9vD4ExmH67-vLidD0moL6HXbrrUUePwj5iwiwJxGFrL8TlwkxA2z51nwLGeBrGp34YlcQIODc_0_4haa_RwPdff=s108-w108-h144-n-k-no)\nBee Quick Plumbing & Sewer 5.0 (201)  \nPlumber  \nOpen 1133 Elizabeth Ave 1.9 mi  \nCall[Directions](https://www.google.com/maps/dir//1133+Elizabeth+Ave,+Naperville,+IL+60540/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x880e4f72d5557429:0xb49fff692cfe14cf?entry=s&ved=1t:269504&ictx=111) [Website](https://beequickplumbingsewersinc.com/) \n\n- *Rating:* 5.0/5 (approx. 201 reviews)\n- *Known for:* Fast emergency response times and reliable local service in Naperville.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWZsMHltOTM5GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdCkgMcMsVKjxEx8GFaSmDJYbHgw-7EN-SWDDNDJO9j4GzutiJe4ezi8g5iWK7mLMoZo7NG_DPpgr8ndwztT8Wm86ZkJgptsOtubk2wtFDvl6Cg6kSzTB7Q5ztAtqR9Jobg800=s192-w192-h144-n-k-no)\nWiz Plumbing Inc.4.9 (433)  \nPlumber  \nOpen 10S185 Schoger Dr 4.3 mi  \nCall[Directions](https://www.google.com/maps/dir//10S185+Schoger+Dr,+Naperville,+IL+60564/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x880ef74980914a3d:0x646d118de8a0d4a9?entry=s&ved=1t:269504&ictx=111) [Website](https://www.wizplumbingandsewer.com/) \n\n- *Rating:* 4.9/5 (approx. 433 reviews)\n- *Known for:* Consistent customer satisfaction and full-service residential plumbing.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWZsMHltOTM5GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLfDRzAdnox3q6V10K6ND5Rsc0CoYicOMcD4OKEZdv9tWj3BzSdXD-j8r28L7OENL4BQUskLnDJMDTsaUjOBoyuzzAHCv3BZ9VTLiYAlvV2CbIx_NuXppkPyaasmE4oW6bGRXSqS_Q=s192-w192-h144-n-k-no)\nLaCassa Plumbing 4.8 (541)  \nPlumber  \nOpen Downtown 1.6 mi  \nCall[Directions](https://www.google.com/maps/dir//50+S+Main+St+Suit+200,+Naperville,+IL+60540/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x880e4fbbaca1f7e3:0xfe9fcf478c33a372?entry=s&ved=1t:269504&ictx=111) [Website](https://lacassaplumbing.com/?utm_source=google&utm_medium=search_engine&utm_campaign=gmb) \n\n- *Rating:* 4.8/5 (approx. 541 reviews)\n- *Known for:* Great communication, clean work, and efficient diagnostics.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWZsMHltOTM5GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLeJAhATYbAeyg34DRTpWS3MqfQeXmyJaFFUusEDzV0P0RfvlXW5XcIAodx4nYopyevfxy7KT7_XSN3bpyLqshdkmReRAjgPM2P_wGb8qp6NG1502buxI8FvC_-JvSiM6nxWCrQ=s108-w108-h144-n-k-no)\nPrinciple Plumbing, Inc.5.0 (317)  \nPlumber  \nOpen  \nCall[Website](https://principleplumbing.com/) \n\n- *Rating:* 5.0/5 (approx. 317 reviews)\n- *Known for:* Water heater replacements, thorough sump pump inspections, and honest recommendations.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWZsMHltOTM5GAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLcb5R7T_hIXYXPZ3JVaLBFs6AcJvwZXT8Mey2wI0ZCN52Z36HNsJqJv2S4lXY9QGfsYjjAU0wL0-8W1yk65fGJVHaWw2m_w_kW3VipRmZTnPEBNnqMg52sAgx8Si0gMDBiE3s2F=s192-w192-h144-n-k-no)\nPaul The Plumber 5.0 (27)  \nPlumber  \nClosed  \nCall[Website](http://www.paultheplumber.com/) \n\n- *Rating:* 4.9/5 (approx. 132 reviews on [Yelp](https://m.yelp.com/search?cflt=plumbing&find_loc=Naperville%2C+IL))\n- *Known for:* Family-owned local service, transparent pricing, and quick drain/fixture repairs.[[1]](https://m.yelp.com/search?cflt=plumbing&find_loc=Naperville%2C+IL)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdTYSdUA-UnDICEMM31r2pkMNa6LYcS87rZ5aITVEkzRlEZajUhJqmJCd1iOGPdQykxJbvg-MIM_pS6022ZovAxkmRVWAWDTUzzBnEZfpkeYLgWlZFHjobcspK1KAhqvT9eWlBkthWC5OK5=s108-w108-h144-n-k-no)\nOncourse Heating, Cooling, Plumbing 5.0 (1.8K)  \nHVAC contractor  \nClosed 1415 Diehl Rd Ste 170 4.1 mi  \nCall[Directions](https://www.google.com/maps/dir//1415+Diehl+Rd+Ste+170,+Naperville,+IL+60563/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x880ef902aacd361f:0x64821a934cd1fc81?entry=s&ved=1t:269504&ictx=111) [Website](https://repair.oncoursehome.com/?utm_source=google&utm_medium=organic&utm_campaign=GMBListing-Naperville-IL) \n\n- *Rating:* 5.0/5 (approx. 1,815 reviews)\n- *Known for:* High volume of positive customer reviews and friendly, punctual technicians.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWZsMHltOTM5GAo)\n\nAre you dealing with a **specific emergency** (like a burst pipe or backed-up drain) or looking for help with a **planned project** (like a water heater replacement or bathroom remodel)? Let me know and I can narrow down the best fit."
+						}
+					]
+				}
+			]
+		}
+	]
+}
