@@ -31,9 +31,11 @@ const COST_PER_RUN = 0.004;
 beforeAll(async () => {
 	await cleanUp();
 	await owner.insert(organization).values({ id: ORG, name: "Grid Scan Test", slug: ORG, createdAt: new Date() });
-	await owner.insert(brands).values(
-		subjects.map((id) => ({ id, name: id, website: `https://${id}.example`, organizationId: ORG, enabled: true })),
-	);
+	await owner
+		.insert(brands)
+		.values(
+			subjects.map((id) => ({ id, name: id, website: `https://${id}.example`, organizationId: ORG, enabled: true })),
+		);
 	for (const subject of subjects) {
 		await owner.insert(prompts).values({ brandId: subject, value: "emergency plumber near me", tags: [NEAR_ME_TAG] });
 		await withSubject(subject, async () => {

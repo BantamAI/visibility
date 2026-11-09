@@ -404,8 +404,7 @@ function ScanRow({ scan }: { scan: Scan }) {
 				{scan.engine} <span className="text-muted-foreground">via {scan.provider}</span>
 			</TableCell>
 			<TableCell>
-				{scan.areaName ?? "Removed area"}{" "}
-				<span className="text-muted-foreground">({POINT_KINDS[scan.pointKind]})</span>
+				{scan.areaName ?? "Removed area"} <span className="text-muted-foreground">({POINT_KINDS[scan.pointKind]})</span>
 			</TableCell>
 			<TableCell className="text-right">
 				{scan.pointsAnswered}/{scan.pointsPlanned}

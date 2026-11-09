@@ -58,7 +58,9 @@ function scans(targets: ModelConfig[]) {
 }
 
 const summary = (specs: ReturnType<typeof scans>) =>
-	specs.map((s) => `${s.config.model}/${s.config.provider} ${s.pointKind} ${s.areaId} ${s.promptId}: ${s.points.length}`);
+	specs.map(
+		(s) => `${s.config.model}/${s.config.provider} ${s.pointKind} ${s.areaId} ${s.promptId}: ${s.points.length}`,
+	);
 
 describe("scansFor", () => {
 	it("makes one scan per area, prompt and point kind, on the engine's one route", () => {
@@ -124,9 +126,7 @@ describe("dueScans", () => {
 	});
 
 	it("starts a new series at once when the engine's route changes", () => {
-		const onCloro = new Map(
-			scans([target("google-ai-mode", "cloro")]).map((s) => [specKey(s), daysAgo(0)] as const),
-		);
+		const onCloro = new Map(scans([target("google-ai-mode", "cloro")]).map((s) => [specKey(s), daysAgo(0)] as const));
 		expect(dueScans(specs, onCloro, now)).toHaveLength(specs.length);
 	});
 });

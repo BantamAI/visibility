@@ -40,7 +40,9 @@ export async function listScans(subjectId: string, limit = 50): Promise<ScanSumm
 			areaName: subjectServiceAreas.name,
 			prompt: prompts.value,
 			livePointsAnswered: answered.points,
-			liveCostUsd: sql<string | null>`(SELECT sum(l.cost_usd) FROM grid_scan_runs r JOIN run_locations l ON l.run_id = r.run_id WHERE r.scan_id = ${gridScans.id})`,
+			liveCostUsd: sql<
+				string | null
+			>`(SELECT sum(l.cost_usd) FROM grid_scan_runs r JOIN run_locations l ON l.run_id = r.run_id WHERE r.scan_id = ${gridScans.id})`,
 		})
 		.from(gridScans)
 		.innerJoin(prompts, eq(prompts.id, gridScans.promptId))

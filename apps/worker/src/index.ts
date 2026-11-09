@@ -159,12 +159,7 @@ async function main() {
 	);
 	console.log("Scheduled request-reprocesses job (every minute)");
 
-	await boss.schedule(
-		START_GRID_SCANS_QUEUE,
-		"*/15 * * * *",
-		{},
-		{ tz: "UTC", singletonKey: START_GRID_SCANS_QUEUE },
-	);
+	await boss.schedule(START_GRID_SCANS_QUEUE, "*/15 * * * *", {}, { tz: "UTC", singletonKey: START_GRID_SCANS_QUEUE });
 	console.log("Scheduled start-grid-scans job (every 15 minutes)");
 
 	await boss.schedule(
