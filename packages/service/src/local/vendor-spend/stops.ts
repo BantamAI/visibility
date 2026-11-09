@@ -1,7 +1,7 @@
 import { db } from "@workspace/lib/db/db";
 import { brands, usageEvents } from "@workspace/lib/db/schema";
 import type { ModelConfig } from "@workspace/lib/providers";
-import { and, eq, gt, gte, isNotNull, isNull, max, or, sql } from "drizzle-orm";
+import { and, eq, gt, gte, inArray, isNotNull, isNull, max, or, sql } from "drizzle-orm";
 import { type ScanSpec, scansFor } from "../grid-scans/plan-scans";
 import { getRunSchedule, previewRunPlan } from "../run-planner";
 import { subjectRunSchedules, vendorSpendStops } from "../schema";
@@ -36,7 +36,10 @@ export async function assertVendorRunning(provider: string): Promise<void> {
 	if (stop) throw new VendorStoppedError(provider);
 }
 
-/** Each vendor's spend today, counted from its last resume when that was today. Needs agency access. */
+/** Only runs are planned; spend on other calls (Places lookups) is outside these limits. */
+const RUN_EVENTS = ["prompt_run", "prompt_run_failed"];
+
+/** Each vendor's run spend today, counted from its last resume when that was today. Needs agency access. */
 async function spendToday(now: Date): Promise<Map<string, number>> {
 	const dayStart = startOfUtcDay(now);
 	const resumes = db
@@ -55,6 +58,7 @@ async function spendToday(now: Date): Promise<Map<string, number>> {
 		.where(
 			and(
 				gte(usageEvents.createdAt, dayStart),
+				inArray(usageEvents.eventType, RUN_EVENTS),
 				isNotNull(usageEvents.provider),
 				or(isNull(resumes.resumedAt), gt(usageEvents.createdAt, resumes.resumedAt)),
 			),
