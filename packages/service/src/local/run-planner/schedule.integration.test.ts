@@ -5,7 +5,7 @@ import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { saveServiceArea } from "../service-areas";
 import { withSubject } from "../tenancy";
-import { NEAR_ME_TAG } from "./plan";
+import { NEAR_ME_TAG } from "./constants";
 import {
 	DEFAULT_RUN_SCHEDULE,
 	getRunSchedule,

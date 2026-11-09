@@ -1,6 +1,7 @@
 import type { LocationSupport, ModelConfig, Provider } from "@workspace/lib/providers";
 import { describe, expect, it } from "vitest";
-import { budgetRefusal, NEAR_ME_TAG, type PlanInput, type PlannerPoint, planRuns } from "./plan";
+import { NEAR_ME_TAG } from "./constants";
+import { budgetRefusal, type PlanInput, type PlannerPoint, planRuns } from "./plan";
 
 function provider(id: string, support: Record<string, LocationSupport[]> = {}): Provider {
 	return {
@@ -35,6 +36,7 @@ function point(kind: PlannerPoint["kind"], fields: Partial<PlannerPoint> = {}): 
 	return {
 		id: `point-${nextPoint}`,
 		kind,
+		label: `${kind} ${nextPoint}`,
 		lat: 35.78,
 		lng: -78.64,
 		city: "Raleigh",
@@ -143,7 +145,12 @@ describe("planRuns", () => {
 	it("reports grid points no configured route can place", () => {
 		const result = plan({ targets: [target("google-ai-overview:searchapi")], points: [grid[0] as PlannerPoint] });
 		expect(result.uncovered).toEqual([
-			{ engine: "google-ai-overview", pointId: grid[0]?.id, reasons: [expect.stringMatching(/doesn't place/)] },
+			{
+				engine: "google-ai-overview",
+				pointId: grid[0]?.id,
+				pointLabel: grid[0]?.label,
+				reasons: [expect.stringMatching(/doesn't place/)],
+			},
 		]);
 		expect(result.series).toEqual([]);
 	});

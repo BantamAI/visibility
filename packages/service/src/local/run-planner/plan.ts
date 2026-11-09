@@ -3,10 +3,8 @@ import { PROJECTION_DAYS_PER_MONTH } from "@workspace/lib/usage";
 import { pickRoute } from "../locations/route";
 import { toRunLocation } from "../locations/run-location";
 import type { SamplePoint, SamplePointKind } from "../schema";
+import { NEAR_ME_TAG } from "./constants";
 import { type PlannerRoute, routesFor } from "./routes";
-
-/** Prompts with this tag ask "near me" and run on the grid; the rest name a city and run on centroids. */
-export const NEAR_ME_TAG = "near-me";
 
 export interface RunCadence {
 	/** Days between full scans: every point of every route. */
@@ -18,7 +16,7 @@ export interface RunCadence {
 
 export type PlannerPoint = Pick<
 	SamplePoint,
-	"id" | "kind" | "lat" | "lng" | "city" | "region" | "country" | "postalCode" | "timezone" | "googleCanonicalName"
+	"id" | "kind" | "label" | "lat" | "lng" | "city" | "region" | "country" | "postalCode" | "timezone" | "googleCanonicalName"
 >;
 
 export interface PlanInput {
@@ -50,6 +48,7 @@ export interface PlannedSeries {
 export interface UncoveredPoint {
 	engine: string;
 	pointId: string;
+	pointLabel: string;
 	reasons: string[];
 }
 
@@ -94,7 +93,7 @@ export function planRuns(input: PlanInput): RunPlan {
 			if (eligible.length === 0) continue;
 			const { route, refused } = pickRoute(eligible, toRunLocation(point), input.getProvider);
 			if (!route) {
-				uncovered.push({ engine, pointId: point.id, reasons: refused.map((r) => r.reason) });
+				uncovered.push({ engine, pointId: point.id, pointLabel: point.label, reasons: refused.map((r) => r.reason) });
 				continue;
 			}
 			const key = routeKey(engine, route, point.kind);

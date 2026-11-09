@@ -3,6 +3,7 @@ import { brands, prompts } from "@workspace/lib/db/schema";
 import { getProvider, type ModelConfig, selectTargetsForBrand } from "@workspace/lib/providers";
 import { and, eq } from "drizzle-orm";
 import { type RunSchedule, samplePoints, subjectRunSchedules } from "../schema";
+import { MAX_INTERVAL_DAYS, MAX_REPEATS } from "./constants";
 import { budgetRefusal, planRuns, type RunCadence, type RunPlan } from "./plan";
 
 export type RunScheduleSettings = RunCadence & {
@@ -17,9 +18,6 @@ export const DEFAULT_RUN_SCHEDULE: RunScheduleSettings = {
 	centroidIntervalDays: 1,
 	repeats: 1,
 };
-
-export const MAX_INTERVAL_DAYS = 31;
-export const MAX_REPEATS = 5;
 
 export class RunScheduleError extends Error {
 	override name = "RunScheduleError";
