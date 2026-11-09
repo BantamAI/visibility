@@ -1,7 +1,15 @@
 import { db } from "@workspace/lib/db/db";
 import { citations, prompts, runExtractions } from "@workspace/lib/db/schema";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-import { type GridScan, gridScanRuns, gridScans, samplePoints, subjectServiceAreas } from "../schema";
+import {
+	type AnswerBusiness,
+	answerBusinesses,
+	type GridScan,
+	gridScanRuns,
+	gridScans,
+	samplePoints,
+	subjectServiceAreas,
+} from "../schema";
 
 export interface ScanSummary {
 	id: string;
@@ -79,8 +87,12 @@ export interface ScanRunResult {
 	runId: string | null;
 	answer: string | null;
 	citations: { url: string; domain: string; title: string | null }[];
+	/** The answer's business cards, then the map pack's, each in the order shown. */
+	businesses: ScanBusiness[];
 	error: string | null;
 }
+
+export type ScanBusiness = Omit<AnswerBusiness, "runId" | "subjectId">;
 
 export interface ScanPointResult {
 	pointId: string;
@@ -128,22 +140,33 @@ async function loadRuns(scanId: string) {
 					.from(citations)
 					.where(inArray(citations.promptRunId, runIds))
 					.orderBy(asc(citations.citationIndex));
-	return { runs, cited };
+	const cards =
+		runIds.length === 0
+			? []
+			: await db
+					.select()
+					.from(answerBusinesses)
+					.where(inArray(answerBusinesses.runId, runIds))
+					.orderBy(asc(answerBusinesses.placement), asc(answerBusinesses.position));
+	return { runs, cited, cards };
 }
 
 /**
- * Every point of a scan with its answers and cited sources, for heat maps. Answers
- * and citations appear once the run has been judged, shortly after it's saved.
+ * Every point of a scan with its answers, cited sources and business cards, for heat maps.
+ * Answers and citations appear once the run has been judged, and cards once they're
+ * parsed, both shortly after it's saved.
  */
 export async function getScanResults(scanId: string): Promise<{ scan: GridScan; points: ScanPointResult[] } | null> {
 	const [scan] = await db.select().from(gridScans).where(eq(gridScans.id, scanId));
 	if (!scan) return null;
-	const { runs, cited } = await loadRuns(scanId);
+	const { runs, cited, cards } = await loadRuns(scanId);
 
 	const citationsByRun = new Map<string, ScanRunResult["citations"]>();
 	for (const { runId, ...citation } of cited) {
 		citationsByRun.set(runId, [...(citationsByRun.get(runId) ?? []), citation]);
 	}
+	const cardsByRun = new Map<string, ScanBusiness[]>();
+	for (const { runId, subjectId, ...card } of cards) cardsByRun.set(runId, [...(cardsByRun.get(runId) ?? []), card]);
 	const points = new Map<string, ScanPointResult>();
 	for (const run of runs) {
 		const point = points.get(run.pointId) ?? {
@@ -161,6 +184,7 @@ export async function getScanResults(scanId: string): Promise<{ scan: GridScan; 
 			runId: run.runId,
 			answer: run.answer,
 			citations: (run.runId && citationsByRun.get(run.runId)) || [],
+			businesses: (run.runId && cardsByRun.get(run.runId)) || [],
 			error: run.error,
 		});
 		points.set(run.pointId, point);
