@@ -65,29 +65,6 @@ export function providerOptionsFor(
 	return { ...options, location: request.location, locationTier: request.tier };
 }
 
-export interface RouteCandidate {
-	config: ModelConfig;
-	tier: FidelityTier;
-}
-
-/** The first candidate that can serve the location, with why each one before it couldn't. */
-export function pickRoute<C extends RouteCandidate>(
-	candidates: readonly C[],
-	location: RunLocation,
-	getProvider: (id: string) => Provider,
-): { route: C | null; refused: { candidate: C; reason: string }[] } {
-	const refused: { candidate: C; reason: string }[] = [];
-	for (const candidate of candidates) {
-		const reason = whyNotHonoured(getProvider(candidate.config.provider), candidate.config, {
-			location,
-			tier: candidate.tier,
-		});
-		if (!reason) return { route: candidate, refused };
-		refused.push({ candidate, reason });
-	}
-	return { route: null, refused };
-}
-
 /** The vendor's cost when the response gives one, else the coarse per-provider estimate. */
 export function runCost(
 	config: ModelConfig,

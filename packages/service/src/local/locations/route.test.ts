@@ -1,6 +1,6 @@
 import type { LocationSupport, ModelConfig, Provider, RunLocation } from "@workspace/lib/providers";
 import { describe, expect, it } from "vitest";
-import { LocationNotHonouredError, pickRoute, providerOptionsFor, runLocationRecord } from "./route";
+import { LocationNotHonouredError, providerOptionsFor, runLocationRecord } from "./route";
 
 const raleigh: RunLocation = {
 	pointId: "30000000-0000-0000-0000-000000000001",
@@ -67,28 +67,6 @@ describe("providerOptionsFor", () => {
 			webSearch: true,
 			version: undefined,
 		});
-	});
-});
-
-describe("pickRoute", () => {
-	it("falls through to the next route, saying why each earlier one couldn't serve", () => {
-		const candidates = [
-			{ config: target("cloro"), tier: "T1" as const },
-			{ config: target("searchapi"), tier: "T1" as const },
-			{ config: target("dataforseo"), tier: "T1" as const },
-		];
-		const { route, refused } = pickRoute(candidates, raleigh, (id) => providers[id]);
-		expect(route?.config.provider).toBe("dataforseo");
-		expect(refused.map(({ candidate, reason }) => [candidate.config.provider, reason])).toEqual([
-			["cloro", expect.stringContaining("googleCanonicalName")],
-			["searchapi", expect.stringContaining("doesn't place")],
-		]);
-	});
-
-	it("returns no route when none can serve the point", () => {
-		const { route, refused } = pickRoute([{ config: target("searchapi"), tier: "T2" }], raleigh, (id) => providers[id]);
-		expect(route).toBeNull();
-		expect(refused).toHaveLength(1);
 	});
 });
 
