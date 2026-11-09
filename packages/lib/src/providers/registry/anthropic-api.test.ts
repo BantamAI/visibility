@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ANTHROPIC_WEB_SEARCH_MAX_USES, API_PROVIDER_MAX_OUTPUT_TOKENS } from "../config";
+import type { RunLocation } from "../types";
 
 const anthropicClient = vi.hoisted(() => ({ create: vi.fn() }));
 
@@ -117,5 +118,68 @@ describe("anthropic-api web search handling", () => {
 		expect(anthropicClient.create).toHaveBeenCalledTimes(2);
 		expect(res.webQueries).toEqual(["elmo aeo"]);
 		vi.useRealTimers();
+	});
+});
+
+describe("anthropic-api user location", () => {
+	const raleigh: RunLocation = {
+		pointId: "30000000-0000-0000-0000-000000000001",
+		latitude: 35.78,
+		longitude: -78.64,
+		city: "Raleigh",
+		region: "NC",
+		country: "US",
+		postalCode: "27601",
+		timezone: "America/New_York",
+	};
+
+	it("serves T4 from city-level fields, and only with web search on", () => {
+		expect(anthropicApi.locationSupport?.({ model: "claude", provider: "anthropic-api", webSearch: true })).toEqual([
+			{ tier: "T4", reads: ["city", "region", "country", "timezone"] },
+		]);
+		expect(anthropicApi.locationSupport?.({ model: "claude", provider: "anthropic-api", webSearch: false })).toEqual(
+			[],
+		);
+	});
+
+	it("gives web search the point's approximate location", async () => {
+		await anthropicApi.run("claude", "emergency plumber near me", {
+			webSearch: true,
+			version: "claude-sonnet-5",
+			location: raleigh,
+			locationTier: "T4",
+		});
+
+		expect(sentArgs().tools).toEqual([
+			{
+				type: "web_search_20250305",
+				name: "web_search",
+				max_uses: ANTHROPIC_WEB_SEARCH_MAX_USES,
+				user_location: {
+					type: "approximate",
+					city: "Raleigh",
+					region: "NC",
+					country: "US",
+					timezone: "America/New_York",
+				},
+			},
+		]);
+	});
+
+	it("tells Claude the approximate location, since a near-me prompt otherwise never searches", async () => {
+		await anthropicApi.run("claude", "emergency plumber near me", {
+			webSearch: true,
+			version: "claude-sonnet-5",
+			location: raleigh,
+			locationTier: "T4",
+		});
+
+		expect(sentArgs().system).toBe("The user's approximate location is Raleigh, NC, US.");
+	});
+
+	it("sends no system prompt without a location", async () => {
+		await anthropicApi.run("claude", "prompt", { webSearch: true, version: "claude-sonnet-5" });
+
+		expect(sentArgs()).not.toHaveProperty("system");
 	});
 });

@@ -40,7 +40,7 @@ The local layer extends Elmo's pipeline rather than replacing it: raw answers st
 - Engines in scope: Google AI Mode, Google AI Overviews, ChatGPT, Gemini, Perplexity and Claude.
 - Grok is dropped. It has no terms-compatible consumer route, and vendors have discontinued it. Copilot and Grok targets stay as Elmo ships them, with no local work.
 - The route for each engine comes from the SP5-L location fidelity bake-off. Location canaries decide when a route is degraded.
-- Claude is the only engine reached through a model API (T4), because Anthropic's consumer terms allow automated access only through an API key. ChatGPT, Gemini and Perplexity are scraped only, with no API fallback: an API answer isn't what a person sees, so an engine whose scraped routes are all degraded reports no data for that period rather than an approximation.
+- Claude is the only engine reached through a model API (T4), because Anthropic's consumer terms allow automated access only through an API key. Its T4 route sends the location both as the web search tool's `user_location` and as a system prompt line, because the tool's location alone never reaches the model and a "near me" prompt then gets no search. ChatGPT, Gemini and Perplexity are scraped only, with no API fallback: an API answer isn't what a person sees, so an engine whose scraped routes are all degraded reports no data for that period rather than an approximation.
 - No scraping of logged-in consumer accounts. Any logged-out scraping we run ourselves goes through E53-S31, after legal review.
 
 **Consequences.**

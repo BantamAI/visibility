@@ -9,6 +9,8 @@ import {
 	warnIfOutputCapped,
 } from "../config";
 import type {
+	LocationSupport,
+	ModelConfig,
 	Provider,
 	ProviderOptions,
 	ScrapeResult,
@@ -19,6 +21,9 @@ import { structuredResearch } from "./ai-sdk";
 import { nonEmptyStrings, sanitizeForJson, sleep } from "./scrape-shared";
 
 const DEFAULT_RESEARCH_MODEL = "claude-sonnet-5-5";
+
+/** Web search takes city-level fields only, so Claude runs on city centroids. */
+const USER_LOCATION: readonly LocationSupport[] = [{ tier: "T4", reads: ["city", "region", "country", "timezone"] }];
 
 function getAnthropicLanguageModel(model: string) {
 	const apiKey = getCredential("ANTHROPIC_API_KEY");
@@ -32,11 +37,23 @@ function getClient(): Anthropic {
 async function runAnthropic(prompt: string, model: string, options?: ProviderOptions): Promise<ScrapeResult> {
 	const client = getClient();
 	const tools: Anthropic.Messages.ToolUnion[] = [];
+	const location = options?.webSearch && options.locationTier === "T4" ? options.location : undefined;
 	if (options?.webSearch) {
 		tools.push({
 			type: "web_search_20250305",
 			name: "web_search",
 			max_uses: ANTHROPIC_WEB_SEARCH_MAX_USES,
+			...(location
+				? {
+						user_location: {
+							type: "approximate" as const,
+							city: location.city,
+							region: location.region,
+							country: location.country,
+							timezone: location.timezone,
+						},
+					}
+				: {}),
 		});
 	}
 
@@ -44,6 +61,11 @@ async function runAnthropic(prompt: string, model: string, options?: ProviderOpt
 		client.messages.create({
 			model,
 			max_tokens: API_PROVIDER_MAX_OUTPUT_TOKENS["anthropic-api"],
+			// user_location only steers search results; Claude itself isn't told, so a
+			// "near me" prompt gets no search at all without this line.
+			...(location
+				? { system: `The user's approximate location is ${location.city}, ${location.region}, ${location.country}.` }
+				: {}),
 			messages: [{ role: "user", content: prompt }],
 			...(tools.length > 0 ? { tools } : {}),
 		});
@@ -99,6 +121,11 @@ export const anthropicApi: Provider = {
 	docsAnchor: "direct-model-apis",
 
 	isConfigured: configuredWhen("ANTHROPIC_API_KEY"),
+
+	// The location reaches only the web search tool.
+	locationSupport(config: ModelConfig) {
+		return config.webSearch ? USER_LOCATION : [];
+	},
 
 	async run(model: string, prompt: string, options?: ProviderOptions): Promise<ScrapeResult> {
 		const version = options?.version ?? DEFAULT_RESEARCH_MODEL;
