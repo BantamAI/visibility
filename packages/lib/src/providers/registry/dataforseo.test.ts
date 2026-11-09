@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { extractRun } from "../../text-extraction";
+import type { RunLocation } from "../types";
 
 const dataforseoClient = vi.hoisted(() => ({
 	chatgptLlmResponsesLive: vi.fn(),
@@ -318,6 +320,88 @@ describe("dataforseo provider", () => {
 		await assertion;
 
 		expect(dataforseoClient.googleOrganicLiveAdvanced).toHaveBeenCalledTimes(3);
+	});
+
+	describe("located runs", () => {
+		const fixture = (name: string) =>
+			JSON.parse(readFileSync(new URL(`./__fixtures__/${name}`, import.meta.url), "utf8")) as Record<string, unknown>;
+
+		const RALEIGH_EAST: RunLocation = {
+			pointId: "raleigh-e",
+			latitude: 35.7796,
+			longitude: -78.53101,
+			city: "Raleigh",
+			region: "NC",
+			country: "US",
+			timezone: "America/New_York",
+		};
+		const located = { webSearch: true, location: RALEIGH_EAST, locationTier: "T1" as const };
+
+		it("places only the Google surfaces at the point", () => {
+			const support = (model: string) =>
+				dataforseo.locationSupport?.({ model, provider: "dataforseo", webSearch: true });
+
+			expect(support("google-ai-mode")).toEqual([{ tier: "T1", reads: ["latitude", "longitude"] }]);
+			expect(support("google-ai-overview")).toEqual([{ tier: "T1", reads: ["latitude", "longitude"] }]);
+			for (const model of ["chatgpt", "gemini", "perplexity"]) expect(support(model)).toEqual([]);
+		});
+
+		it("asks AI Mode from the point and reports where Google placed it", async () => {
+			dataforseoClient.googleAiModeLiveAdvanced.mockResolvedValueOnce(fixture("dataforseo-ai-mode-located.json"));
+
+			const result = await dataforseo.run(
+				"google-ai-mode",
+				"I have a burst pipe, who's an emergency plumber near me?",
+				located,
+			);
+
+			const [payload] = dataforseoClient.googleAiModeLiveAdvanced.mock.calls[0];
+			expect(payload[0]).toMatchObject({ location_coordinate: "35.7796000,-78.5310100,15z" });
+			expect(payload[0]).not.toHaveProperty("location_code");
+
+			expect(stored(result).textContent).toContain("Bennie Bittle Plumbing");
+			expect(result.vendorRunId).toBe("11090212-3073-0139-0000-18f44fb798a7");
+			expect(result.costUsd).toBe(0.004);
+			const reported = result.vendorReportedLocation as { latitude: number; longitude: number };
+			expect(reported.latitude).toBeCloseTo(RALEIGH_EAST.latitude, 2);
+			expect(reported.longitude).toBeCloseTo(RALEIGH_EAST.longitude, 2);
+		});
+
+		it("asks the organic SERP from the point and keeps its local pack for card parsing", async () => {
+			dataforseoClient.googleOrganicLiveAdvanced.mockResolvedValueOnce(fixture("dataforseo-ai-overview-located.json"));
+
+			const result = await dataforseo.run(
+				"google-ai-overview",
+				"plumbing company near me that does sewer line repair",
+				located,
+			);
+
+			const [payload] = dataforseoClient.googleOrganicLiveAdvanced.mock.calls[0];
+			expect(payload[0]).toMatchObject({
+				location_coordinate: "35.7796000,-78.5310100,200",
+				load_async_ai_overview: true,
+			});
+			expect(payload[0]).not.toHaveProperty("location_code");
+
+			expect(stored(result).textContent).toContain("Matthew's Plumbing Solutions");
+			expect(JSON.stringify(result.rawOutput)).toContain('"type":"local_pack"');
+			expect(result.costUsd).toBe(0.004);
+			expect(result.vendorReportedLocation).toMatchObject({ latitude: 35.7792277, longitude: -78.5308299 });
+		});
+
+		it("gives a located AI Overview more tries before giving up", async () => {
+			vi.useFakeTimers();
+			dataforseoClient.googleOrganicLiveAdvanced.mockResolvedValue({
+				tasks: [{ status_code: 40101, status_message: "Internal SE Server Error.", result: null }],
+			});
+
+			const promise = dataforseo.run("google-ai-overview", "emergency plumber near me", located);
+			const assertion = expect(promise).rejects.toThrow("DataForSEO API Error: 40101 Internal SE Server Error.");
+			await vi.runAllTimersAsync();
+			await assertion;
+
+			expect(dataforseoClient.googleOrganicLiveAdvanced).toHaveBeenCalledTimes(5);
+		});
 	});
 
 	it("resolves Gemini Vertex grounding-redirect citation URLs to the real source", async () => {

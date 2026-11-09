@@ -64,13 +64,14 @@ const TRANSIENT_RETRY_BASE_DELAY_MS = 1500;
 export async function retryTransient<T>(
 	attempt: (attemptIndex: number) => Promise<Attempt<T>>,
 	describeExhausted: (lastError: string) => string,
+	attempts = TRANSIENT_RETRY_ATTEMPTS,
 ): Promise<T> {
 	let lastError = "";
-	for (let i = 0; i < TRANSIENT_RETRY_ATTEMPTS; i++) {
+	for (let i = 0; i < attempts; i++) {
 		const outcome = await attempt(i);
 		if ("result" in outcome) return outcome.result;
 		lastError = outcome.error;
-		if (i < TRANSIENT_RETRY_ATTEMPTS - 1) await sleep(TRANSIENT_RETRY_BASE_DELAY_MS * (i + 1));
+		if (i < attempts - 1) await sleep(TRANSIENT_RETRY_BASE_DELAY_MS * (i + 1));
 	}
 	throw new Error(describeExhausted(lastError));
 }

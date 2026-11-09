@@ -1,0 +1,121 @@
+{
+	"version": "0.1.20261103",
+	"status_code": 20000,
+	"status_message": "Ok.",
+	"cost": 0.004,
+	"tasks_count": 1,
+	"tasks_error": 0,
+	"tasks": [
+		{
+			"id": "11090214-3073-0139-0000-f7c9daad232b",
+			"status_code": 20000,
+			"status_message": "Ok.",
+			"cost": 0.004,
+			"result_count": 1,
+			"path": ["v3", "serp", "google", "organic", "live", "advanced"],
+			"data": {
+				"api": "serp",
+				"function": "live",
+				"se": "google",
+				"se_type": "organic",
+				"keyword": "plumbing company near me that does sewer line repair",
+				"language_code": "en",
+				"depth": 10,
+				"load_async_ai_overview": true,
+				"location_coordinate": "35.7796000,-78.5310100,200",
+				"device": "desktop",
+				"os": "windows"
+			},
+			"result": [
+				{
+					"keyword": "plumbing company near me that does sewer line repair",
+					"type": "organic",
+					"se_domain": "google.com",
+					"location_code": 2840,
+					"language_code": "en",
+					"check_url": "https://www.google.com/search?q=plumbing%20company%20near%20me%20that%20does%20sewer%20line%20repair&hl=en&gl=US&ie=UTF-8&uule=a+cm9sZTogMQpwcm9kdWNlcjogMTIKdGltZXN0YW1wOiAxNzk0MTkzMTAyODUxMDAwCmxhdGxuZyB7CiAgbGF0aXR1ZGVfZTc6IDM1Nzc5MjI3NwogIGxvbmdpdHVkZV9lNzogLTc4NTMwODI5OQp9CnJhZGl1czogMTAwMDAKcHJvdmVuYW5jZTogNgo%3D",
+					"datetime": "2026-11-09 02:14:32 +00:00",
+					"item_types": ["ai_overview", "local_pack", "organic"],
+					"items_count": 4,
+					"items": [
+						{
+							"type": "ai_overview",
+							"rank_group": 1,
+							"rank_absolute": 1,
+							"asynchronous_ai_overview": true,
+							"markdown": "`Matthew's Plumbing Solutions` is a top-rated, local plumbing company near Knightdale that handles main sewer line repairs and replacements.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXg4X2xoOWpfGAo)\n\n### Local Plumbing Companies for Sewer Line Repair\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLdoMcE5ZnykdNa53qxFfJIKhXbqlw25pC-1ESbSeS3jJgVuL-aowyT04xsIf0fNceEG68K8r4KxVDmI8S7pwiq6WsL7_jU4kwwm-BLSR2ZbfHzohjvfC087z-mEnrRR6xaunuFvqg=s108-w108-h144-n-k-no)\nMatthew's Plumbing Solutions 4.9 (1.0K)  \nPlumber  \nClosed Raleigh, NC 1.7 mi  \nCall[Directions](https://www.google.com/maps/dir//515+S+New+Hope+Rd+%23106,+Raleigh,+NC+27610/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac5f92db0053cf:0x39a45e9c7535bdc1?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAEShAEBxCJF11W7p65njNqDUumUld0qYSjZmeP-tXFGH1D-C7AL2N9QWRPK1OlIrtcKWvHC6oDxy6LOOvEK8oixjNyCrD8Vh2AVsQmT_TPEtLCcd3ok86WafIIB7zSyfdsy2vG3zX5X4yFZuhCvIrUBzYC5D-wou4FC49P-eD1b0n97JW1eOUw) \n\n- **Address:** 515 S New Hope Rd #106, Raleigh, NC 27610 *(approx. 4 minutes away)* \n- **Phone:** (919) 977-1896\n- **Rating:** 4.9/5 (1,022+ reviews)\n- **Services:** Main sewer line replacement, pipe re-piping, drain services, and general plumbing repairs.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXg4X2xoOWpfGAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLd334y_ieprrMg78nsYOhVRu9Nev-l_vlG-s5DgQVbL7JwctsXXdDmER615K0v17qES_xmxKX4-MKrgVG4YXE64SfGfRU7g-R4NSXWT5ldpBb9aluJnmBozSTCwLTGfm6PehK19=s108-w108-h144-n-k-no)\nTCR Rooter & Plumbing LLC 4.8 (117)  \nPlumber  \nOpen Raleigh, NC 6.1 mi  \nCall[Directions](https://www.google.com/maps/dir//5020+Departure+Dr+Ste+J,+Raleigh,+NC+27616/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89ac58904da72623:0x81d8101c306745c1?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESVAHEIkXX0uheGpkeWXw_JVUalFx_6OMKq5r3MJ-qsfycojXKw5nvTC32jKCT4LIKqI9ZpnPlTUy62lZqJcnaGQsidgJgARiX5OxgwqcgUYBBA4Qbtw) \n\n- **Address:** 5020 Departure Dr Ste J, Raleigh, NC 27616\n- **Phone:** (919) 467-2207\n- **Rating:** 4.8/5 (117+ reviews)\n- **Services:** 24/7 emergency dispatch, sewer line clearing, and permanent sewer line repairs. Offers $25 off service calls.[[1]](https://www.google.com/searchviewer/10?svid=CCYSECoOCgwvZy8xaGMwcmpfdmoYCg)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLcmoG0FGYNOTpQiOQkK-JiUYAvvHbk4T4uBaLB_5q3GiU0z02sg6usJV6UvoeRo0RM9yUFMOVfUaXuPIDW2dtkgtVBQjZfGvsmrsvaFSG2cWdFzgO1sureNwalhvw-fbjlOwgOCP20iWN-w=s192-w192-h144-n-k-no)\nCrossroads Plumbing and Drain 5.0 (50)  \nPlumber  \nOpen  \nCall[Directions](https://www.google.com/maps/dir//''/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x28186306b1c50ee3:0x4e33dac4568a702f?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESTgHEIkXXnsO5GAuByg0n1zzD5p7gCQoeUoQQopHwe6wGVQdZSeqsqfyUYzbJw3RDInwBMQn6twi2Nahgx8W1yNkDdaqKSz-4j2_oWzSmSg) \n\n- **Phone:** (919) 971-1803\n- **Rating:** 5/5 (50+ reviews)\n- **Services:** 24/7 emergency plumbing, sewer camera inspections, drain cleaning, and sewer line repairs.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXg4X2xoOWpfGAo)\n\n\n\n---\n\n![](https://lh3.googleusercontent.com/grass-cs/AABkmLe_-_2PFsxuvkzn_cmJ8QDbxQkGulln22w-Ny2ycBCQqlSKI6vqQHvbVw-ftIMbJHNwj21Bgp4BTWBYGJmFX7K9WRufL4A_XyT166hXkLvnYvwbM2hxfVGcoW_VpNPck5jKwNI=s108-w108-h144-n-k-no)\nMichael & Son Services 4.8 (14.5K)  \nHVAC contractor  \nOpen Raleigh, NC 5.7 mi  \nCall[Directions](https://www.google.com/maps/dir//4001+Atlantic+Ave,+Raleigh,+NC+27604/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0x89acf0af5a070861:0x823fb937af3bf139?entry=s&ved=1t:269504&ictx=111) [Website](https://google.com/goto?url=CAESkgEBxCJF18PIKt0Mlgs3gQk8m8ekvhoN7wBciCHymLMNcjLjDb3pQlxWUQ8TZUPSuARSiwxFxGdPQUk0LCyP4wF_qvGSgL0zy13vyfh0l_uKbRH13gQ5lVcur4DTN0HmlDcBbmQ61nzI7M4405UKE8HTL0IQfe1ypx8Xp5fjZNiB9ypccTFeBBRI6JMS_Mko8Wf5fw) \n\n- **Address:** 4001 Atlantic Ave, Raleigh, NC 27604\n- **Rating:** 4.8/5 (14,541+ reviews)\n- **Services:** 24/7 emergency dispatch, front-yard water and sewer line repairs.[[1]](https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXg4X2xoOWpfGAo)\n\nYou can also compare more local options or read customer ratings through Angi's Local Sewer Pros Directory.[[1]](https://google.com/goto?url=CAESZgHEIkXXwSVbSYso69xurTABqnp9TgLTGvVPJKgdOC8PDSiUoMaMzY64nMK0fIGJAmsi4sJIHiiLoPFLpDYO6iUOZIIoFndMqmQ8AjAr1UWw7-wdjqF2stElQS-PTdG0L_FuD_K2MA)To help narrow down the best option, could you let me know:\n\n- **What symptoms** are you noticing (e.g., slow drains, sewage odors, wet spots in the yard)?\n- Are you looking for **spot repair, root clearing, or a full line replacement**?",
+							"references": [
+								{
+									"type": "ai_overview_reference",
+									"source": "Angie's List",
+									"domain": "www.angi.com",
+									"url": "https://www.angi.com/nearme/sewer-service/",
+									"title": "Hire the Best Local Sewer pros Near Me with Reviews | Angi"
+								},
+								{
+									"type": "ai_overview_reference",
+									"source": "Google",
+									"domain": "www.google.com",
+									"url": "https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMXg4X2xoOWpfGAo",
+									"title": "Crossroads Plumbing and Drain"
+								},
+								{
+									"type": "ai_overview_reference",
+									"source": "Google",
+									"domain": "www.google.com",
+									"url": "https://www.google.com/searchviewer/10?svid=CCYSESoPCg0vZy8xMWRmc3h3ODZyGAo",
+									"title": "Matthew's Plumbing Solutions"
+								}
+							]
+						},
+						{
+							"type": "local_pack",
+							"rank_group": 1,
+							"rank_absolute": 2,
+							"title": "J.R. Lane Plumbing",
+							"description": "40+ years in business · Raleigh, NC \nOpen 24 hours \nOnsite services · Online estimates \n",
+							"domain": "google.com",
+							"phone": "(919) 231-1388",
+							"url": "https://google.com/goto?url=CAESXAHEIkXXFX6QUDvQD20vZoM2lSHb-l7yNtSnQCt_NUukce0y50JpqmX9m_gk7msXgH8MWrdrbr7r0U6NF0pfcARPmzsAKTbAxwifOQ2XS233FApcM7SSJuTZ8YvF",
+							"is_paid": false,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 4.8,
+								"votes_count": 197,
+								"rating_max": 5
+							},
+							"cid": "9624099268607063852"
+						},
+						{
+							"type": "local_pack",
+							"rank_group": 2,
+							"rank_absolute": 3,
+							"title": "Matthew's Plumbing Solutions",
+							"description": "7+ years in business · Raleigh, NC \nClosed · Opens 8 AM Mon \n\"They came out the same day and fixed our problem, quick, clean, and easy.\" \n",
+							"domain": "google.com",
+							"phone": "(919) 977-1896",
+							"url": "https://google.com/goto?url=CAEShAEBxCJF17aVv1R71nL9lIWVbP5v7KySRxQ8IcnbNdLNJwFxEeY5OBZ8bTtaiEACPA1oFtoADV2f1iyp6VBFstTVfCKGByTONQv9OqRyVzBuJZdSVWQF08F33MDG7Q_6CQI1SuulccXTQ9ZLNgGidObjZVAPKspdkbkR8pArnKpDYdkMwjc",
+							"is_paid": false,
+							"rating": {
+								"rating_type": "Max5",
+								"value": 4.9,
+								"votes_count": 1000,
+								"rating_max": 5
+							},
+							"cid": "4153548782416805313"
+						},
+						{
+							"type": "organic",
+							"rank_group": 1,
+							"rank_absolute": 5,
+							"domain": "google.com",
+							"title": "Sewer Repair Myrtle Beach, SC - Sewer Line Repair",
+							"url": "https://google.com/goto?url=CAESfgHEIkXXx-M4JSZZheE9AevXvhNnntysWFwr32uC6Fs8Di33IRrW5-mtDC7CkcC1K1rOrDG19IbYbhBDzAi0p-oNF_Da1Dq-NuLVGQPiYeB8ABfOrGDxhWmFMLB7tRHqwX1UfCvoPGoBDd0gvgmvUjpdOKiXHO_N4O8AC3r3Sw",
+							"description": "Need sewer repair near me Myrtle Beach, contact B & B Plumbing Myrtle Beach today. (843) 648-5149 Open 24/7 for Emergency and Same-Day Plumbing"
+						}
+					]
+				}
+			]
+		}
+	]
+}
