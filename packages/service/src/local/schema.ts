@@ -13,6 +13,7 @@ import {
 	numeric,
 	pgEnum,
 	pgTable,
+	primaryKey,
 	smallint,
 	text,
 	timestamp,
@@ -170,10 +171,13 @@ export const runLocations = pgTable(
 		vendorRunId: text("vendor_run_id"),
 		costUsd: numeric("cost_usd", { precision: 12, scale: 6 }),
 		costSource: runCostSource("cost_source"),
+		/** The parser version its `answer_businesses` were derived with; null until they are. */
+		businessesVersion: smallint("businesses_version"),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [
 		index("run_locations_subject_id_idx").on(table.subjectId),
+		index("run_locations_businesses_version_idx").on(table.businessesVersion),
 		check(
 			"run_locations_method_matches_tier_check",
 			sql`(${table.fidelityTier}, ${table.locationMethod}) IN (('T1', 'geo_coordinate'), ('T2', 'egress_city'), ('T3', 'egress_region'), ('T4', 'api_user_location'), ('T5', 'prompt_only'))`,
@@ -181,6 +185,41 @@ export const runLocations = pgTable(
 		check("run_locations_cost_source_check", sql`(${table.costUsd} IS NULL) = (${table.costSource} IS NULL)`),
 	],
 ).enableRLS();
+
+export const cardPlacement = pgEnum("card_placement", ["answer", "local_pack"]);
+
+/**
+ * The business cards in a located run's answer, normalized across vendors and derived from
+ * its `raw_output`, so a parser fix rebuilds them. The trigger sets `subject_id` from the run.
+ */
+export const answerBusinesses = pgTable(
+	"answer_businesses",
+	{
+		runId: uuid("run_id")
+			.references(() => promptRuns.id, { onDelete: "cascade" })
+			.notNull(),
+		subjectId: text("subject_id").notNull(),
+		placement: cardPlacement("placement").notNull(),
+		position: smallint("position").notNull(),
+		name: text("name").notNull(),
+		placeId: text("place_id"),
+		cid: text("cid"),
+		phone: text("phone"),
+		address: text("address"),
+		lat: doublePrecision("lat"),
+		lng: doublePrecision("lng"),
+		rating: doublePrecision("rating"),
+		reviewCount: integer("review_count"),
+		website: text("website"),
+	},
+	(table) => [
+		primaryKey({ name: "answer_businesses_pk", columns: [table.runId, table.placement, table.position] }),
+		index("answer_businesses_subject_id_idx").on(table.subjectId),
+		check("answer_businesses_position_check", sql`${table.position} >= 1`),
+	],
+).enableRLS();
+
+export type AnswerBusiness = typeof answerBusinesses.$inferSelect;
 
 /** A subject's located-run schedule. The run planner refuses to enable one whose plan costs more than its budget. */
 export const subjectRunSchedules = pgTable(

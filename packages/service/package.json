@@ -14,6 +14,7 @@
 		"test:pgtap": "bash scripts/run-pgtap.sh"
 	},
 	"exports": {
+		"./local/answer-businesses": "./src/local/answer-businesses/index.ts",
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/grid-scans": "./src/local/grid-scans/index.ts",
 		"./local/locations": "./src/local/locations/index.ts",
