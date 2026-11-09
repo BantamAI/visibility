@@ -281,6 +281,13 @@
       "when": 1794241845245,
       "tag": "0039_grid_scans",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794246104290,
+      "tag": "0040_weekly_city_runs",
+      "breakpoints": true
     }
   ]
 }

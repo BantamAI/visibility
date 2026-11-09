@@ -192,7 +192,7 @@ export const subjectRunSchedules = pgTable(
 		enabled: boolean("enabled").default(false).notNull(),
 		monthlyBudgetUsd: numeric("monthly_budget_usd", { precision: 10, scale: 2, mode: "number" }),
 		scanIntervalDays: smallint("scan_interval_days").default(7).notNull(),
-		centroidIntervalDays: smallint("centroid_interval_days").default(1).notNull(),
+		centroidIntervalDays: smallint("centroid_interval_days").default(7).notNull(),
 		repeats: smallint("repeats").default(1).notNull(),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 		updatedAt: timestamp("updated_at", { withTimezone: true })

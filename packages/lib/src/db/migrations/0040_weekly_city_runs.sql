@@ -1,0 +1,1 @@
+ALTER TABLE "subject_run_schedules" ALTER COLUMN "centroid_interval_days" SET DEFAULT 7;
