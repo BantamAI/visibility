@@ -4,7 +4,7 @@ import { getProvider, type ModelConfig, selectTargetsForBrand } from "@workspace
 import { and, eq } from "drizzle-orm";
 import { type RunSchedule, samplePoints, subjectRunSchedules } from "../schema";
 import { MAX_INTERVAL_DAYS, MAX_REPEATS } from "./constants";
-import { budgetRefusal, planRuns, type RunCadence, type RunPlan } from "./plan";
+import { budgetRefusal, type PlannerPoint, planRuns, type RunCadence, type RunPlan } from "./plan";
 
 export type RunScheduleSettings = RunCadence & {
 	enabled: boolean;
@@ -67,7 +67,7 @@ export async function previewRunPlan(
 	subjectId: string,
 	settings: RunScheduleSettings,
 	scrapeTargets: readonly ModelConfig[],
-): Promise<{ plan: RunPlan; refusal: string | null }> {
+): Promise<{ plan: RunPlan; refusal: string | null; points: PlannerPoint[] }> {
 	const [brand] = await db.select({ enabledModels: brands.enabledModels }).from(brands).where(eq(brands.id, subjectId));
 	if (!brand) throw new RunScheduleError("No such subject");
 	const [subjectPrompts, points] = await Promise.all([
@@ -88,7 +88,7 @@ export async function previewRunPlan(
 		cadence: settings,
 		getProvider,
 	});
-	return { plan, refusal: budgetRefusal(plan, settings.monthlyBudgetUsd) };
+	return { plan, refusal: budgetRefusal(plan, settings.monthlyBudgetUsd), points };
 }
 
 /** Refuses to leave the schedule enabled when its plan doesn't fit the budget. */

@@ -6,12 +6,19 @@ import type { OnboardingSuggestion } from "@workspace/lib/onboarding";
 import { PROCESS_PROMPT_QUEUE } from "@workspace/lib/queues/prompt-jobs";
 import { GENERATE_REPORT_QUEUE } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
+import {
+	GRID_SCAN_RUN_QUEUE,
+	type GridScanRunData,
+	START_GRID_SCANS_QUEUE,
+	VENDOR_CONCURRENCY,
+} from "@workspace/service/local/grid-scans";
 import { withAgency, withSubject } from "@workspace/service/local/tenancy";
 import { eq } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { type AnalyzeBrandData, analyzeBrandJob } from "./jobs/analyze-brand";
 import { DERIVE_RUNS_QUEUE, type DeriveRunsData, deriveRunsJob } from "./jobs/derive-runs";
 import { type GenerateReportData, generateReportJob } from "./jobs/generate-report";
+import { gridScanRunJob, startGridScansJob } from "./jobs/grid-scans";
 import { type ProcessPromptData, processPromptJob } from "./jobs/process-prompt";
 import { type RefreshRollupsData, refreshRollupsJob } from "./jobs/refresh-rollups";
 import {
@@ -152,6 +159,21 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 		);
 		console.log("Registered handler: sync-auth0-memberships");
 	}
+
+	await boss.work(
+		START_GRID_SCANS_QUEUE,
+		{ localConcurrency: 1 },
+		withSentry(START_GRID_SCANS_QUEUE, asAgency(START_GRID_SCANS_QUEUE, startGridScansJob)),
+	);
+	console.log(`Registered handler: ${START_GRID_SCANS_QUEUE}`);
+
+	// Jobs are grouped by vendor, so each vendor's limit holds across every worker.
+	await boss.work<GridScanRunData>(
+		GRID_SCAN_RUN_QUEUE,
+		{ localConcurrency: 10, groupConcurrency: VENDOR_CONCURRENCY },
+		withSentry(GRID_SCAN_RUN_QUEUE, asSubject(brandOf, gridScanRunJob)),
+	);
+	console.log(`Registered handler: ${GRID_SCAN_RUN_QUEUE}`);
 
 	await boss.work<RefreshRollupsData>(
 		REFRESH_ROLLUPS_QUEUE,

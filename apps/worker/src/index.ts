@@ -8,6 +8,11 @@ import { PROCESS_PROMPT_QUEUE, PROMPT_JOB_OPTIONS } from "@workspace/lib/queues/
 import { GENERATE_REPORT_QUEUE, REPORT_JOB_OPTIONS } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
+import {
+	GRID_SCAN_RUN_QUEUE,
+	GRID_SCAN_RUN_QUEUE_OPTIONS,
+	START_GRID_SCANS_QUEUE,
+} from "@workspace/service/local/grid-scans";
 import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
 import type { PgBoss } from "pg-boss";
 import { startBackfills } from "./backfills";
@@ -127,6 +132,8 @@ async function main() {
 		retryLimit: 0,
 		expireInSeconds: 60 * 2,
 	});
+	await createOrUpdateQueue(boss, GRID_SCAN_RUN_QUEUE, GRID_SCAN_RUN_QUEUE_OPTIONS);
+	await boss.createQueue(START_GRID_SCANS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 10 });
 	console.log("Queues created");
 
 	await boss.schedule("schedule-maintenance", "*/5 * * * *", { source: "scheduled" }, { tz: "UTC" });
@@ -151,6 +158,9 @@ async function main() {
 		{ tz: "UTC", singletonKey: REQUEST_REPROCESSES_QUEUE },
 	);
 	console.log("Scheduled request-reprocesses job (every minute)");
+
+	await boss.schedule(START_GRID_SCANS_QUEUE, "*/15 * * * *", {}, { tz: "UTC", singletonKey: START_GRID_SCANS_QUEUE });
+	console.log("Scheduled start-grid-scans job (every 15 minutes)");
 
 	await boss.schedule(
 		REFRESH_ROLLUPS_QUEUE,

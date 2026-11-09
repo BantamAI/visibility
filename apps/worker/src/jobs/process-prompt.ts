@@ -205,7 +205,9 @@ async function recordUsageEvent(input: {
 	}
 }
 
-async function runModelIteration({
+type RunTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+export async function runModelIteration({
 	promptId,
 	promptValue,
 	brand,
@@ -213,6 +215,7 @@ async function runModelIteration({
 	providerImpl,
 	runIndex,
 	location,
+	onSaved,
 }: {
 	promptId: string;
 	promptValue: string;
@@ -221,7 +224,9 @@ async function runModelIteration({
 	providerImpl: Provider;
 	runIndex: number;
 	location?: LocationRequest;
-}): Promise<void> {
+	/** Runs in the transaction that saves the run. */
+	onSaved?: (tx: RunTx, promptRunId: string) => Promise<void>;
+}): Promise<string> {
 	const logPrefix = `[${config.model}_${runIndex}]`;
 	// Throws before anything is spent when the provider can't honour the location's tier.
 	const options = providerOptionsFor(providerImpl, config, location);
@@ -258,6 +263,7 @@ async function runModelIteration({
 					.insert(runLocations)
 					.values(runLocationRecord({ runId: id, subjectId: brand.id, config, request: location, result }));
 			}
+			await onSaved?.(tx, id);
 			return id;
 		});
 		console.log(`${logPrefix} Saved prompt run ${promptRunId}`);
@@ -274,6 +280,7 @@ async function runModelIteration({
 			config,
 			vendorCostUsd: result.costUsd,
 		});
+		return promptRunId;
 	} catch (error) {
 		// A single run's failure doesn't fail the job, so report it here to keep
 		// per-provider failure rates visible.
