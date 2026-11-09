@@ -1,4 +1,4 @@
-import { IconReport, IconTable, IconTimeline, IconTool } from "@tabler/icons-react";
+import { IconCoin, IconReport, IconTable, IconTimeline, IconTool } from "@tabler/icons-react";
 import type { NavItem } from "@/components/nav-main";
 
 export function adminNavItems({
@@ -18,6 +18,7 @@ export function adminNavItems({
 		{ title: "Brands", link: { to: "/admin" }, icon: IconTable },
 		...(reportsEnabled ? [reports] : []),
 		{ title: "Workflows", link: { to: "/admin/workflows" }, icon: IconTimeline },
+		{ title: "Vendor Spend", link: { to: "/admin/vendor-spend" }, icon: IconCoin },
 		{ title: "Tools", link: { to: "/admin/tools" }, icon: IconTool },
 	];
 }
