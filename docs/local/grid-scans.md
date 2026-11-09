@@ -22,4 +22,4 @@ When no run is left pending, the scan completes with its coverage (points with a
 
 ## Results
 
-`getScanResults` returns every point of a scan with its location, each repeat's status, answer text and cited sources, for the heat maps in E53-S32. Uncovered points return their stand-in's runs, and gaps return none. Answers and citations appear once the run is judged, shortly after it's saved. Ranked businesses will come from E53-S29.
+`getScanResults` returns every point of a scan with its location, each repeat's status, answer text, cited sources and business cards, for the heat maps in E53-S32. Uncovered points return their stand-in's runs, and gaps return none. Answers and citations appear once the run is judged, and cards once they're parsed (`docs/local/answer-businesses.md`), both shortly after it's saved.
