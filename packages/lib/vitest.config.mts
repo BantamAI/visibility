@@ -7,7 +7,7 @@ export default defineConfig({
 			{
 				test: {
 					name: "unit",
-					include: ["src/**/*.test.ts"],
+					include: ["src/**/*.test.ts", "scripts/location-probe/**/*.test.ts"],
 					exclude: ["src/**/*.integration.test.ts"],
 					// The shared db client is built at import time and needs a URL, even
 					// for tests that never open a connection.

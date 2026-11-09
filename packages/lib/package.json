@@ -10,6 +10,9 @@
 		"test:integration": "vitest run --project=integration",
 		"compare:onboarding": "tsx scripts/compare-onboarding.ts",
 		"generate:auth-schema": "bash scripts/generate-auth-schema.sh",
+		"location-probe:run": "tsx scripts/location-probe/probe.ts",
+		"location-probe:score": "tsx scripts/location-probe/score.ts",
+		"location-probe:check-types": "tsc --noEmit -p scripts/location-probe/tsconfig.json",
 		"verify:membership-dedupe": "tsx scripts/verify-membership-dedupe.ts"
 	},
 	"exports": {
