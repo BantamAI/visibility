@@ -215,6 +215,13 @@ export const ENV_REGISTRY: EnvVarSpec[] = [
 			"How far back the worker reprocesses history (re-extracting and re-judging answers) after the extractor, the judge, or a brand's names or competitors change, in days (default 90), or 'all'. Only enabled prompts of enabled brands are reprocessed.",
 	},
 	{
+		name: "GOOGLE_PLACES_API_KEY",
+		scope: "server",
+		requiredBy: "optional",
+		description:
+			"Google Maps Platform key with Places API (New) and Geocoding API enabled. Anchors subjects and competitors on Place IDs; without it, Place ID lookups are unavailable.",
+	},
+	{
 		name: "JINA_API_KEY",
 		scope: "server",
 		requiredBy: "optional",

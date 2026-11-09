@@ -18,6 +18,7 @@
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/grid-scans": "./src/local/grid-scans/index.ts",
 		"./local/locations": "./src/local/locations/index.ts",
+		"./local/places": "./src/local/places/index.ts",
 		"./local/run-planner": "./src/local/run-planner/index.ts",
 		"./local/run-planner/constants": "./src/local/run-planner/constants.ts",
 		"./local/schema": "./src/local/schema.ts",

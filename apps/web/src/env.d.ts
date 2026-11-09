@@ -49,6 +49,7 @@ declare global {
 			readonly CLORO_API_KEY?: string;
 			readonly TYPESAFE_API_KEY?: string;
 			readonly REPROCESS_DAYS?: string;
+			readonly GOOGLE_PLACES_API_KEY?: string;
 			readonly JINA_API_KEY?: string;
 			readonly ONBOARDING_LLM_TARGET?: string;
 			readonly ELMO_ENCRYPTION_KEY?: string;
