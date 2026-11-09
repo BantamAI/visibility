@@ -1,4 +1,4 @@
-import { brands, promptRuns } from "@workspace/lib/db/schema";
+import { brands, promptRuns, prompts } from "@workspace/lib/db/schema";
 import type { RunLocation } from "@workspace/lib/providers";
 import { sql } from "drizzle-orm";
 import {
@@ -213,9 +213,104 @@ export const subjectRunSchedules = pgTable(
 	],
 ).enableRLS();
 
+/** A point the scan's route couldn't place: it takes the stand-in's results, or is a gap when there's none. */
+export interface UncoveredScanPoint {
+	pointId: string;
+	label: string;
+	lat: number;
+	lng: number;
+	reason: string;
+	standInPointId: string | null;
+}
+
+export const gridScanStatus = pgEnum("grid_scan_status", ["running", "complete"]);
+export const gridScanRunStatus = pgEnum("grid_scan_run_status", ["pending", "answered", "failed"]);
+
+/**
+ * One prompt on one route across every active point of one kind in a service area.
+ * `area_id` has no foreign key, so a scan outlives its area.
+ */
+export const gridScans = pgTable(
+	"grid_scans",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id")
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		areaId: uuid("area_id").notNull(),
+		promptId: uuid("prompt_id")
+			.references(() => prompts.id, { onDelete: "cascade" })
+			.notNull(),
+		model: text("model").notNull(),
+		provider: text("provider").notNull(),
+		webSearchEnabled: boolean("web_search_enabled").notNull(),
+		version: text("version"),
+		fidelityTier: fidelityTier("fidelity_tier").notNull(),
+		pointKind: samplePointKind("point_kind").notNull(),
+		repeats: smallint("repeats").notNull(),
+		uncovered: jsonb("uncovered").$type<UncoveredScanPoint[]>().default([]).notNull(),
+		estimatedCostUsd: numeric("estimated_cost_usd", { precision: 12, scale: 6, mode: "number" }),
+		status: gridScanStatus("status").default("running").notNull(),
+		pointsPlanned: integer("points_planned").notNull(),
+		pointsAnswered: integer("points_answered"),
+		costUsd: numeric("cost_usd", { precision: 12, scale: 6, mode: "number" }),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		completedAt: timestamp("completed_at", { withTimezone: true }),
+	},
+	(table) => [
+		index("grid_scans_subject_id_idx").on(table.subjectId, table.createdAt),
+		unique("grid_scans_id_subject_id_key").on(table.id, table.subjectId),
+		check("grid_scans_repeats_check", sql`${table.repeats} >= 1`),
+		check("grid_scans_points_planned_check", sql`${table.pointsPlanned} >= 1`),
+		check(
+			"grid_scans_complete_check",
+			sql`(${table.status} = 'complete') = (${table.completedAt} IS NOT NULL AND ${table.pointsAnswered} IS NOT NULL)`,
+		),
+	],
+).enableRLS();
+
+/**
+ * One run of a scan: a point and a repeat. `location` is a snapshot of the point, so
+ * `point_id` has no foreign key, and a failed run still has somewhere on the map.
+ */
+export const gridScanRuns = pgTable(
+	"grid_scan_runs",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id").notNull(),
+		scanId: uuid("scan_id").notNull(),
+		pointId: uuid("point_id").notNull(),
+		location: jsonb("location").$type<RunLocation>().notNull(),
+		repeat: smallint("repeat").notNull(),
+		status: gridScanRunStatus("status").default("pending").notNull(),
+		attempts: smallint("attempts").default(0).notNull(),
+		runId: uuid("run_id").references(() => promptRuns.id, { onDelete: "cascade" }),
+		lastError: text("last_error"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("grid_scan_runs_subject_id_idx").on(table.subjectId),
+		uniqueIndex("grid_scan_runs_scan_id_point_id_repeat_idx").on(table.scanId, table.pointId, table.repeat),
+		uniqueIndex("grid_scan_runs_run_id_idx").on(table.runId),
+		// Ties each run to a scan of the same subject.
+		foreignKey({
+			name: "grid_scan_runs_scan_fk",
+			columns: [table.scanId, table.subjectId],
+			foreignColumns: [gridScans.id, gridScans.subjectId],
+		}).onDelete("cascade"),
+		check("grid_scan_runs_answered_check", sql`(${table.status} = 'answered') = (${table.runId} IS NOT NULL)`),
+	],
+).enableRLS();
+
 export type ServiceArea = typeof subjectServiceAreas.$inferSelect;
 export type SamplePoint = typeof samplePoints.$inferSelect;
 export type RefUsPlace = typeof refUsPlaces.$inferSelect;
 export type RefUsZcta = typeof refUsZctas.$inferSelect;
 export type RunLocationRecord = typeof runLocations.$inferInsert;
 export type RunSchedule = typeof subjectRunSchedules.$inferSelect;
+export type GridScan = typeof gridScans.$inferSelect;
+export type GridScanRun = typeof gridScanRuns.$inferSelect;
