@@ -16,7 +16,17 @@ export interface RunCadence {
 
 export type PlannerPoint = Pick<
 	SamplePoint,
-	"id" | "kind" | "label" | "lat" | "lng" | "city" | "region" | "country" | "postalCode" | "timezone" | "googleCanonicalName"
+	| "id"
+	| "kind"
+	| "label"
+	| "lat"
+	| "lng"
+	| "city"
+	| "region"
+	| "country"
+	| "postalCode"
+	| "timezone"
+	| "googleCanonicalName"
 >;
 
 export interface PlanInput {
@@ -76,17 +86,18 @@ function routeKey(engine: string, route: PlannerRoute, kind: SamplePointKind): s
 	return [engine, provider, version ?? "", webSearch, route.tier, kind].join("|");
 }
 
-/**
- * Expands a subject's prompts × engines × points × repeats into the series a
- * schedule runs. Each point takes the best route that can serve it, so a point
- * missing a field the best route sends falls back to the next one.
- */
-export function planRuns(input: PlanInput): RunPlan {
-	const engines = [...new Set(input.targets.map((target) => target.model))];
-	const groups = new Map<string, { engine: string; route: PlannerRoute; kind: SamplePointKind; pointIds: string[] }>();
-	const uncovered: UncoveredPoint[] = [];
+interface RouteGroup {
+	engine: string;
+	route: PlannerRoute;
+	kind: SamplePointKind;
+	pointIds: string[];
+}
 
-	for (const engine of engines) {
+/** Each point takes the best route that can serve it, so a point missing a field the best route sends falls back. */
+function assignRoutes(input: PlanInput): { groups: RouteGroup[]; uncovered: UncoveredPoint[] } {
+	const groups = new Map<string, RouteGroup>();
+	const uncovered: UncoveredPoint[] = [];
+	for (const engine of new Set(input.targets.map((target) => target.model))) {
 		const routes = routesFor(engine, input.targets).filter((route) => !input.isDegraded?.(route));
 		for (const point of input.points) {
 			const eligible = routes.filter((route) => route.pointKinds.includes(point.kind));
@@ -102,30 +113,32 @@ export function planRuns(input: PlanInput): RunPlan {
 			groups.set(key, group);
 		}
 	}
+	return { groups: [...groups.values()], uncovered };
+}
 
-	const cheapT1Engines = new Set(
-		[...groups.values()]
-			.filter((group) => group.kind === "centroid" && group.route.tier === "T1")
-			.sort(
-				(a, b) =>
-					(a.route.costPerRunUsd ?? Number.POSITIVE_INFINITY) - (b.route.costPerRunUsd ?? Number.POSITIVE_INFINITY) ||
-					a.engine.localeCompare(b.engine),
-			)
-			.map((group) => group.engine)
-			.filter((engine, index, all) => all.indexOf(engine) === index)
-			.slice(0, CHEAP_T1_ROUTES),
-	);
+function cheapestT1Engines(groups: readonly RouteGroup[]): Set<string> {
+	const cost = (group: RouteGroup) => group.route.costPerRunUsd ?? Number.POSITIVE_INFINITY;
+	const engines = groups
+		.filter((group) => group.kind === "centroid" && group.route.tier === "T1")
+		.sort((a, b) => cost(a) - cost(b) || a.engine.localeCompare(b.engine))
+		.map((group) => group.engine);
+	return new Set([...new Set(engines)].slice(0, CHEAP_T1_ROUTES));
+}
+
+/** Expands a subject's prompts × engines × points × repeats into the series a schedule runs. */
+export function planRuns(input: PlanInput): RunPlan {
+	const { groups, uncovered } = assignRoutes(input);
+	const cheapT1Engines = cheapestT1Engines(groups);
+	const { cadence } = input;
 
 	const series: PlannedSeries[] = [];
-	for (const { engine, route, kind, pointIds } of groups.values()) {
+	for (const { engine, route, kind, pointIds } of groups) {
 		const promptIds = promptsFor(route.tier, kind, input);
 		if (promptIds.length === 0) continue;
-		const intervalDays =
-			kind === "centroid" && route.tier === "T1" && cheapT1Engines.has(engine)
-				? input.cadence.centroidIntervalDays
-				: input.cadence.scanIntervalDays;
+		const runsOften = kind === "centroid" && route.tier === "T1" && cheapT1Engines.has(engine);
+		const intervalDays = runsOften ? cadence.centroidIntervalDays : cadence.scanIntervalDays;
 		const runsPerMonth =
-			pointIds.length * promptIds.length * input.cadence.repeats * (PROJECTION_DAYS_PER_MONTH / intervalDays);
+			pointIds.length * promptIds.length * cadence.repeats * (PROJECTION_DAYS_PER_MONTH / intervalDays);
 		series.push({
 			engine,
 			config: route.config,
@@ -134,7 +147,7 @@ export function planRuns(input: PlanInput): RunPlan {
 			pointIds,
 			promptIds,
 			intervalDays,
-			repeats: input.cadence.repeats,
+			repeats: cadence.repeats,
 			runsPerMonth,
 			costPerRunUsd: route.costPerRunUsd,
 			costPerMonthUsd: route.costPerRunUsd === null ? null : route.costPerRunUsd * runsPerMonth,

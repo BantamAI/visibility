@@ -44,6 +44,8 @@ const TIER_LABELS: Record<string, string> = {
 	T5: "T5 · City in Prompt",
 };
 
+const POINT_KINDS: Record<string, string> = { centroid: "cities", grid: "grid", zip: "ZIPs" };
+
 const usd = (value: number) => `$${value.toFixed(2)}`;
 const whole = (value: number) => Math.round(value).toLocaleString();
 
@@ -186,7 +188,11 @@ function RunPlanSettingsPage() {
 							/>
 						</div>
 						<div className="flex items-center gap-2 sm:col-span-2">
-							<Switch id="plan-enabled" checked={draft.enabled} onCheckedChange={(checked) => set("enabled", checked)} />
+							<Switch
+								id="plan-enabled"
+								checked={draft.enabled}
+								onCheckedChange={(checked) => set("enabled", checked)}
+							/>
 							<Label htmlFor="plan-enabled">Schedule Enabled</Label>
 						</div>
 						{error && <p className="text-destructive text-sm sm:col-span-2">{error}</p>}
@@ -232,25 +238,8 @@ function RunPlanSettingsPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{shown.plan.series.map((s) => (
-										<TableRow key={s.key}>
-											<TableCell>{s.engine}</TableCell>
-											<TableCell>{s.provider}</TableCell>
-											<TableCell>
-												<Badge variant={s.tier === "T1" ? "default" : "secondary"}>{TIER_LABELS[s.tier] ?? s.tier}</Badge>
-											</TableCell>
-											<TableCell>
-												{s.points} {s.pointKind === "centroid" ? "cities" : s.pointKind === "zip" ? "ZIPs" : "grid"}
-											</TableCell>
-											<TableCell className="text-right">{s.prompts}</TableCell>
-											<TableCell className="text-right">
-												{s.intervalDays === 1 ? "day" : `${s.intervalDays} days`}
-											</TableCell>
-											<TableCell className="text-right">{whole(s.runsPerMonth)}</TableCell>
-											<TableCell className="text-right">
-												{s.costPerMonthUsd === null ? "Unknown" : usd(s.costPerMonthUsd)}
-											</TableCell>
-										</TableRow>
+									{shown.plan.series.map((series) => (
+										<SeriesRow key={series.key} series={series} />
 									))}
 								</TableBody>
 							</Table>
@@ -288,5 +277,30 @@ function RunPlanSettingsPage() {
 				</Card>
 			)}
 		</div>
+	);
+}
+
+type Series = Awaited<ReturnType<typeof getRunPlan>>["plan"]["series"][number];
+
+function SeriesRow({ series }: { series: Series }) {
+	return (
+		<TableRow>
+			<TableCell>{series.engine}</TableCell>
+			<TableCell>{series.provider}</TableCell>
+			<TableCell>
+				<Badge variant={series.tier === "T1" ? "default" : "secondary"}>
+					{TIER_LABELS[series.tier] ?? series.tier}
+				</Badge>
+			</TableCell>
+			<TableCell>
+				{series.points} {POINT_KINDS[series.pointKind]}
+			</TableCell>
+			<TableCell className="text-right">{series.prompts}</TableCell>
+			<TableCell className="text-right">{series.intervalDays === 1 ? "day" : `${series.intervalDays} days`}</TableCell>
+			<TableCell className="text-right">{whole(series.runsPerMonth)}</TableCell>
+			<TableCell className="text-right">
+				{series.costPerMonthUsd === null ? "Unknown" : usd(series.costPerMonthUsd)}
+			</TableCell>
+		</TableRow>
 	);
 }

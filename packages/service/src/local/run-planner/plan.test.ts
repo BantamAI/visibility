@@ -117,7 +117,14 @@ describe("planRuns", () => {
 		const unnamed = point("centroid", { googleCanonicalName: null });
 		const result = plan({ targets: [target("google-ai-mode:cloro")], points: [centroid, unnamed] });
 		expect(seriesOf(result, "google-ai-mode")).toEqual([
-			{ provider: "cloro", tier: "T1", kind: "centroid", points: 1, prompts: [nearMe.id, cityNamed.id], intervalDays: 1 },
+			{
+				provider: "cloro",
+				tier: "T1",
+				kind: "centroid",
+				points: 1,
+				prompts: [nearMe.id, cityNamed.id],
+				intervalDays: 1,
+			},
 			{ provider: "cloro", tier: "T5", kind: "centroid", points: 1, prompts: [cityNamed.id], intervalDays: 7 },
 		]);
 	});
@@ -128,7 +135,14 @@ describe("planRuns", () => {
 			isDegraded: (route) => route.config.provider === "dataforseo",
 		});
 		expect(seriesOf(result, "google-ai-mode")).toEqual([
-			{ provider: "cloro", tier: "T1", kind: "centroid", points: 1, prompts: [nearMe.id, cityNamed.id], intervalDays: 1 },
+			{
+				provider: "cloro",
+				tier: "T1",
+				kind: "centroid",
+				points: 1,
+				prompts: [nearMe.id, cityNamed.id],
+				intervalDays: 1,
+			},
 		]);
 	});
 
@@ -198,6 +212,8 @@ describe("budgetRefusal", () => {
 	});
 
 	it("refuses a plan it can't price", () => {
-		expect(budgetRefusal(plan({ targets: [target("chatgpt:unpriced")] }), 1000)).toMatch(/no cost estimate for unpriced/);
+		expect(budgetRefusal(plan({ targets: [target("chatgpt:unpriced")] }), 1000)).toMatch(
+			/no cost estimate for unpriced/,
+		);
 	});
 });

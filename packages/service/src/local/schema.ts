@@ -203,7 +203,10 @@ export const subjectRunSchedules = pgTable(
 	(table) => [
 		index("subject_run_schedules_subject_id_idx").on(table.subjectId),
 		check("subject_run_schedules_budget_check", sql`${table.monthlyBudgetUsd} >= 0`),
-		check("subject_run_schedules_enabled_needs_budget_check", sql`NOT ${table.enabled} OR ${table.monthlyBudgetUsd} IS NOT NULL`),
+		check(
+			"subject_run_schedules_enabled_needs_budget_check",
+			sql`NOT ${table.enabled} OR ${table.monthlyBudgetUsd} IS NOT NULL`,
+		),
 		check("subject_run_schedules_scan_interval_check", sql`${table.scanIntervalDays} BETWEEN 1 AND 31`),
 		check("subject_run_schedules_centroid_interval_check", sql`${table.centroidIntervalDays} BETWEEN 1 AND 31`),
 		check("subject_run_schedules_repeats_check", sql`${table.repeats} BETWEEN 1 AND 5`),

@@ -68,10 +68,7 @@ export async function previewRunPlan(
 	settings: RunScheduleSettings,
 	scrapeTargets: readonly ModelConfig[],
 ): Promise<{ plan: RunPlan; refusal: string | null }> {
-	const [brand] = await db
-		.select({ enabledModels: brands.enabledModels })
-		.from(brands)
-		.where(eq(brands.id, subjectId));
+	const [brand] = await db.select({ enabledModels: brands.enabledModels }).from(brands).where(eq(brands.id, subjectId));
 	if (!brand) throw new RunScheduleError("No such subject");
 	const [subjectPrompts, points] = await Promise.all([
 		db
