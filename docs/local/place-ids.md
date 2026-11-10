@@ -14,7 +14,7 @@ Elmo replaces a brand's competitor rows every time competitors are saved, so a c
 
 ## What's stored, and for how long
 
-Google's [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies) let Place IDs be stored indefinitely, and coordinates for at most 30 days. Nothing else from a Places response may be cached, so `place_anchors` holds only the Place ID and the CID. Names, addresses and phones are shown from a live search and never saved. The subject's own name, phone, address and service area come from the facts API (linked clients) or manual entry (prospects).
+Google's [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies) let Place IDs be stored indefinitely, and coordinates for at most 30 days. Nothing else from a Places response may be cached, so `place_anchors` holds only the Place ID and the CID. On this page, names, addresses and phones are shown from a live search and never saved. The subject's own name, phone, address and service area come from the facts API (linked clients) or manual entry (prospects).
 
 The CID is read from the place's `googleMapsUri` (`https://maps.google.com/?cid=…&g_mp=…`), since some answer cards link by CID instead of Place ID. Google's policy names only the Place ID as exempt, so the CID is treated as the Place ID's companion: it's replaced whenever the Place ID is.
 
@@ -34,11 +34,11 @@ Every call records a `usage_events` row (`provider` `google-places`, `event_type
 
 | Call | SKU | Per call |
 |---|---|---|
-| Text Search (with phone numbers) | Text Search Enterprise | $0.035 |
+| Text Search (with phone numbers and websites) | Text Search Enterprise | $0.035 |
 | Place ID refresh | Place Details Essentials (IDs Only) | $0 |
 | CID for a replaced ID | Place Details Pro | $0.017 |
 | Geocode | Geocoding | $0.005 |
 
-Every request names its fields in a field mask, since Google bills a call at the tier of the costliest field asked for. Phone numbers lift Text Search to Enterprise; they're worth it, because a phone is the surest way to tell two same-named businesses apart.
+Every request names its fields in a field mask, since Google bills a call at the tier of the costliest field asked for. Phone numbers lift Text Search to Enterprise; they're worth it, because a phone is the surest way to tell two same-named businesses apart. Websites are an Enterprise field too, so asking for them costs nothing more.
 
-Places calls are made by staff, by the daily refresh, and by the job that looks up the businesses answers name (`docs/local/named-businesses.md`). That job stops for the day once a subject has made 200 calls. None of these are runs, so they're outside the vendor spend stops (`docs/local/vendor-spend.md`). To cap all Places spend, set a per-day request quota on the key in Google Cloud.
+Places calls are made by staff, by the daily refresh, by the job that looks up the businesses answers name (`docs/local/named-businesses.md`), and by competitor seeding (`docs/local/competitor-discovery.md`). The last two stop for the day once a subject has made 200 calls. None of these are runs, so they're outside the vendor spend stops (`docs/local/vendor-spend.md`). To cap all Places spend, set a per-day request quota on the key in Google Cloud.
