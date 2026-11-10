@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { listContacts, saveContact } from "@workspace/service/local/local-mentions";
 import { confirmAnchor, findPlaces, listAnchorTargets, removeAnchor } from "@workspace/service/local/places";
 import { listServiceAreas } from "@workspace/service/local/service-areas";
 import { withSubject } from "@workspace/service/local/tenancy";
@@ -11,7 +12,17 @@ export const getPlaceAnchors = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		await requireBrandSession(data.brandId);
 		return withSubject(data.brandId, async () => {
-			const [targets, areas] = await Promise.all([listAnchorTargets(data.brandId), listServiceAreas(data.brandId)]);
+			const [targets, areas, contacts] = await Promise.all([
+				listAnchorTargets(data.brandId),
+				listServiceAreas(data.brandId),
+				listContacts(data.brandId),
+			]);
+			const contactOf = (competitorName: string | null) =>
+				contacts.find((contact) =>
+					competitorName === null
+						? contact.competitorName === null
+						: contact.competitorName?.toLowerCase() === competitorName.toLowerCase(),
+				);
 			return {
 				configured: Boolean(process.env.GOOGLE_PLACES_API_KEY),
 				targets: targets.map(({ competitorName, name, anchor }) => ({
@@ -26,6 +37,8 @@ export const getPlaceAnchors = createServerFn({ method: "GET" })
 						checkedAt: anchor.checkedAt.toISOString(),
 						obsoleteAt: anchor.obsoleteAt?.toISOString() ?? null,
 					},
+					phone: contactOf(competitorName)?.phone ?? null,
+					address: contactOf(competitorName)?.address ?? null,
 				})),
 				areas: areas.map((area) => ({ id: area.id, name: area.name, isPrimary: area.isPrimary })),
 			};
@@ -70,4 +83,25 @@ export const removePlaceAnchorFn = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		await requireBrandSession(data.brandId);
 		await withSubject(data.brandId, () => removeAnchor(data.brandId, data.competitorName));
+	});
+
+export const saveBusinessContactFn = createServerFn({ method: "POST" })
+	.validator(
+		z.object({
+			brandId: z.string(),
+			competitorName: z.string().nullable(),
+			phone: z.string().max(40),
+			address: z.string().max(300),
+		}),
+	)
+	.handler(async ({ data }) => {
+		const session = await requireBrandSession(data.brandId);
+		await withSubject(data.brandId, () =>
+			saveContact(data.brandId, {
+				competitorName: data.competitorName,
+				phone: data.phone,
+				address: data.address,
+				updatedBy: session.user.email,
+			}),
+		);
 	});

@@ -1,3 +1,4 @@
+export { BusinessContactError, listContacts, saveContact } from "./contacts";
 export {
 	type Contact,
 	describeWhereabouts,

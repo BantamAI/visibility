@@ -112,16 +112,14 @@ describe("local mentions", () => {
 
 	beforeAll(async () => {
 		run = await saveRun(A);
-		await owner
-			.insert(placeAnchors)
-			.values({
-				subjectId: A,
-				competitorName: RIVAL,
-				placeId: "ChIJrivalrivalrival01",
-				cid: RIVAL_CID,
-				searchQuery: RIVAL,
-				confirmedBy: "staff",
-			});
+		await owner.insert(placeAnchors).values({
+			subjectId: A,
+			competitorName: RIVAL,
+			placeId: "ChIJrivalrivalrival01",
+			cid: RIVAL_CID,
+			searchQuery: RIVAL,
+			confirmedBy: "staff",
+		});
 	});
 
 	it("waits for both the run's cards and its judgement", async () => {
