@@ -4,7 +4,7 @@ import { whyNotHonoured } from "../locations/route";
 import { toRunLocation } from "../locations/run-location";
 import type { SamplePoint, SamplePointKind } from "../schema";
 import { distanceMeters } from "../service-areas/geo";
-import { NEAR_ME_TAG } from "./constants";
+import { CITY_TAG_PREFIX, cityTag, NEAR_ME_TAG } from "./constants";
 import { type PlannerRoute, routeFor } from "./routes";
 
 export interface RunCadence {
@@ -50,11 +50,21 @@ export interface PlannedSeries {
 	pointKind: SamplePointKind;
 	pointIds: string[];
 	promptIds: string[];
+	/**
+	 * Prompts that name a city, with the points they run on: that city's points, or the
+	 * centroid standing in for one the route can't place (listed as uncovered).
+	 */
+	scopedPrompts?: Record<string, ScopedPromptPoints>;
 	intervalDays: number;
 	repeats: number;
 	runsPerMonth: number;
 	costPerRunUsd: number | null;
 	costPerMonthUsd: number | null;
+}
+
+export interface ScopedPromptPoints {
+	pointIds: string[];
+	uncoveredPointIds: string[];
 }
 
 /**
@@ -88,19 +98,55 @@ export interface RunPlan {
 
 const CHEAP_T1_ROUTES = 2;
 
-function promptsFor(tier: FidelityTier, kind: SamplePointKind, input: PlanInput): string[] {
-	const nearMe = (prompt: PlanInput["prompts"][number]) => prompt.tags.includes(NEAR_ME_TAG);
-	// A T5 run sends no location, so a "near me" prompt there would measure wherever the vendor's server is.
-	if (tier === "T5") return input.prompts.filter((p) => !nearMe(p)).map((p) => p.id);
-	if (kind !== "centroid") return input.prompts.filter(nearMe).map((p) => p.id);
-	return input.prompts.map((p) => p.id);
-}
-
 interface RouteGroup {
 	engine: string;
 	route: PlannerRoute;
 	kind: SamplePointKind;
-	pointIds: string[];
+	points: PlannerPoint[];
+	refused: { point: PlannerPoint; standIn: PlannerPoint | null }[];
+}
+
+type PlanPrompt = PlanInput["prompts"][number];
+
+const isNearMe = (prompt: PlanPrompt) => prompt.tags.includes(NEAR_ME_TAG);
+const citiesOf = (prompt: PlanPrompt) => prompt.tags.filter((tag) => tag.startsWith(CITY_TAG_PREFIX));
+
+function scopedPoints(group: RouteGroup, cities: readonly string[]): ScopedPromptPoints | null {
+	const inCity = (point: PlannerPoint) => point.city !== null && cities.includes(cityTag(point.city, point.region));
+	const pointIds = new Set(group.points.filter(inCity).map((point) => point.id));
+	const uncoveredPointIds: string[] = [];
+	for (const { point, standIn } of group.refused) {
+		if (!inCity(point)) continue;
+		uncoveredPointIds.push(point.id);
+		if (standIn) pointIds.add(standIn.id);
+	}
+	return pointIds.size === 0 ? null : { pointIds: [...pointIds], uncoveredPointIds };
+}
+
+/** The prompts a group runs, and how many runs one scan of them all makes. */
+function groupPrompts(group: RouteGroup, prompts: readonly PlanPrompt[]) {
+	// A T5 run sends no location, so a "near me" prompt there would measure wherever the vendor's server is.
+	const runsNearMe = group.route.tier !== "T5";
+	const promptIds: string[] = [];
+	const scopedPrompts: Record<string, ScopedPromptPoints> = {};
+	let runsPerScan = 0;
+	for (const prompt of prompts) {
+		if (isNearMe(prompt) && !runsNearMe) continue;
+		const cities = citiesOf(prompt);
+		if (cities.length === 0) {
+			if (group.kind !== "centroid" && !isNearMe(prompt)) continue;
+			promptIds.push(prompt.id);
+			runsPerScan += group.points.length;
+			continue;
+		}
+		if (group.kind !== "centroid") continue;
+		const scoped = scopedPoints(group, cities);
+		if (!scoped) continue;
+		promptIds.push(prompt.id);
+		scopedPrompts[prompt.id] = scoped;
+		runsPerScan += scoped.pointIds.length;
+	}
+	return { promptIds, scopedPrompts: Object.keys(scopedPrompts).length > 0 ? scopedPrompts : undefined, runsPerScan };
 }
 
 function nearestStandIn(point: PlannerPoint, served: readonly PlannerPoint[]): PlannerPoint | null {
@@ -132,12 +178,17 @@ function assignRoutes(input: PlanInput) {
 			if (reason) refused.push({ point, reason });
 			else served.push(point);
 		}
+		const standIns = refused.map(({ point, reason }) => ({ point, reason, standIn: nearestStandIn(point, served) }));
 		for (const kind of new Set(served.map((point) => point.kind))) {
-			const pointIds = served.filter((point) => point.kind === kind).map((point) => point.id);
-			groups.push({ engine, route, kind, pointIds });
+			groups.push({
+				engine,
+				route,
+				kind,
+				points: served.filter((point) => point.kind === kind),
+				refused: standIns.filter(({ point }) => point.kind === kind),
+			});
 		}
-		for (const { point, reason } of refused) {
-			const standIn = nearestStandIn(point, served);
+		for (const { point, reason, standIn } of standIns) {
 			uncovered.push({
 				engine,
 				pointId: point.id,
@@ -169,20 +220,21 @@ export function planRuns(input: PlanInput): RunPlan {
 	const { cadence } = input;
 
 	const series: PlannedSeries[] = [];
-	for (const { engine, route, kind, pointIds } of groups) {
-		const promptIds = promptsFor(route.tier, kind, input);
+	for (const group of groups) {
+		const { engine, route, kind } = group;
+		const { promptIds, scopedPrompts, runsPerScan } = groupPrompts(group, input.prompts);
 		if (promptIds.length === 0) continue;
 		const runsOften = kind === "centroid" && route.tier === "T1" && cheapT1Engines.has(engine);
 		const intervalDays = runsOften ? cadence.centroidIntervalDays : cadence.scanIntervalDays;
-		const runsPerMonth =
-			pointIds.length * promptIds.length * cadence.repeats * (PROJECTION_DAYS_PER_MONTH / intervalDays);
+		const runsPerMonth = runsPerScan * cadence.repeats * (PROJECTION_DAYS_PER_MONTH / intervalDays);
 		series.push({
 			engine,
 			config: route.config,
 			tier: route.tier,
 			pointKind: kind,
-			pointIds,
+			pointIds: group.points.map((point) => point.id),
 			promptIds,
+			...(scopedPrompts && { scopedPrompts }),
 			intervalDays,
 			repeats: cadence.repeats,
 			runsPerMonth,

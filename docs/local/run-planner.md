@@ -23,7 +23,7 @@ When the canaries mark an engine's route degraded (E53-S27), the engine pauses: 
 
 ## Which prompts run where
 
-Prompts tagged `near-me` run on grid points and centroids. All other prompts are taken to name a city and run on centroids only. T5 runs only city-named prompts, because a "near me" prompt with no location measures wherever the vendor's server is. So ChatGPT, Gemini and Perplexity get no near-me runs until they have a route below T5.
+Prompts tagged `near-me` run on grid points and centroids. All other prompts are taken to name a city and run on centroids only. A prompt tagged `city:<city>-<state>` (`docs/local/prompt-templates.md`) runs only at that city's centroids, or at the centroid standing in for one the route can't place. Other city-named prompts run at every centroid. T5 runs only city-named prompts, because a "near me" prompt with no location measures wherever the vendor's server is. So ChatGPT, Gemini and Perplexity get no near-me runs until they have a route below T5.
 
 ## Cadence
 

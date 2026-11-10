@@ -43,6 +43,36 @@ function groupByArea(points: readonly PlannerPoint[]): Map<string, PlannerPoint[
 	return byArea;
 }
 
+type Series = RunPlan["series"][number];
+
+/** One area's scans of a series: a scan per prompt, a city-named prompt covering only its city's points. */
+function areaScans(
+	series: Series,
+	areaId: string,
+	areaPoints: PlannerPoint[],
+	areaUncovered: UncoveredScanPoint[],
+): ScanSpec[] {
+	return series.promptIds.flatMap((promptId) => {
+		const scoped = series.scopedPrompts?.[promptId];
+		const points = scoped ? areaPoints.filter((point) => scoped.pointIds.includes(point.id)) : areaPoints;
+		if (points.length === 0) return [];
+		return [
+			{
+				areaId,
+				promptId,
+				config: series.config,
+				tier: series.tier,
+				pointKind: series.pointKind,
+				repeats: series.repeats,
+				intervalDays: series.intervalDays,
+				points,
+				uncovered: scoped ? areaUncovered.filter((u) => scoped.uncoveredPointIds.includes(u.pointId)) : areaUncovered,
+				estimatedCostUsd: series.costPerRunUsd === null ? null : series.costPerRunUsd * points.length * series.repeats,
+			},
+		];
+	});
+}
+
 /** Splits each planned series into one scan per area and prompt. */
 export function scansFor(plan: RunPlan, points: readonly PlannerPoint[]): ScanSpec[] {
 	const byId = new Map(points.map((point) => [point.id, point]));
@@ -64,22 +94,7 @@ export function scansFor(plan: RunPlan, points: readonly PlannerPoint[]): ScanSp
 					reason: u.reason,
 					standInPointId: u.standIn?.pointId ?? null,
 				}));
-			const estimatedCostUsd =
-				series.costPerRunUsd === null ? null : series.costPerRunUsd * areaPoints.length * series.repeats;
-			for (const promptId of series.promptIds) {
-				specs.push({
-					areaId,
-					promptId,
-					config: series.config,
-					tier: series.tier,
-					pointKind: series.pointKind,
-					repeats: series.repeats,
-					intervalDays: series.intervalDays,
-					points: areaPoints,
-					uncovered: areaUncovered,
-					estimatedCostUsd,
-				});
-			}
+			specs.push(...areaScans(series, areaId, areaPoints, areaUncovered));
 		}
 	}
 	return specs;

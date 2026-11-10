@@ -22,6 +22,7 @@
 		"./local/locations": "./src/local/locations/index.ts",
 		"./local/named-businesses": "./src/local/named-businesses/index.ts",
 		"./local/places": "./src/local/places/index.ts",
+		"./local/prompt-templates": "./src/local/prompt-templates/index.ts",
 		"./local/run-planner": "./src/local/run-planner/index.ts",
 		"./local/run-planner/constants": "./src/local/run-planner/constants.ts",
 		"./local/schema": "./src/local/schema.ts",

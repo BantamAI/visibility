@@ -1,4 +1,4 @@
-export { BRAND_MODE_RUNS, MAX_INTERVAL_DAYS, MAX_REPEATS, NEAR_ME_TAG } from "./constants";
+export { BRAND_MODE_RUNS, CITY_TAG_PREFIX, cityTag, MAX_INTERVAL_DAYS, MAX_REPEATS, NEAR_ME_TAG } from "./constants";
 export {
 	budgetRefusal,
 	type PausedEngine,
@@ -7,6 +7,7 @@ export {
 	planRuns,
 	type RunCadence,
 	type RunPlan,
+	type ScopedPromptPoints,
 	type UncoveredPoint,
 } from "./plan";
 export { costPerRunUsd, type PlannerRoute, ROUTING_TABLE, type RouteSpec, routeFor } from "./routes";

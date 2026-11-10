@@ -13,6 +13,7 @@ import {
 	IconListDetails,
 	IconMapPin,
 	IconMapPinCheck,
+	IconMessageQuestion,
 	IconMessages,
 	IconMoodSmile,
 	IconPlugConnected,
@@ -132,6 +133,11 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 					title: "Local Competitors",
 					link: { to: "/app/org/$org/brand/$brand/settings/local-competitors", params },
 					icon: IconBuildingStore,
+				},
+				{
+					title: "Local Prompts",
+					link: { to: "/app/org/$org/brand/$brand/settings/local-prompts", params },
+					icon: IconMessageQuestion,
 				},
 				{
 					title: "Run Plan",

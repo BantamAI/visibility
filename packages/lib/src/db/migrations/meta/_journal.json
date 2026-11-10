@@ -330,6 +330,13 @@
       "when": 1794279313428,
       "tag": "0046_competitor_discovery",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1794316703898,
+      "tag": "0047_service_jobs",
+      "breakpoints": true
     }
   ]
 }

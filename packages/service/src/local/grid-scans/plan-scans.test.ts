@@ -1,6 +1,6 @@
 import type { LocationSupport, ModelConfig, Provider } from "@workspace/lib/providers";
 import { describe, expect, it } from "vitest";
-import { NEAR_ME_TAG, type PlannerPoint, planRuns } from "../run-planner";
+import { cityTag, NEAR_ME_TAG, type PlannerPoint, planRuns } from "../run-planner";
 import { dueScans, EARLY_START_MS, scansFor, specKey } from "./plan-scans";
 
 function provider(id: string, support: Record<string, LocationSupport[]> = {}): Provider {
@@ -99,6 +99,67 @@ describe("scansFor", () => {
 			(s) => s.pointKind === "grid" && s.areaId === "raleigh",
 		);
 		expect(grid?.estimatedCostUsd).toBeCloseTo(9 * 2 * 0.004);
+	});
+});
+
+describe("scansFor with prompts that name a city", () => {
+	const raleighCity = point("centroid", "triangle", { label: "Raleigh" });
+	const caryCity = point("centroid", "triangle", { label: "Cary", city: "Cary" });
+	const garner = point("centroid", "triangle", { label: "Garner", city: "Garner", googleCanonicalName: null });
+	const triangleGrid = Array.from({ length: 4 }, () => point("grid", "triangle"));
+	const trianglePoints = [...triangleGrid, raleighCity, caryCity, garner];
+	const inCary = { id: "in-cary", tags: [cityTag("Cary", "NC")] };
+	const inGarner = { id: "in-garner", tags: [cityTag("Garner", "NC")] };
+	const inDenver = { id: "in-denver", tags: [cityTag("Denver", "CO")] };
+
+	const scoped = (targets: ModelConfig[]) =>
+		scansFor(
+			planRuns({
+				targets,
+				prompts: [nearMe, inCary, inGarner, inDenver],
+				points: trianglePoints,
+				cadence,
+				getProvider,
+			}),
+			trianglePoints,
+		);
+
+	it("runs a city-named prompt on that city's centroid only, never on the grid", () => {
+		expect(summary(scoped([target("google-ai-mode", "dataforseo")])).sort()).toEqual([
+			"google-ai-mode/dataforseo centroid triangle in-cary: 1",
+			"google-ai-mode/dataforseo centroid triangle in-garner: 1",
+			"google-ai-mode/dataforseo centroid triangle near-me: 3",
+			"google-ai-mode/dataforseo grid triangle near-me: 4",
+		]);
+		const cary = scoped([target("google-ai-mode", "dataforseo")]).find((s) => s.promptId === "in-cary");
+		expect(cary?.points.map((p) => p.id)).toEqual([caryCity.id]);
+	});
+
+	it("runs a city the route can't place at the centroid standing in for it", () => {
+		const specs = scoped([target("google-ai-mode", "cloro")]);
+		const garnerScan = specs.find((s) => s.promptId === "in-garner");
+		expect(garnerScan?.points).toHaveLength(1);
+		expect(garnerScan?.uncovered).toEqual([expect.objectContaining({ pointId: garner.id })]);
+		expect(specs.find((s) => s.promptId === "in-cary")?.uncovered).toEqual([]);
+	});
+
+	it("runs city-named prompts at T5, where near-me prompts don't run", () => {
+		expect(summary(scoped([target("chatgpt", "brightdata")])).sort()).toEqual([
+			"chatgpt/brightdata centroid triangle in-cary: 1",
+			"chatgpt/brightdata centroid triangle in-garner: 1",
+		]);
+	});
+
+	it("counts only the runs a city-named prompt makes", () => {
+		const plan = planRuns({
+			targets: [target("chatgpt", "brightdata")],
+			prompts: [inCary, inDenver],
+			points: trianglePoints,
+			cadence: { ...cadence, repeats: 1 },
+			getProvider,
+		});
+		expect(plan.series[0]?.promptIds).toEqual(["in-cary"]);
+		expect(plan.runsPerMonth).toBeCloseTo(30 / 7);
 	});
 });
 

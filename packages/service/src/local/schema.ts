@@ -618,6 +618,8 @@ export const subjectServices = pgTable(
 			.references(() => brands.id, { onDelete: "cascade" })
 			.notNull(),
 		name: text("name").notNull(),
+		/** Specific jobs people ask for under this service, such as "water heater replacement". */
+		jobs: text("jobs").array().notNull().default([]),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [
