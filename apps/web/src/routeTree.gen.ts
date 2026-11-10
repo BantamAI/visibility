@@ -98,6 +98,7 @@ import { Route as AuthedAppOrgOrgBrandBrandSettingsBrandRouteImport } from './ro
 import { Route as AuthedAppOrgOrgBrandBrandSettingsCompetitorsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/competitors'
 import { Route as AuthedAppOrgOrgBrandBrandSettingsLlmsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/llms'
 import { Route as AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/local-competitors'
+import { Route as AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/local-prompts'
 import { Route as AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/place-ids'
 import { Route as AuthedAppOrgOrgBrandBrandSettingsPromptsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/prompts'
 import { Route as AuthedAppOrgOrgBrandBrandSettingsRunPlanRouteImport } from './routes/_authed/app/org/$org/brand/$brand/settings/run-plan'
@@ -592,6 +593,12 @@ const AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute =
     path: '/settings/local-competitors',
     getParentRoute: () => AuthedAppOrgOrgBrandBrandRoute,
   } as any)
+const AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute =
+  AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRouteImport.update({
+    id: '/settings/local-prompts',
+    path: '/settings/local-prompts',
+    getParentRoute: () => AuthedAppOrgOrgBrandBrandRoute,
+  } as any)
 const AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute =
   AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRouteImport.update({
     id: '/settings/place-ids',
@@ -704,6 +711,7 @@ export interface FileRoutesByFullPath {
   '/app/org/$org/brand/$brand/settings/competitors': typeof AuthedAppOrgOrgBrandBrandSettingsCompetitorsRoute
   '/app/org/$org/brand/$brand/settings/llms': typeof AuthedAppOrgOrgBrandBrandSettingsLlmsRoute
   '/app/org/$org/brand/$brand/settings/local-competitors': typeof AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute
+  '/app/org/$org/brand/$brand/settings/local-prompts': typeof AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute
   '/app/org/$org/brand/$brand/settings/place-ids': typeof AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute
   '/app/org/$org/brand/$brand/settings/prompts': typeof AuthedAppOrgOrgBrandBrandSettingsPromptsRoute
   '/app/org/$org/brand/$brand/settings/run-plan': typeof AuthedAppOrgOrgBrandBrandSettingsRunPlanRoute
@@ -792,6 +800,7 @@ export interface FileRoutesByTo {
   '/app/org/$org/brand/$brand/settings/competitors': typeof AuthedAppOrgOrgBrandBrandSettingsCompetitorsRoute
   '/app/org/$org/brand/$brand/settings/llms': typeof AuthedAppOrgOrgBrandBrandSettingsLlmsRoute
   '/app/org/$org/brand/$brand/settings/local-competitors': typeof AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute
+  '/app/org/$org/brand/$brand/settings/local-prompts': typeof AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute
   '/app/org/$org/brand/$brand/settings/place-ids': typeof AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute
   '/app/org/$org/brand/$brand/settings/prompts': typeof AuthedAppOrgOrgBrandBrandSettingsPromptsRoute
   '/app/org/$org/brand/$brand/settings/run-plan': typeof AuthedAppOrgOrgBrandBrandSettingsRunPlanRoute
@@ -888,6 +897,7 @@ export interface FileRoutesById {
   '/_authed/app/org/$org/brand/$brand/settings/competitors': typeof AuthedAppOrgOrgBrandBrandSettingsCompetitorsRoute
   '/_authed/app/org/$org/brand/$brand/settings/llms': typeof AuthedAppOrgOrgBrandBrandSettingsLlmsRoute
   '/_authed/app/org/$org/brand/$brand/settings/local-competitors': typeof AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute
+  '/_authed/app/org/$org/brand/$brand/settings/local-prompts': typeof AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute
   '/_authed/app/org/$org/brand/$brand/settings/place-ids': typeof AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute
   '/_authed/app/org/$org/brand/$brand/settings/prompts': typeof AuthedAppOrgOrgBrandBrandSettingsPromptsRoute
   '/_authed/app/org/$org/brand/$brand/settings/run-plan': typeof AuthedAppOrgOrgBrandBrandSettingsRunPlanRoute
@@ -984,6 +994,7 @@ export interface FileRouteTypes {
     | '/app/org/$org/brand/$brand/settings/competitors'
     | '/app/org/$org/brand/$brand/settings/llms'
     | '/app/org/$org/brand/$brand/settings/local-competitors'
+    | '/app/org/$org/brand/$brand/settings/local-prompts'
     | '/app/org/$org/brand/$brand/settings/place-ids'
     | '/app/org/$org/brand/$brand/settings/prompts'
     | '/app/org/$org/brand/$brand/settings/run-plan'
@@ -1072,6 +1083,7 @@ export interface FileRouteTypes {
     | '/app/org/$org/brand/$brand/settings/competitors'
     | '/app/org/$org/brand/$brand/settings/llms'
     | '/app/org/$org/brand/$brand/settings/local-competitors'
+    | '/app/org/$org/brand/$brand/settings/local-prompts'
     | '/app/org/$org/brand/$brand/settings/place-ids'
     | '/app/org/$org/brand/$brand/settings/prompts'
     | '/app/org/$org/brand/$brand/settings/run-plan'
@@ -1167,6 +1179,7 @@ export interface FileRouteTypes {
     | '/_authed/app/org/$org/brand/$brand/settings/competitors'
     | '/_authed/app/org/$org/brand/$brand/settings/llms'
     | '/_authed/app/org/$org/brand/$brand/settings/local-competitors'
+    | '/_authed/app/org/$org/brand/$brand/settings/local-prompts'
     | '/_authed/app/org/$org/brand/$brand/settings/place-ids'
     | '/_authed/app/org/$org/brand/$brand/settings/prompts'
     | '/_authed/app/org/$org/brand/$brand/settings/run-plan'
@@ -1840,6 +1853,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRouteImport
       parentRoute: typeof AuthedAppOrgOrgBrandBrandRoute
     }
+    '/_authed/app/org/$org/brand/$brand/settings/local-prompts': {
+      id: '/_authed/app/org/$org/brand/$brand/settings/local-prompts'
+      path: '/settings/local-prompts'
+      fullPath: '/app/org/$org/brand/$brand/settings/local-prompts'
+      preLoaderRoute: typeof AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRouteImport
+      parentRoute: typeof AuthedAppOrgOrgBrandBrandRoute
+    }
     '/_authed/app/org/$org/brand/$brand/settings/place-ids': {
       id: '/_authed/app/org/$org/brand/$brand/settings/place-ids'
       path: '/settings/place-ids'
@@ -1929,6 +1949,7 @@ interface AuthedAppOrgOrgBrandBrandRouteChildren {
   AuthedAppOrgOrgBrandBrandSettingsCompetitorsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsCompetitorsRoute
   AuthedAppOrgOrgBrandBrandSettingsLlmsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsLlmsRoute
   AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute
+  AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute
   AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute
   AuthedAppOrgOrgBrandBrandSettingsPromptsRoute: typeof AuthedAppOrgOrgBrandBrandSettingsPromptsRoute
   AuthedAppOrgOrgBrandBrandSettingsRunPlanRoute: typeof AuthedAppOrgOrgBrandBrandSettingsRunPlanRoute
@@ -1967,6 +1988,8 @@ const AuthedAppOrgOrgBrandBrandRouteChildren: AuthedAppOrgOrgBrandBrandRouteChil
       AuthedAppOrgOrgBrandBrandSettingsLlmsRoute,
     AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute:
       AuthedAppOrgOrgBrandBrandSettingsLocalCompetitorsRoute,
+    AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute:
+      AuthedAppOrgOrgBrandBrandSettingsLocalPromptsRoute,
     AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute:
       AuthedAppOrgOrgBrandBrandSettingsPlaceIdsRoute,
     AuthedAppOrgOrgBrandBrandSettingsPromptsRoute:
@@ -2156,6 +2179,7 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
 
 import type { getRouter } from './router.tsx'
 import type { startInstance } from './start.ts'

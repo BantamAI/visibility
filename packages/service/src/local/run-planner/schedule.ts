@@ -62,11 +62,15 @@ export async function getRunSchedule(subjectId: string): Promise<RunScheduleSett
 	return settingsFrom(row);
 }
 
-/** The plan these settings would run for the subject, with why it can't be enabled, if it can't. */
+/**
+ * The plan these settings would run for the subject, with why it can't be enabled, if it
+ * can't. `adding` prices prompts before they're saved.
+ */
 export async function previewRunPlan(
 	subjectId: string,
 	settings: RunScheduleSettings,
 	scrapeTargets: readonly ModelConfig[],
+	adding: readonly { id: string; tags: readonly string[] }[] = [],
 ): Promise<{ plan: RunPlan; refusal: string | null; points: PlannerPoint[] }> {
 	const [brand] = await db.select({ enabledModels: brands.enabledModels }).from(brands).where(eq(brands.id, subjectId));
 	if (!brand) throw new RunScheduleError("No such subject");
@@ -83,7 +87,7 @@ export async function previewRunPlan(
 	]);
 	const plan = planRuns({
 		targets: selectTargetsForBrand([...scrapeTargets], brand.enabledModels),
-		prompts: subjectPrompts,
+		prompts: [...subjectPrompts, ...adding],
 		points,
 		cadence: settings,
 		getProvider,

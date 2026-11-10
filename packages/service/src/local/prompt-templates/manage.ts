@@ -14,7 +14,11 @@ export class LocalPromptError extends Error {
 export const MAX_JOBS_PER_SERVICE = 5;
 const MAX_JOB_LENGTH = 80;
 
-export async function setServiceJobs(subjectId: string, serviceId: string, input: readonly string[]): Promise<string[]> {
+export async function setServiceJobs(
+	subjectId: string,
+	serviceId: string,
+	input: readonly string[],
+): Promise<string[]> {
 	const jobs: string[] = [];
 	for (const raw of input) {
 		const job = raw.trim().replace(/\s+/g, " ");
@@ -45,11 +49,7 @@ export async function listAreaCities(subjectId: string): Promise<AreaCities[]> {
 			.select()
 			.from(samplePoints)
 			.where(
-				and(
-					eq(samplePoints.subjectId, subjectId),
-					eq(samplePoints.kind, "centroid"),
-					eq(samplePoints.active, true),
-				),
+				and(eq(samplePoints.subjectId, subjectId), eq(samplePoints.kind, "centroid"), eq(samplePoints.active, true)),
 			),
 	]);
 	return citiesByArea(areas, centroids);

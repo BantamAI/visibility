@@ -102,7 +102,10 @@ describe("citiesByArea", () => {
 	const centroid = (city: string, lat: number) => ({ areaId: "a", city, region: "NC", lat, lng: -78.64 });
 
 	it("lists an area's cities nearest the center first, the nearest as its main city", () => {
-		const [triangle] = citiesByArea([area], [centroid("Cary", 35.9), centroid("Raleigh", 35.79), centroid("Garner", 35.7)]);
+		const [triangle] = citiesByArea(
+			[area],
+			[centroid("Cary", 35.9), centroid("Raleigh", 35.79), centroid("Garner", 35.7)],
+		);
 		expect(triangle?.cities.map((c) => [c.city, c.main])).toEqual([
 			["Raleigh", true],
 			["Garner", false],
