@@ -15,6 +15,7 @@ import {
 	START_GRID_SCANS_QUEUE,
 } from "@workspace/service/local/grid-scans";
 import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
+import { DISCOVER_COMPETITORS_QUEUE } from "@workspace/service/local/competitor-discovery";
 import { RESOLVE_NAMED_BUSINESSES_QUEUE } from "@workspace/service/local/named-businesses";
 import { REFRESH_PLACE_IDS_QUEUE } from "@workspace/service/local/places";
 import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
@@ -143,6 +144,7 @@ async function main() {
 	await boss.createQueue(DERIVE_ANSWER_BUSINESSES_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	await boss.createQueue(DERIVE_LOCAL_MENTIONS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	await boss.createQueue(RESOLVE_NAMED_BUSINESSES_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 15 });
+	await boss.createQueue(DISCOVER_COMPETITORS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 15 });
 	await boss.createQueue(REFRESH_PLACE_IDS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 30 });
 	console.log("Queues created");
 
@@ -203,6 +205,14 @@ async function main() {
 		{ tz: "UTC", singletonKey: RESOLVE_NAMED_BUSINESSES_QUEUE },
 	);
 	console.log("Scheduled resolve-named-businesses job (every 5 minutes)");
+
+	await boss.schedule(
+		DISCOVER_COMPETITORS_QUEUE,
+		"*/15 * * * *",
+		{},
+		{ tz: "UTC", singletonKey: DISCOVER_COMPETITORS_QUEUE },
+	);
+	console.log("Scheduled discover-competitors job (every 15 minutes)");
 
 	await boss.schedule(REFRESH_PLACE_IDS_QUEUE, "17 4 * * *", {}, { tz: "UTC", singletonKey: REFRESH_PLACE_IDS_QUEUE });
 	console.log("Scheduled refresh-place-ids job (daily)");
