@@ -742,3 +742,33 @@ export const areaCompetitors = pgTable(
 ).enableRLS();
 
 export type AreaCompetitor = typeof areaCompetitors.$inferSelect;
+
+/**
+ * News sites the agency counts as local news, grouped by the metro they cover. A domain
+ * here is local news wherever it's cited, so one listed for any metro counts for every subject.
+ */
+export const localNewsSources = pgTable(
+	"local_news_sources",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		metro: text("metro").notNull(),
+		domain: text("domain").notNull(),
+		/** Null for rows from the seed list. */
+		addedBy: text("added_by"),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		uniqueIndex("local_news_sources_metro_domain_idx").on(sql`lower(${table.metro})`, table.domain),
+		index("local_news_sources_domain_idx").on(table.domain),
+		check(
+			"local_news_sources_metro_check",
+			sql`btrim(${table.metro}) <> '' AND ${table.metro} = btrim(${table.metro})`,
+		),
+		check(
+			"local_news_sources_domain_check",
+			sql`${table.domain} <> '' AND ${table.domain} = lower(btrim(${table.domain}))`,
+		),
+	],
+).enableRLS();
+
+export type LocalNewsSource = typeof localNewsSources.$inferSelect;

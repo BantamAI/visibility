@@ -28,6 +28,7 @@ import { Route as DotwellKnownOauthProtectedResourceIndexRouteImport } from './r
 import { Route as DotwellKnownOauthProtectedResourceSplatRouteImport } from './routes/[.]well-known/oauth-protected-resource/$'
 import { Route as AuthedAcceptInvitationInvitationIdRouteImport } from './routes/_authed/accept-invitation/$invitationId'
 import { Route as AuthedAdminIndexRouteImport } from './routes/_authed/admin/index'
+import { Route as AuthedAdminLocalNewsRouteImport } from './routes/_authed/admin/local-news'
 import { Route as AuthedAdminToolsRouteImport } from './routes/_authed/admin/tools'
 import { Route as AuthedAdminVendorSpendRouteImport } from './routes/_authed/admin/vendor-spend'
 import { Route as AuthedAdminWorkflowsRouteImport } from './routes/_authed/admin/workflows'
@@ -202,6 +203,11 @@ const AuthedAcceptInvitationInvitationIdRoute =
 const AuthedAdminIndexRoute = AuthedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedAdminRoute,
+} as any)
+const AuthedAdminLocalNewsRoute = AuthedAdminLocalNewsRouteImport.update({
+  id: '/local-news',
+  path: '/local-news',
   getParentRoute: () => AuthedAdminRoute,
 } as any)
 const AuthedAdminToolsRoute = AuthedAdminToolsRouteImport.update({
@@ -640,6 +646,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
+  '/admin/local-news': typeof AuthedAdminLocalNewsRoute
   '/admin/tools': typeof AuthedAdminToolsRoute
   '/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/admin/workflows': typeof AuthedAdminWorkflowsRoute
@@ -732,6 +739,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
+  '/admin/local-news': typeof AuthedAdminLocalNewsRoute
   '/admin/tools': typeof AuthedAdminToolsRoute
   '/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/admin/workflows': typeof AuthedAdminWorkflowsRoute
@@ -826,6 +834,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/.well-known/oauth-protected-resource/$': typeof DotwellKnownOauthProtectedResourceSplatRoute
   '/_authed/accept-invitation/$invitationId': typeof AuthedAcceptInvitationInvitationIdRoute
+  '/_authed/admin/local-news': typeof AuthedAdminLocalNewsRoute
   '/_authed/admin/tools': typeof AuthedAdminToolsRoute
   '/_authed/admin/vendor-spend': typeof AuthedAdminVendorSpendRoute
   '/_authed/admin/workflows': typeof AuthedAdminWorkflowsRoute
@@ -923,6 +932,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/.well-known/oauth-protected-resource/$'
     | '/accept-invitation/$invitationId'
+    | '/admin/local-news'
     | '/admin/tools'
     | '/admin/vendor-spend'
     | '/admin/workflows'
@@ -1015,6 +1025,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/.well-known/oauth-protected-resource/$'
     | '/accept-invitation/$invitationId'
+    | '/admin/local-news'
     | '/admin/tools'
     | '/admin/vendor-spend'
     | '/admin/workflows'
@@ -1108,6 +1119,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/.well-known/oauth-protected-resource/$'
     | '/_authed/accept-invitation/$invitationId'
+    | '/_authed/admin/local-news'
     | '/_authed/admin/tools'
     | '/_authed/admin/vendor-spend'
     | '/_authed/admin/workflows'
@@ -1361,6 +1373,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthedAdminIndexRouteImport
+      parentRoute: typeof AuthedAdminRoute
+    }
+    '/_authed/admin/local-news': {
+      id: '/_authed/admin/local-news'
+      path: '/local-news'
+      fullPath: '/admin/local-news'
+      preLoaderRoute: typeof AuthedAdminLocalNewsRouteImport
       parentRoute: typeof AuthedAdminRoute
     }
     '/_authed/admin/tools': {
@@ -1892,6 +1911,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedAdminRouteChildren {
+  AuthedAdminLocalNewsRoute: typeof AuthedAdminLocalNewsRoute
   AuthedAdminToolsRoute: typeof AuthedAdminToolsRoute
   AuthedAdminVendorSpendRoute: typeof AuthedAdminVendorSpendRoute
   AuthedAdminWorkflowsRoute: typeof AuthedAdminWorkflowsRoute
@@ -1899,6 +1919,7 @@ interface AuthedAdminRouteChildren {
 }
 
 const AuthedAdminRouteChildren: AuthedAdminRouteChildren = {
+  AuthedAdminLocalNewsRoute: AuthedAdminLocalNewsRoute,
   AuthedAdminToolsRoute: AuthedAdminToolsRoute,
   AuthedAdminVendorSpendRoute: AuthedAdminVendorSpendRoute,
   AuthedAdminWorkflowsRoute: AuthedAdminWorkflowsRoute,
@@ -2179,7 +2200,6 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
 
 import type { getRouter } from './router.tsx'
 import type { startInstance } from './start.ts'

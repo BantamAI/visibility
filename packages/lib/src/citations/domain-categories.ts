@@ -4,6 +4,8 @@
 export type CitationCategory =
 	| "brand"
 	| "competitor"
+	| "listings"
+	| "local-news"
 	| "editorial"
 	| "reviews"
 	| "ecommerce"
@@ -18,6 +20,8 @@ export type CitationCategory =
 export const CITATION_CATEGORIES: CitationCategory[] = [
 	"brand",
 	"competitor",
+	"listings",
+	"local-news",
 	"editorial",
 	"reviews",
 	"ecommerce",
@@ -533,6 +537,18 @@ export const CATEGORY_CONFIG: Record<
 		chartColor: "#ef4444",
 		badgeClass: "bg-red-500/90 text-white",
 		chartDotClass: "bg-red-500",
+	},
+	listings: {
+		label: "Listings",
+		chartColor: "#6366f1",
+		badgeClass: "bg-indigo-500/90 text-white",
+		chartDotClass: "bg-indigo-500",
+	},
+	"local-news": {
+		label: "Local News",
+		chartColor: "#0e7490",
+		badgeClass: "bg-cyan-700/90 text-white",
+		chartDotClass: "bg-cyan-700",
 	},
 	editorial: {
 		label: "Editorial",

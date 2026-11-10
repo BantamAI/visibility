@@ -13,7 +13,7 @@ export const BUCKET_MS = BUCKET_MINUTES * 60 * 1000;
  */
 export const ROLLUP_VERSION = 3;
 /** Bumped when the curated domain lists or the URL classifier change. */
-export const CLASSIFIER_VERSION = 1;
+export const CLASSIFIER_VERSION = 2;
 
 /**
  * Workers still on the previous version keep writing runs, without marks, until
