@@ -1,0 +1,5 @@
+{
+	"error_message": "This API key is not authorized to use this service or API. Please check the API restrictions settings of your API key in the Google Cloud Console to ensure that all of the APIs and services you need to use are correctly specified in the list of enabled APIs. For more information, see https://developers.google.com/maps/api-key-best-practices.",
+	"results": [],
+	"status": "REQUEST_DENIED"
+}

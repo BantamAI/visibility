@@ -1,0 +1,21 @@
+{
+	"places": [
+		{
+			"id": "ChIJj61dQgK6j4AR4GeTYWZsKWw",
+			"types": ["corporate_office", "point_of_interest", "service", "establishment"],
+			"nationalPhoneNumber": "(650) 253-0000",
+			"internationalPhoneNumber": "+1 650-253-0000",
+			"formattedAddress": "1600 Amphitheatre Pkwy, Mountain View, CA 94043",
+			"location": {
+				"latitude": 37.4220541,
+				"longitude": -122.08532419999999
+			},
+			"googleMapsUri": "https://maps.google.com/?cid=7793879817120868320&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+			"displayName": {
+				"text": "Googleplex",
+				"languageCode": "en"
+			},
+			"primaryType": "corporate_office"
+		}
+	]
+}

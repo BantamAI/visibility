@@ -54,11 +54,11 @@ async function cleanUp() {
 	await owner.delete(organization).where(eq(organization.id, ORG));
 }
 
-async function spend(provider: string, usd: number, createdAt: Date) {
+async function spend(provider: string, usd: number, createdAt: Date, eventType = "prompt_run") {
 	await owner.insert(usageEvents).values({
 		organizationId: ORG,
 		brandId: A,
-		eventType: "prompt_run",
+		eventType,
 		provider,
 		estimatedCostUsd: usd.toFixed(6),
 		createdAt,
@@ -77,6 +77,7 @@ describe("vendor spend stops", () => {
 		expect(plan).toBeGreaterThan(0);
 		await spend("dataforseo", 50, at(-1));
 		await spend("dataforseo", plan * 2, at(1));
+		await spend("google-places", 5, at(1), "places_call");
 
 		expect(await checkVendorSpend(targets, at(1))).toEqual([]);
 		await expect(withSubject(A, () => assertVendorRunning("dataforseo"))).resolves.toBeUndefined();

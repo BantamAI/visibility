@@ -377,3 +377,49 @@ export const vendorSpendStops = pgTable(
 ).enableRLS();
 
 export type VendorSpendStop = typeof vendorSpendStops.$inferSelect;
+
+/**
+ * The Place ID a subject (no `competitor_name`) or one of its tracked competitors is anchored on,
+ * as staff confirmed it. Elmo replaces a brand's competitor rows on every save, so competitors are
+ * matched by name, case-insensitively. Google lets Place IDs be kept indefinitely; nothing else
+ * from Google is stored here, and the CID is read from the place's Maps link.
+ */
+export const placeAnchors = pgTable(
+	"place_anchors",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id")
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		competitorName: text("competitor_name"),
+		placeId: text("place_id").notNull(),
+		cid: text("cid"),
+		/** What found it, re-run when Google retires the ID. */
+		searchQuery: text("search_query").notNull(),
+		confirmedBy: text("confirmed_by").notNull(),
+		confirmedAt: timestamp("confirmed_at", { withTimezone: true }).defaultNow().notNull(),
+		/** When Google last said the ID is current. */
+		checkedAt: timestamp("checked_at", { withTimezone: true }).defaultNow().notNull(),
+		/** When Google said the ID no longer exists; it needs confirming again. */
+		obsoleteAt: timestamp("obsolete_at", { withTimezone: true }),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("place_anchors_subject_id_idx").on(table.subjectId),
+		uniqueIndex("place_anchors_subject_idx").on(table.subjectId).where(sql`${table.competitorName} IS NULL`),
+		uniqueIndex("place_anchors_competitor_idx")
+			.on(table.subjectId, sql`lower(${table.competitorName})`)
+			.where(sql`${table.competitorName} IS NOT NULL`),
+		index("place_anchors_checked_at_idx").on(table.checkedAt),
+		check(
+			"place_anchors_competitor_name_check",
+			sql`${table.competitorName} IS NULL OR btrim(${table.competitorName}) <> ''`,
+		),
+	],
+).enableRLS();
+
+export type PlaceAnchor = typeof placeAnchors.$inferSelect;

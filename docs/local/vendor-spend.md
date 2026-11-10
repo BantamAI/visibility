@@ -6,7 +6,7 @@ A planner bug, a retry storm or a vendor price change can't run up more than a b
 
 A vendor's plan for the day is the estimated cost of every scan on it, across every subject with an enabled schedule that fits its budget, as if all of them started that day. No schedule interval is shorter than a day, so that's the most a day can legitimately cost. A vendor with spend but no plan has no allowance at all: nothing enabled should have spent there.
 
-Spend is the sum of `usage_events.estimated_cost_usd` for the vendor since midnight UTC, counting failed runs too, since some vendors bill them. Runs record the vendor's reported cost when it gives one and the estimate in `packages/lib/src/usage/cost.ts` otherwise.
+Spend is the sum of `usage_events.estimated_cost_usd` for the vendor's runs since midnight UTC, counting failed runs too, since some vendors bill them. Other calls, such as Google Places lookups (`docs/local/place-ids.md`), aren't runs and don't count. Runs record the vendor's reported cost when it gives one and the estimate in `packages/lib/src/usage/cost.ts` otherwise.
 
 ## Stopping and resuming
 

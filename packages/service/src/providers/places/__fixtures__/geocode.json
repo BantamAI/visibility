@@ -1,0 +1,15 @@
+{
+	"results": [
+		{
+			"address_components": [],
+			"formatted_address": "123 Example St, Columbus, OH 43215, USA",
+			"geometry": {
+				"location": { "lat": 39.9612, "lng": -82.9988 },
+				"location_type": "ROOFTOP"
+			},
+			"place_id": "ChIJd8BlQ2BZwokRAFUEcm_qrcA",
+			"types": ["street_address"]
+		}
+	],
+	"status": "OK"
+}

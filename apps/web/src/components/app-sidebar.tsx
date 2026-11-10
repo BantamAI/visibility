@@ -11,6 +11,7 @@ import {
 	IconLink,
 	IconListDetails,
 	IconMapPin,
+	IconMapPinCheck,
 	IconMessages,
 	IconMoodSmile,
 	IconPlugConnected,
@@ -120,6 +121,11 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 					title: "Service Areas",
 					link: { to: "/app/org/$org/brand/$brand/settings/service-areas", params },
 					icon: IconMapPin,
+				},
+				{
+					title: "Place IDs",
+					link: { to: "/app/org/$org/brand/$brand/settings/place-ids", params },
+					icon: IconMapPinCheck,
 				},
 				{
 					title: "Run Plan",
