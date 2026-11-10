@@ -7,6 +7,7 @@ import { PROCESS_PROMPT_QUEUE } from "@workspace/lib/queues/prompt-jobs";
 import { GENERATE_REPORT_QUEUE } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
+import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import {
 	GRID_SCAN_RUN_QUEUE,
 	type GridScanRunData,
@@ -24,6 +25,7 @@ import { deriveAnswerBusinessesJob } from "./jobs/answer-businesses";
 import { DERIVE_RUNS_QUEUE, type DeriveRunsData, deriveRunsJob } from "./jobs/derive-runs";
 import { type GenerateReportData, generateReportJob } from "./jobs/generate-report";
 import { gridScanRunJob, startGridScansJob } from "./jobs/grid-scans";
+import { deriveLocalMentionsJob } from "./jobs/local-mentions";
 import { refreshPlaceIdsJob } from "./jobs/place-ids";
 import { type ProcessPromptData, processPromptJob } from "./jobs/process-prompt";
 import { type RefreshRollupsData, refreshRollupsJob } from "./jobs/refresh-rollups";
@@ -200,6 +202,13 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 		withSentry(DERIVE_ANSWER_BUSINESSES_QUEUE, asAgency(DERIVE_ANSWER_BUSINESSES_QUEUE, deriveAnswerBusinessesJob)),
 	);
 	console.log(`Registered handler: ${DERIVE_ANSWER_BUSINESSES_QUEUE}`);
+
+	await boss.work(
+		DERIVE_LOCAL_MENTIONS_QUEUE,
+		{ localConcurrency: 1 },
+		withSentry(DERIVE_LOCAL_MENTIONS_QUEUE, asAgency(DERIVE_LOCAL_MENTIONS_QUEUE, deriveLocalMentionsJob)),
+	);
+	console.log(`Registered handler: ${DERIVE_LOCAL_MENTIONS_QUEUE}`);
 
 	await boss.work(
 		REFRESH_PLACE_IDS_QUEUE,
