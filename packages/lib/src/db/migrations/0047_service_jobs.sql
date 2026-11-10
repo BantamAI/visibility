@@ -1,0 +1,1 @@
+ALTER TABLE "subject_services" ADD COLUMN "jobs" text[] DEFAULT '{}' NOT NULL;
