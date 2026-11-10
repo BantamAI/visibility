@@ -31,4 +31,4 @@ Cards are derived from the run's stored `raw_output`, never from a second vendor
 
 Scan results (`docs/local/grid-scans.md`) list each run's cards, answer cards first.
 
-Cards aren't matched to the subject or its competitors here; that's E53-S5.
+Cards are matched to the subject and its competitors in `docs/local/local-mentions.md`.
