@@ -9,6 +9,7 @@ import { GENERATE_REPORT_QUEUE, REPORT_JOB_OPTIONS } from "@workspace/lib/queues
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
 import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
+import { installLocalCitationCategories, loadLocalNewsDomains } from "@workspace/service/local/citation-categories";
 import { DISCOVER_COMPETITORS_QUEUE } from "@workspace/service/local/competitor-discovery";
 import {
 	GRID_SCAN_RUN_QUEUE,
@@ -66,6 +67,10 @@ async function main() {
 	validateScrapeTargets(parseScrapeTargets(process.env.SCRAPE_TARGETS), getProvider);
 	console.log("SCRAPE_TARGETS validated");
 	reprocessDays();
+
+	// Before anything classifies a citation, startup's reclassify included.
+	installLocalCitationCategories();
+	await withAgency({ actor: "worker", reason: "startup: load local news sites" }, () => loadLocalNewsDomains());
 
 	// Before anything stamps runs or brands: the stamp names the judge.
 	const { judgeVersion } = configureMentionAnalyzer();
