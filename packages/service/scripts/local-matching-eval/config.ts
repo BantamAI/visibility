@@ -1,5 +1,7 @@
 import type { AreaForContext } from "../../src/local/local-mentions/context";
 import type { MatchableCard } from "../../src/local/local-mentions/match";
+import type { NamedBusiness } from "../../src/local/named-businesses/extract";
+import type { Resolved } from "../../src/local/named-businesses/resolve";
 
 export type AreaId = "raleigh" | "denver" | "naperville";
 
@@ -111,3 +113,14 @@ export interface EvalSet {
 		note: string;
 	}[];
 }
+
+/** What `resolve.ts` found: the businesses each answer names, and the listing each name is near an area. */
+export interface NamedSet {
+	/** By run id. */
+	extractions: Record<string, NamedBusiness[]>;
+	/** By `resolutionKey`. */
+	resolutions: Record<string, Resolved>;
+}
+
+export const resolutionKey = (area: AreaId, business: Pick<NamedBusiness, "nameKey" | "phone" | "address">) =>
+	`${area}|${business.nameKey}|${business.phone ?? ""}|${business.address ?? ""}`;
