@@ -13,9 +13,20 @@ export function normalizeDomain(urlOrDomain: string): string {
 	}
 }
 
+export interface MentionSubject {
+	name: string;
+	aliases: string[];
+	domains: string[];
+	/**
+	 * Where a local business is, as the judge reads it, so a same-named business elsewhere is
+	 * judged a different company. Brand-mode subjects have none.
+	 */
+	localContext?: string;
+}
+
 export interface MentionConfig {
-	brand: { name: string; aliases: string[]; domains: string[] };
-	competitors: { name: string; aliases: string[]; domains: string[] }[];
+	brand: MentionSubject;
+	competitors: MentionSubject[];
 }
 
 export function mentionConfigFrom(brand: Brand, competitors: Competitor[]): MentionConfig {
@@ -77,10 +88,13 @@ type Subject = MentionConfig["brand"];
  */
 export function judgedSubject(subject: Subject): Subject {
 	const present = (values: string[]) => values.map((value) => value.trim()).filter(Boolean);
+	const localContext = subject.localContext?.trim();
 	return {
 		name: subject.name.trim(),
 		aliases: present(subject.aliases),
 		domains: present(subject.domains).map(normalizeDomain),
+		// Absent rather than empty, so a subject without one keeps the fingerprint it always had.
+		...(localContext ? { localContext } : {}),
 	};
 }
 

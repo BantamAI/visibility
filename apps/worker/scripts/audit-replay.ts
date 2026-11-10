@@ -23,6 +23,7 @@ import { loadRawOutputs, selectRuns } from "@workspace/lib/db/runs";
 import { brands, citations, competitors, promptRuns } from "@workspace/lib/db/schema";
 import { type MentionConfig, mentionConfigFrom } from "@workspace/lib/mentions";
 import { extractorFor, extractRun } from "@workspace/lib/text-extraction";
+import { loadLocalContexts, localizeMentionConfig } from "@workspace/service/local/local-mentions";
 import { withAgency } from "@workspace/service/local/tenancy";
 import { and, asc, eq, gt, gte, inArray } from "drizzle-orm";
 import { mentionAnalyzer } from "../src/mention-judge";
@@ -79,7 +80,8 @@ async function configFor(brandId: string): Promise<MentionConfig> {
 	if (cached) return cached;
 	const [brand] = await db.select().from(brands).where(eq(brands.id, brandId));
 	const brandCompetitors = await db.select().from(competitors).where(eq(competitors.brandId, brandId));
-	const config = mentionConfigFrom(brand, brandCompetitors);
+	const local = await loadLocalContexts(db, [brandId]);
+	const config = localizeMentionConfig(mentionConfigFrom(brand, brandCompetitors), local.get(brandId));
 	configs.set(brandId, config);
 	return config;
 }

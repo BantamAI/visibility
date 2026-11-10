@@ -75,6 +75,28 @@ describe("judged mentions", () => {
 	});
 });
 
+describe("local subjects", () => {
+	it("tells the judge where a local business is, so a namesake elsewhere can be ruled out", async () => {
+		const { requests, analyze } = recording();
+		const local: MentionConfig = {
+			...config,
+			brand: { ...config.brand, localContext: "It's the business serving Raleigh, NC." },
+		};
+		await analyze.analyze("Apple is great.", local);
+		const verdict = requests[0].questions.brand__verdict;
+		expect(verdict.instructions).toContain("It's the business serving Raleigh, NC.");
+		expect(verdict.criteria.other_company).toMatch(/somewhere else/);
+	});
+
+	it("asks a brand-mode subject exactly what it always did", async () => {
+		const { requests, analyze } = recording();
+		await analyze.analyze("Apple is great.", config);
+		expect(requests[0].questions.brand__verdict.instructions).toBe(
+			"How does the answer portray Apple (website https://www.apple.com)? A link to its website counts as a mention.",
+		);
+	});
+});
+
 describe("answers too large for Jev", () => {
 	it("asks about fewer companies at a time, and gets the same judgements", async () => {
 		const text = "Apple is great value. Globex is a solid alternative. Initech is the one to avoid.";

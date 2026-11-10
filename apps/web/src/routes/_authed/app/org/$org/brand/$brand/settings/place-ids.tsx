@@ -11,11 +11,19 @@ import { useState } from "react";
 import { useBrandId } from "@/hooks/use-brand-id";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
-import { confirmPlaceAnchorFn, getPlaceAnchors, removePlaceAnchorFn, searchPlacesFn } from "@/server/places";
+import {
+	confirmPlaceAnchorFn,
+	getPlaceAnchors,
+	removePlaceAnchorFn,
+	saveBusinessContactFn,
+	searchPlacesFn,
+} from "@/server/places";
 
 export const Route = createFileRoute("/_authed/app/org/$org/brand/$brand/settings/place-ids")({
 	staticData: { crumb: "Place IDs" },
-	head: pageHead({ description: "Anchor this business and its competitors on Google Place IDs." }),
+	head: pageHead({
+		description: "Anchor this business and its competitors on Google Place IDs, phones and addresses.",
+	}),
 	component: PlaceIdsSettingsPage,
 });
 
@@ -41,6 +49,7 @@ function PlaceIdsSettingsPage() {
 	});
 	const writeError = useWriteErrorMessage();
 	const [finding, setFinding] = useState<Target | null>(null);
+	const [editing, setEditing] = useState<Target | null>(null);
 	const [error, setError] = useState<string | null>(null);
 
 	const refresh = () => queryClient.invalidateQueries({ queryKey });
@@ -61,8 +70,9 @@ function PlaceIdsSettingsPage() {
 			<div>
 				<h1 className="text-3xl font-bold">Place IDs</h1>
 				<p className="text-muted-foreground">
-					Anchor this business and each tracked competitor on its Google Place ID, so a same-named business in another
-					city isn't counted as one of them.
+					Anchor this business and each tracked competitor on its Google Place ID, phone and address, so a same-named
+					business in another city isn't counted as one of them. Answer cards are matched on all three, and the mention
+					judge is told the phone and address.
 				</p>
 			</div>
 
@@ -85,6 +95,7 @@ function PlaceIdsSettingsPage() {
 							<TableHead>Business</TableHead>
 							<TableHead>Place ID</TableHead>
 							<TableHead>Status</TableHead>
+							<TableHead>Phone and Address</TableHead>
 							<TableHead />
 						</TableRow>
 					</TableHeader>
@@ -115,6 +126,9 @@ function PlaceIdsSettingsPage() {
 								<TableCell>
 									<AnchorStatus target={target} />
 								</TableCell>
+								<TableCell className="text-sm">
+									<Contact target={target} />
+								</TableCell>
 								<TableCell className="text-right">
 									<div className="flex justify-end gap-2">
 										<Button variant="outline" size="sm" disabled={!data.configured} onClick={() => setFinding(target)}>
@@ -125,12 +139,27 @@ function PlaceIdsSettingsPage() {
 												Remove
 											</Button>
 										)}
+										<Button variant="outline" size="sm" onClick={() => setEditing(target)}>
+											Edit Contact
+										</Button>
 									</div>
 								</TableCell>
 							</TableRow>
 						))}
 					</TableBody>
 				</Table>
+			)}
+
+			{editing && (
+				<ContactEditor
+					key={editing.competitorName ?? "subject"}
+					brandId={brandId}
+					target={editing}
+					onDone={async (saved) => {
+						if (saved) await refresh();
+						setEditing(null);
+					}}
+				/>
 			)}
 
 			{finding && data && (
@@ -146,6 +175,81 @@ function PlaceIdsSettingsPage() {
 				/>
 			)}
 		</div>
+	);
+}
+
+function Contact({ target }: { target: Target }) {
+	if (!target.phone && !target.address) return "—";
+	return (
+		<>
+			{target.phone && <div>{target.phone}</div>}
+			{target.address && <div className="text-muted-foreground text-xs">{target.address}</div>}
+		</>
+	);
+}
+
+function ContactEditor({
+	brandId,
+	target,
+	onDone,
+}: {
+	brandId: string;
+	target: Target;
+	onDone: (saved: boolean) => void;
+}) {
+	const writeError = useWriteErrorMessage();
+	const [phone, setPhone] = useState(target.phone ?? "");
+	const [address, setAddress] = useState(target.address ?? "");
+	const [busy, setBusy] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const save = async (event: React.FormEvent) => {
+		event.preventDefault();
+		setBusy(true);
+		setError(null);
+		try {
+			await saveBusinessContactFn({ data: { brandId, competitorName: target.competitorName, phone, address } });
+			onDone(true);
+		} catch (err) {
+			setError(writeError(err, "Couldn't save the phone and address."));
+			setBusy(false);
+		}
+	};
+
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Phone and Address of {target.name}</CardTitle>
+				<CardDescription>
+					As the business publishes them, not copied from Google. Leave both empty to clear them.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<form onSubmit={save} className="space-y-3">
+					<Input
+						value={phone}
+						onChange={(event) => setPhone(event.target.value)}
+						placeholder="(919) 555-0100"
+						aria-label="Phone"
+					/>
+					<Input
+						value={address}
+						onChange={(event) => setAddress(event.target.value)}
+						placeholder="1 Main St, Raleigh, NC 27601"
+						aria-label="Address"
+					/>
+					{error && <p className="text-destructive text-sm">{error}</p>}
+					<div className="flex gap-2">
+						<Button type="submit" disabled={busy}>
+							Save
+						</Button>
+						<Button type="button" variant="outline" onClick={() => onDone(false)}>
+							Cancel
+						</Button>
+					</div>
+				</form>
+			</CardContent>
+		</Card>
 	);
 }
 

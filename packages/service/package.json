@@ -17,6 +17,7 @@
 		"./local/answer-businesses": "./src/local/answer-businesses/index.ts",
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/grid-scans": "./src/local/grid-scans/index.ts",
+		"./local/local-mentions": "./src/local/local-mentions/index.ts",
 		"./local/locations": "./src/local/locations/index.ts",
 		"./local/places": "./src/local/places/index.ts",
 		"./local/run-planner": "./src/local/run-planner/index.ts",

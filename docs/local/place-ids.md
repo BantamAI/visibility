@@ -8,6 +8,8 @@ Lookups go through Places API (New) and the Geocoding API, behind the `PlacesPro
 
 On the brand's **Place IDs** settings page, Find searches Google for the business's name, leaning toward the subject's primary service area (or another one you pick). Each candidate shows its address, phone, distance from the area's center, and whether it's outside the area. Picking one stores its Place ID and Maps CID in `place_anchors`, with the search that found it and who confirmed it. Change replaces an anchor; Remove deletes it.
 
+The same page takes each business's phone and address (Edit Contact), which matching also uses; see `docs/local/local-mentions.md`.
+
 Elmo replaces a brand's competitor rows every time competitors are saved, so a competitor's anchor is tied to its name, case-insensitively, not its row. Renaming a competitor leaves its anchor behind, and it needs finding again.
 
 ## What's stored, and for how long

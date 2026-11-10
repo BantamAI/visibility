@@ -68,6 +68,19 @@ describe("mentionsStamp", () => {
 		expect(mentionsStamp(recased, J)).not.toBe(mentionsStamp(config, J));
 	});
 
+	it("is unchanged for subjects with no local context, so brand-mode history isn't re-judged", () => {
+		expect(mentionsStamp(config, J)).toBe("1:fa1333b3e2d319f3:judge-0.3.0");
+		const blank = { ...config, brand: { ...config.brand, localContext: " " } };
+		expect(mentionsStamp(blank, J)).toBe(mentionsStamp(config, J));
+	});
+
+	it("changes when a local subject's whereabouts change", () => {
+		const raleigh = { ...config, brand: { ...config.brand, localContext: "It serves Raleigh." } };
+		const denver = { ...config, brand: { ...config.brand, localContext: "It serves Denver." } };
+		expect(mentionsStamp(raleigh, J)).not.toBe(mentionsStamp(config, J));
+		expect(mentionsStamp(denver, J)).not.toBe(mentionsStamp(raleigh, J));
+	});
+
 	it("survives reordering competitors, so a bulk save does not restamp history", () => {
 		const reordered = { ...config, competitors: [...config.competitors].reverse() };
 		expect(mentionsStamp(reordered, J)).toBe(mentionsStamp(config, J));

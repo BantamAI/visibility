@@ -67,16 +67,20 @@ type Subject = MentionConfig["brand"];
 
 function verdictQuestion(subject: Subject): JevChoiceQuestion {
 	const { name, domains } = subject;
+	const localContext = subject.localContext?.trim();
+	const where = localContext ? ` ${localContext}` : "";
 	return {
 		type: "choice",
-		instructions: `How does the answer portray ${name}${domains.length ? ` (website ${domains.join(", ")})` : ""}? A link to its website counts as a mention.`,
+		instructions: `How does the answer portray ${name}${domains.length ? ` (website ${domains.join(", ")})` : ""}?${where} A link to its website counts as a mention.`,
 		criteria: {
 			positive: `${name} or its product is recommended, praised, or described favourably.`,
 			neutral: `${name} or its product is mentioned factually without evaluation, or only cited as a source.`,
 			negative: `${name} or its product is criticised, warned against, or compared unfavourably.`,
 			mixed: `${name} gets clear praise and clear criticism of similar weight.`,
 			other_meaning: "The name is used as an ordinary word, not for any entity.",
-			other_company: "The name refers to a different entity (company, product, person or place) with the same name.",
+			other_company: localContext
+				? "The name refers to a different entity with the same name, such as a business of that name somewhere else."
+				: "The name refers to a different entity (company, product, person or place) with the same name.",
 			no_info: `The answer says it has no information about ${name}.`,
 		},
 	};

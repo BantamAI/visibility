@@ -14,6 +14,7 @@ import {
 	GRID_SCAN_RUN_QUEUE_OPTIONS,
 	START_GRID_SCANS_QUEUE,
 } from "@workspace/service/local/grid-scans";
+import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import { REFRESH_PLACE_IDS_QUEUE } from "@workspace/service/local/places";
 import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
 import { CHECK_VENDOR_SPEND_QUEUE } from "@workspace/service/local/vendor-spend";
@@ -139,6 +140,7 @@ async function main() {
 	await boss.createQueue(START_GRID_SCANS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 10 });
 	await boss.createQueue(CHECK_VENDOR_SPEND_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	await boss.createQueue(DERIVE_ANSWER_BUSINESSES_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
+	await boss.createQueue(DERIVE_LOCAL_MENTIONS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 4 });
 	await boss.createQueue(REFRESH_PLACE_IDS_QUEUE, { retryLimit: 0, expireInSeconds: 60 * 30 });
 	console.log("Queues created");
 
@@ -183,6 +185,14 @@ async function main() {
 		{ tz: "UTC", singletonKey: DERIVE_ANSWER_BUSINESSES_QUEUE },
 	);
 	console.log("Scheduled derive-answer-businesses job (every 5 minutes)");
+
+	await boss.schedule(
+		DERIVE_LOCAL_MENTIONS_QUEUE,
+		"*/5 * * * *",
+		{},
+		{ tz: "UTC", singletonKey: DERIVE_LOCAL_MENTIONS_QUEUE },
+	);
+	console.log("Scheduled derive-local-mentions job (every 5 minutes)");
 
 	await boss.schedule(REFRESH_PLACE_IDS_QUEUE, "17 4 * * *", {}, { tz: "UTC", singletonKey: REFRESH_PLACE_IDS_QUEUE });
 	console.log("Scheduled refresh-place-ids job (daily)");

@@ -173,6 +173,8 @@ export const runLocations = pgTable(
 		costSource: runCostSource("cost_source"),
 		/** The parser version its `answer_businesses` were derived with; null until they are. */
 		businessesVersion: smallint("businesses_version"),
+		/** What its `local_mentions` were derived from (see `localMentionsStamp`); null until they are. */
+		localMentionsStamp: text("local_mentions_stamp"),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [
@@ -423,3 +425,102 @@ export const placeAnchors = pgTable(
 ).enableRLS();
 
 export type PlaceAnchor = typeof placeAnchors.$inferSelect;
+
+/**
+ * The phone and address of the subject (no `competitor_name`) or one of its tracked competitors,
+ * as staff entered them or the facts sync filled them, never copied from a cached Google response.
+ * Keyed like `place_anchors`: competitors by name, case-insensitively.
+ */
+export const businessContacts = pgTable(
+	"business_contacts",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id")
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		competitorName: text("competitor_name"),
+		/** E.164. */
+		phone: text("phone"),
+		address: text("address"),
+		updatedBy: text("updated_by").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("business_contacts_subject_id_idx").on(table.subjectId),
+		uniqueIndex("business_contacts_subject_idx").on(table.subjectId).where(sql`${table.competitorName} IS NULL`),
+		uniqueIndex("business_contacts_competitor_idx")
+			.on(table.subjectId, sql`lower(${table.competitorName})`)
+			.where(sql`${table.competitorName} IS NOT NULL`),
+		check(
+			"business_contacts_competitor_name_check",
+			sql`${table.competitorName} IS NULL OR btrim(${table.competitorName}) <> ''`,
+		),
+		check("business_contacts_phone_check", sql`${table.phone} ~ '^\\+[0-9]{8,15}$'`),
+		check("business_contacts_address_check", sql`${table.address} IS NULL OR btrim(${table.address}) <> ''`),
+	],
+).enableRLS();
+
+export type BusinessContact = typeof businessContacts.$inferSelect;
+
+export const localMatchMethod = pgEnum("local_match_method", [
+	"place_id",
+	"cid",
+	"phone",
+	"url",
+	"text+jev",
+	"resolved",
+]);
+export type LocalMatchMethod = (typeof localMatchMethod.enumValues)[number];
+
+/**
+ * Why a row needs a person's eye: `unresolved`, counted on the judge's word alone; `doubtful`, a name
+ * the judge couldn't rule out, uncounted; `other_listing`, counted for a card of the same name nearby
+ * that isn't the anchored listing; `namesake_card`, uncounted for a card of a namesake elsewhere.
+ */
+export const localMentionReview = pgEnum("local_mention_review", [
+	"unresolved",
+	"doubtful",
+	"other_listing",
+	"namesake_card",
+]);
+export type LocalMentionReview = (typeof localMentionReview.enumValues)[number];
+
+/**
+ * How a located run's answer names the subject (no `competitor_name`) and each tracked competitor:
+ * one row per business it names or shows a card for, derived from the run's cards and the mention
+ * judge's assessments, so it's rebuilt whenever either changes. The trigger sets `subject_id`.
+ */
+export const localMentions = pgTable(
+	"local_mentions",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		runId: uuid("run_id")
+			.references(() => promptRuns.id, { onDelete: "cascade" })
+			.notNull(),
+		subjectId: text("subject_id").notNull(),
+		competitorName: text("competitor_name"),
+		/** Whether it counts as a mention of this business; false keeps a namesake for review and evaluation. */
+		counted: boolean("counted").notNull(),
+		method: localMatchMethod("method").notNull(),
+		confidence: doublePrecision("confidence").notNull(),
+		review: localMentionReview("review"),
+		/** The card that matched, for a structured match. */
+		cardPlacement: cardPlacement("card_placement"),
+		cardPosition: smallint("card_position"),
+	},
+	(table) => [
+		index("local_mentions_subject_id_idx").on(table.subjectId),
+		uniqueIndex("local_mentions_run_subject_idx").on(table.runId).where(sql`${table.competitorName} IS NULL`),
+		uniqueIndex("local_mentions_run_competitor_idx")
+			.on(table.runId, sql`lower(${table.competitorName})`)
+			.where(sql`${table.competitorName} IS NOT NULL`),
+		check("local_mentions_confidence_check", sql`${table.confidence} BETWEEN 0 AND 1`),
+		check("local_mentions_card_check", sql`(${table.cardPlacement} IS NULL) = (${table.cardPosition} IS NULL)`),
+	],
+).enableRLS();
+
+export type LocalMention = typeof localMentions.$inferSelect;
