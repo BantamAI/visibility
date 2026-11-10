@@ -127,14 +127,7 @@ function PlaceIdsSettingsPage() {
 									<AnchorStatus target={target} />
 								</TableCell>
 								<TableCell className="text-sm">
-									{target.phone || target.address ? (
-										<>
-											{target.phone && <div>{target.phone}</div>}
-											{target.address && <div className="text-muted-foreground text-xs">{target.address}</div>}
-										</>
-									) : (
-										"—"
-									)}
+									<Contact target={target} />
 								</TableCell>
 								<TableCell className="text-right">
 									<div className="flex justify-end gap-2">
@@ -182,6 +175,16 @@ function PlaceIdsSettingsPage() {
 				/>
 			)}
 		</div>
+	);
+}
+
+function Contact({ target }: { target: Target }) {
+	if (!target.phone && !target.address) return "—";
+	return (
+		<>
+			{target.phone && <div>{target.phone}</div>}
+			{target.address && <div className="text-muted-foreground text-xs">{target.address}</div>}
+		</>
 	);
 }
 

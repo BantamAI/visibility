@@ -7,13 +7,13 @@ import { PROCESS_PROMPT_QUEUE } from "@workspace/lib/queues/prompt-jobs";
 import { GENERATE_REPORT_QUEUE } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
-import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import {
 	GRID_SCAN_RUN_QUEUE,
 	type GridScanRunData,
 	START_GRID_SCANS_QUEUE,
 	VENDOR_CONCURRENCY,
 } from "@workspace/service/local/grid-scans";
+import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import { REFRESH_PLACE_IDS_QUEUE } from "@workspace/service/local/places";
 import { BRAND_MODE_RUNS } from "@workspace/service/local/run-planner/constants";
 import { withAgency, withSubject } from "@workspace/service/local/tenancy";

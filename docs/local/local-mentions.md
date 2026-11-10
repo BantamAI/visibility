@@ -66,10 +66,10 @@ Matching needs both a run's cards and its judgement. Every 5 minutes, `derive-lo
 | Setup | Precision | Recall |
 |---|---|---|
 | Elmo's judge (name and website only) | 0.561 | 1.000 |
-| Judge told where the business is | 0.860 | 1.000 |
+| Judge told where the business is | 0.860–0.871 | 1.000 |
 | Local matching (cards, then that judge) | 0.961 | 1.000 |
 
-Run on November 9, 2026. The three remaining false positives are a Roto-Rooter franchise in the Denver area counted as the tracked company-owned branch, a bare "Roto-Rooter" in a Naperville answer judged as Denver's, and a plumber named Duane Blanton taken for J. Blanton Plumbing.
+Run twice on November 9, 2026; Jev's judgements vary slightly between runs, and the ranges show it. The three remaining false positives are a Roto-Rooter franchise in the Denver area counted as the tracked company-owned branch, a bare "Roto-Rooter" in a Naperville answer judged as Denver's, and a plumber named Duane Blanton taken for J. Blanton Plumbing.
 
 Caveats:
 

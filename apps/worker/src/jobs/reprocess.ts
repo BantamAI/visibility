@@ -19,8 +19,8 @@ import {
 	runMentions,
 } from "@workspace/lib/db/schema";
 import { type MentionConfig, mentionConfigFrom } from "@workspace/lib/mentions";
-import { loadLocalContexts, localizeMentionConfig } from "@workspace/service/local/local-mentions";
 import { computeSystemTags } from "@workspace/lib/tag-utils";
+import { loadLocalContexts, localizeMentionConfig } from "@workspace/service/local/local-mentions";
 import { and, eq, gte, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
 import { getBoss } from "../boss";

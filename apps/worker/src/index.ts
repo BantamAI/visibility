@@ -9,12 +9,12 @@ import { GENERATE_REPORT_QUEUE, REPORT_JOB_OPTIONS } from "@workspace/lib/queues
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
 import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
-import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import {
 	GRID_SCAN_RUN_QUEUE,
 	GRID_SCAN_RUN_QUEUE_OPTIONS,
 	START_GRID_SCANS_QUEUE,
 } from "@workspace/service/local/grid-scans";
+import { DERIVE_LOCAL_MENTIONS_QUEUE } from "@workspace/service/local/local-mentions";
 import { REFRESH_PLACE_IDS_QUEUE } from "@workspace/service/local/places";
 import { assertAppRole, withAgency } from "@workspace/service/local/tenancy";
 import { CHECK_VENDOR_SPEND_QUEUE } from "@workspace/service/local/vendor-spend";

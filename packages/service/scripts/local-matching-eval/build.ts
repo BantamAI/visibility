@@ -14,8 +14,8 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { wholeWordPattern } from "@workspace/lib/mentions";
 import { extractorFor, extractRun } from "@workspace/lib/text-extraction";
-import { parseAnswerBusinesses } from "../../src/local/answer-businesses/parse";
 import pg from "pg";
+import { parseAnswerBusinesses } from "../../src/local/answer-businesses/parse";
 import { zipOf } from "../../src/local/local-mentions/near";
 import { googlePlacesProvider } from "../../src/providers/places/google";
 import { AREAS, type AreaId, type EvalSet } from "./config";
@@ -116,6 +116,48 @@ async function zipPoints(zips: string[]): Promise<EvalSet["zips"]> {
 const names = (business: { name: string; aliases: string[] }) =>
 	[business.name, ...business.aliases].map((term) => wholeWordPattern(term));
 
+type Item = EvalSet["items"][number];
+type Run = EvalSet["runs"][number];
+
+/** Every tracked business the answer names, as each area that judges it tracks them. */
+function itemsFor(run: Run, labelled: Map<string, Item>): Item[] {
+	return [run.area, ...ALSO_JUDGED_AS[run.area]].flatMap((judgedAs) =>
+		AREAS[judgedAs].businesses.flatMap((business) => {
+			const patterns = names(business);
+			const named =
+				patterns.some((pattern) => pattern.test(run.text)) ||
+				run.cards.some((card) => card.placement === "answer" && patterns.some((pattern) => pattern.test(card.name)));
+			if (!named) return [];
+			const proposed = {
+				run: run.id,
+				judgedAs,
+				business: business.name,
+				mentioned: judgedAs === run.area,
+				note: "proposed",
+			};
+			return [labelled.get(`${run.id}|${judgedAs}|${business.name}`) ?? proposed];
+		}),
+	);
+}
+
+function asRead(run: ProbeRun): Run | null {
+	const text = extractRun(run.rawOutput, extractorFor({ provider: run.provider, model: run.engine })).textContent;
+	if (!text) return null;
+	const cards = parseAnswerBusinesses(run.rawOutput, run.provider).map(
+		({ placement, position, name, placeId, cid, phone, website, address }) => ({
+			placement,
+			position,
+			name,
+			placeId,
+			cid,
+			phone,
+			website,
+			address,
+		}),
+	);
+	return { id: run.key, area: run.subject, route: run.route, prompt: run.prompt, text, cards };
+}
+
 async function main() {
 	const source = process.argv[2];
 	if (!source) throw new Error("Pass the path to the bake-off's runs.jsonl");
@@ -127,44 +169,13 @@ async function main() {
 	const existing: EvalSet | null = existsSync(DATASET) ? JSON.parse(readFileSync(DATASET, "utf8")) : null;
 	const labelled = new Map(existing?.items.map((item) => [`${item.run}|${item.judgedAs}|${item.business}`, item]));
 
-	const set: EvalSet = { anchors: await anchors(), zips: {}, runs: [], items: [] };
-	for (const run of sample(runs)) {
-		const text = extractRun(run.rawOutput, extractorFor({ provider: run.provider, model: run.engine })).textContent;
-		if (!text) continue;
-		const cards = parseAnswerBusinesses(run.rawOutput, run.provider).map(
-			({ placement, position, name, placeId, cid, phone, website, address }) => ({
-				placement,
-				position,
-				name,
-				placeId,
-				cid,
-				phone,
-				website,
-				address,
-			}),
-		);
-		set.runs.push({ id: run.key, area: run.subject, route: run.route, prompt: run.prompt, text, cards });
-		for (const judgedAs of [run.subject, ...ALSO_JUDGED_AS[run.subject]]) {
-			for (const business of AREAS[judgedAs].businesses) {
-				const patterns = names(business);
-				const named =
-					patterns.some((pattern) => pattern.test(text)) ||
-					cards.some((card) => card.placement === "answer" && patterns.some((pattern) => pattern.test(card.name)));
-				if (!named) continue;
-				const id = `${run.key}|${judgedAs}|${business.name}`;
-				set.items.push(
-					labelled.get(id) ?? {
-						run: run.key,
-						judgedAs,
-						business: business.name,
-						mentioned: judgedAs === run.subject,
-						note: "proposed",
-					},
-				);
-			}
-		}
-	}
-	set.zips = await zipPoints(set.runs.flatMap((run) => run.cards.flatMap((card) => zipOf(card.address) ?? [])));
+	const read = sample(runs).flatMap((run) => asRead(run) ?? []);
+	const set: EvalSet = {
+		anchors: await anchors(),
+		zips: await zipPoints(read.flatMap((run) => run.cards.flatMap((card) => zipOf(card.address) ?? []))),
+		runs: read,
+		items: read.flatMap((run) => itemsFor(run, labelled)),
+	};
 	writeFileSync(DATASET, `${JSON.stringify(set, null, "\t")}\n`);
 	console.log(`${set.runs.length} answers, ${set.items.length} items`);
 }

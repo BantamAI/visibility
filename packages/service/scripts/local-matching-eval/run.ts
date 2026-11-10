@@ -61,79 +61,80 @@ async function pool<T>(items: T[], size: number, work: (item: T) => Promise<void
 	);
 }
 
+type Prediction = Record<Setup, boolean> & { method: string };
+type Item = EvalSet["items"][number];
+
+const keyOf = (item: Item) => `${item.run}\t${item.judgedAs}\t${item.business}`;
+
+/** Judges one answer as one area's would be, under every setup. */
+async function predict(run: EvalSet["runs"][number], area: AreaId): Promise<[string, Prediction][]> {
+	const [plain, local] = await Promise.all([
+		analyzer.analyze(run.text, mentionConfig(area), null, run.prompt),
+		analyzer.analyze(run.text, localConfig(area), null, run.prompt),
+	]);
+	const businesses = tracked(area);
+	const { center, radiusMeters } = AREAS[area];
+	const near = nearAreaByZip([{ ...center, radiusMeters }], new Map(Object.entries(set.zips)));
+	const matches = matchLocalMentions(businesses, run.cards, local.assessments, near);
+	return businesses.map((business) => {
+		const match = matches.find((m) => m.competitorName === business.competitorName);
+		const prediction: Prediction = {
+			"Elmo's judge": judged(plain, business),
+			"Judge told where": judged(local, business),
+			"Cards, then judge told where": match?.counted ?? false,
+			method: match ? `${match.method}${match.review ? ` (${match.review})` : ""}` : "none",
+		};
+		return [`${run.id}\t${area}\t${business.name}`, prediction];
+	});
+}
+
+function printScores(predictions: Map<string, Prediction>): void {
+	console.log("| Setup | Precision | Recall | False positives | False negatives |");
+	console.log("|---|---|---|---|---|");
+	const pct = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}%` : "–");
+	for (const setup of SETUPS) {
+		const outcomes = set.items.map((item) => ({ item, predicted: predictions.get(keyOf(item))?.[setup] ?? false }));
+		const tp = outcomes.filter(({ item, predicted }) => predicted && item.mentioned).length;
+		const fp = outcomes.filter(({ item, predicted }) => predicted && !item.mentioned).length;
+		const fn = outcomes.filter(({ item, predicted }) => !predicted && item.mentioned).length;
+		console.log(`| ${setup} | ${pct(tp, tp + fp)} | ${pct(tp, tp + fn)} | ${fp} | ${fn} |`);
+	}
+}
+
+function printErrors(predictions: Map<string, Prediction>, runs: Map<string, EvalSet["runs"][number]>): void {
+	const methods = new Map<string, { right: number; wrong: number }>();
+	console.log("\nWrong under the full match:");
+	for (const item of set.items) {
+		const prediction = predictions.get(keyOf(item));
+		const method = prediction?.method ?? "none";
+		const right = (prediction?.["Cards, then judge told where"] ?? false) === item.mentioned;
+		const tally = methods.get(method) ?? { right: 0, wrong: 0 };
+		tally[right ? "right" : "wrong"]++;
+		methods.set(method, tally);
+		if (right) continue;
+		const run = runs.get(item.run);
+		const note = item.note ? `: ${item.note}` : "";
+		console.log(
+			`- ${item.mentioned ? "missed" : "counted"}: ${item.business} in a ${run?.area} ${run?.route} answer judged as ${item.judgedAs} (${method})${note}`,
+		);
+	}
+	console.log("\n| Method | Right | Wrong |\n|---|---|---|");
+	for (const [method, { right, wrong }] of [...methods].sort()) console.log(`| ${method} | ${right} | ${wrong} |`);
+}
+
 async function main() {
 	const runs = new Map(set.runs.map((run) => [run.id, run]));
 	const pairs = [...new Set(set.items.map((item) => `${item.run}\t${item.judgedAs}`))];
-	const predictions = new Map<string, Record<Setup, boolean> & { method: string; probability: number }>();
+	const predictions = new Map<string, Prediction>();
 	await pool(pairs, 8, async (pair) => {
 		const [runId, area] = pair.split("\t") as [string, AreaId];
 		const run = runs.get(runId);
 		if (!run) throw new Error(`No run ${runId}`);
-		const [plain, local] = await Promise.all([
-			analyzer.analyze(run.text, mentionConfig(area), null, run.prompt),
-			analyzer.analyze(run.text, localConfig(area), null, run.prompt),
-		]);
-		const businesses = tracked(area);
-		const { center, radiusMeters } = AREAS[area];
-		const near = nearAreaByZip([{ ...center, radiusMeters }], new Map(Object.entries(set.zips)));
-		const matches = matchLocalMentions(businesses, run.cards, local.assessments, near);
-		for (const business of businesses) {
-			const match = matches.find((m) => m.competitorName === business.competitorName);
-			predictions.set(`${pair}\t${business.name}`, {
-				"Elmo's judge": judged(plain, business),
-				"Judge told where": judged(local, business),
-				"Cards, then judge told where": match?.counted ?? false,
-				method: match ? `${match.method}${match.review ? ` (${match.review})` : ""}` : "none",
-				probability:
-					(business.competitorName === null
-						? local.assessments?.brand?.probability
-						: local.assessments?.competitors[business.competitorName]?.probability) ?? 0,
-			});
-		}
+		for (const [key, prediction] of await predict(run, area)) predictions.set(key, prediction);
 	});
-
 	console.log(`${set.items.length} items from ${set.runs.length} answers\n`);
-	console.log("| Setup | Precision | Recall | False positives | False negatives |");
-	console.log("|---|---|---|---|---|");
-	for (const setup of SETUPS) {
-		let tp = 0;
-		let fp = 0;
-		let fn = 0;
-		for (const item of set.items) {
-			const predicted = predictions.get(`${item.run}\t${item.judgedAs}\t${item.business}`)?.[setup] ?? false;
-			if (predicted && item.mentioned) tp++;
-			else if (predicted) fp++;
-			else if (item.mentioned) fn++;
-		}
-		const pct = (n: number, d: number) => (d ? `${((100 * n) / d).toFixed(1)}%` : "–");
-		console.log(`| ${setup} | ${pct(tp, tp + fp)} | ${pct(tp, tp + fn)} | ${fp} | ${fn} |`);
-	}
-
-	const methods = new Map<string, { right: number; wrong: number }>();
-	console.log("\nWrong under the full match:");
-	for (const item of set.items) {
-		const prediction = predictions.get(`${item.run}\t${item.judgedAs}\t${item.business}`);
-		const counted = prediction?.["Cards, then judge told where"] ?? false;
-		const tally = methods.get(prediction?.method ?? "none") ?? { right: 0, wrong: 0 };
-		tally[counted === item.mentioned ? "right" : "wrong"]++;
-		methods.set(prediction?.method ?? "none", tally);
-		if (counted === item.mentioned) continue;
-		const run = runs.get(item.run);
-		console.log(
-			`- ${counted ? "counted" : "missed"}: ${item.business} in a ${run?.area} ${run?.route} answer judged as ${item.judgedAs} (${prediction?.method})${item.note ? `: ${item.note}` : ""}`,
-		);
-	}
-	if (process.env.SHOW_PROBABILITIES) {
-		for (const item of set.items) {
-			const prediction = predictions.get(`${item.run}\t${item.judgedAs}\t${item.business}`);
-			if (prediction?.method.startsWith("text"))
-				console.log(
-					`P ${item.mentioned ? "yes" : "no "} ${prediction.probability.toFixed(3)} ${item.business} ${item.note}`,
-				);
-		}
-	}
-	console.log("\n| Method | Right | Wrong |\n|---|---|---|");
-	for (const [method, { right, wrong }] of [...methods].sort()) console.log(`| ${method} | ${right} | ${wrong} |`);
+	printScores(predictions);
+	printErrors(predictions, runs);
 }
 
 await main();
