@@ -6,7 +6,7 @@ A plumber's competitors in Raleigh aren't its competitors in Denver, and nobody 
 
 A subject's services (`subject_services`) are what it sells, written as people search for it: "plumber", "water heater repair". Add them on the brand's **Local Competitors** settings page.
 
-A prompt counts toward a service when it carries the tag `service:<service>` (case doesn't matter), such as `service:plumber`. Prompts tagged with no service count toward the area as a whole. E53-S4's prompt templates will add these tags.
+A prompt counts toward a service when it carries the tag `service:<service>` (case doesn't matter), such as `service:plumber`. Prompts tagged with no service count toward the area as a whole. Prompts from the Local Prompts page carry these tags (`docs/local/prompt-templates.md`).
 
 ## Seeding from Google
 
