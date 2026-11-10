@@ -42,7 +42,13 @@ describe("searchText", () => {
 
 	it("returns the website a place lists", async () => {
 		const body = JSON.stringify({
-			places: [{ id: "ChIJoakcityoakcity0001", displayName: { text: "Oak City Plumbing" }, websiteUri: "https://oakcity.example/" }],
+			places: [
+				{
+					id: "ChIJoakcityoakcity0001",
+					displayName: { text: "Oak City Plumbing" },
+					websiteUri: "https://oakcity.example/",
+				},
+			],
 		});
 		const { impl } = fakeFetch(200, body);
 		const [candidate] = (await googlePlacesProvider("key", impl).searchText("Oak City Plumbing", null)).data;

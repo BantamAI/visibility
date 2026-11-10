@@ -1,6 +1,6 @@
 import { dedupeAliases } from "@workspace/lib/citations/domain-categories";
 import { db } from "@workspace/lib/db/db";
-import { brands, competitors, promptRuns, prompts } from "@workspace/lib/db/schema";
+import { brands, type Competitor, competitors, promptRuns, prompts } from "@workspace/lib/db/schema";
 import { and, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { type AreaCircle, NEAR_AREA_FACTOR, zipOf } from "../local-mentions/near";
 import {
@@ -17,13 +17,14 @@ import {
 } from "../schema";
 import { distanceMeters } from "../service-areas/geo";
 import { getDiscoverySettings, listServices } from "./manage";
-import { type AreaCandidate, trackedInArea } from "./rank";
+import { type AreaCandidate, type DiscoverySettings, trackedInArea } from "./rank";
 import {
 	competitorDomain,
 	isSubjectName,
 	namesByPlace,
 	type Sighting,
 	serviceRuns,
+	type Tally,
 	tallyServices,
 	tallySightings,
 } from "./tally";
@@ -117,17 +118,15 @@ async function sightingsSince(subjectId: string, areas: Area[], since: Date): Pr
 	};
 	return [
 		...named.flatMap(({ placeId, ...sighting }) => (placeId ? [{ ...sighting, placeId }] : [])),
-		...cards
-			.filter(nearItsArea)
-			.map(({ placeId, runId, areaId, tags, cid, name, website }) => ({
-				runId,
-				areaId,
-				tags,
-				placeId: placeId as string,
-				cid,
-				name,
-				website,
-			})),
+		...cards.filter(nearItsArea).map(({ placeId, runId, areaId, tags, cid, name, website }) => ({
+			runId,
+			areaId,
+			tags,
+			placeId: placeId as string,
+			cid,
+			name,
+			website,
+		})),
 	];
 }
 
@@ -179,54 +178,19 @@ export async function discoverCompetitors(subjectId: string, now = new Date()): 
 	const names = namesByPlace(sightings);
 	const nameOf = placeNames(existing, anchors, existingCompetitors, names);
 
+	const changes = areas.map((area) =>
+		planArea(
+			existing.filter((row) => row.areaId === area.id),
+			tallies.get(area.id) ?? new Map(),
+			{ nameOf, names, settings },
+		),
+	);
 	await db.transaction(async (tx) => {
-		for (const area of areas) {
-			const rows = new Map(existing.filter((row) => row.areaId === area.id).map((row) => [row.placeId, row]));
-			const areaTallies = tallies.get(area.id) ?? new Map();
-			const candidates: AreaCandidate[] = [...new Set([...rows.keys(), ...areaTallies.keys()])].flatMap((placeId) => {
-				const row = rows.get(placeId);
-				const tally = areaTallies.get(placeId);
-				const name = row?.name ?? nameOf(placeId);
-				if (!name) return [];
-				return {
-					placeId,
-					name,
-					status: row?.status ?? "auto",
-					seedRank: row?.seedRank ?? null,
-					answerRuns: tally?.runs.size ?? 0,
-					serviceRuns: tally ? serviceRuns(tally) : 0,
-					tracked: row?.tracked ?? false,
-				};
-			});
-			const tracked = trackedInArea(candidates, settings);
-			for (const candidate of candidates) {
-				const row = rows.get(candidate.placeId);
-				const tally = areaTallies.get(candidate.placeId);
-				// No longer named nor seeded, so it can't be tracked: only a staff decision or Elmo's competitor keeps it.
-				if (row && !tally && row.status === "auto" && row.seedRank === null && !row.ownsCompetitor) {
-					await tx.delete(areaCompetitors).where(eq(areaCompetitors.id, row.id));
-					continue;
-				}
-				const answered = names.get(candidate.placeId) ?? [];
-				const values = {
-					answerRuns: candidate.answerRuns,
-					tracked: tracked.has(candidate.placeId),
-					aliases:
-						answered.length > 0
-							? answered.filter((name) => lower(name) !== lower(candidate.name)).slice(0, MAX_ALIASES)
-							: (row?.aliases ?? []),
-					services: [...new Set([...(row?.services ?? []), ...(tally ? tallyServices(tally) : [])])].sort(),
-					cid: row?.cid ?? tally?.cid ?? null,
-					website: row?.website ?? tally?.website ?? null,
-				};
-				if (!row) {
-					await tx
-						.insert(areaCompetitors)
-						.values({ subjectId, areaId: area.id, placeId: candidate.placeId, name: candidate.name, ...values });
-				} else if (changed(row, values)) {
-					await tx.update(areaCompetitors).set(values).where(eq(areaCompetitors.id, row.id));
-				}
-			}
+		for (const [i, { inserts, updates, deletes }] of changes.entries()) {
+			for (const row of inserts) await tx.insert(areaCompetitors).values({ subjectId, areaId: areas[i].id, ...row });
+			for (const { id, values } of updates)
+				await tx.update(areaCompetitors).set(values).where(eq(areaCompetitors.id, id));
+			if (deletes.length > 0) await tx.delete(areaCompetitors).where(inArray(areaCompetitors.id, deletes));
 		}
 	});
 
@@ -234,6 +198,85 @@ export async function discoverCompetitors(subjectId: string, now = new Date()): 
 	const synced = await syncCompetitors(subjectId, rows);
 	return { tracked: rows.filter((row) => row.tracked).length, ...synced };
 }
+
+type RowValues = Pick<AreaCompetitor, "answerRuns" | "tracked" | "aliases" | "services" | "cid" | "website">;
+
+interface AreaChanges {
+	inserts: (RowValues & { placeId: string; name: string })[];
+	updates: { id: string; values: RowValues }[];
+	deletes: string[];
+}
+
+interface PlanContext {
+	nameOf: (placeId: string) => string | undefined;
+	names: Map<string, string[]>;
+	settings: DiscoverySettings;
+}
+
+function candidateFor(
+	placeId: string,
+	row: AreaCompetitor | undefined,
+	tally: Tally | undefined,
+	context: PlanContext,
+): AreaCandidate | null {
+	const name = row?.name ?? context.nameOf(placeId);
+	if (!name) return null;
+	return {
+		placeId,
+		name,
+		status: row?.status ?? "auto",
+		seedRank: row?.seedRank ?? null,
+		answerRuns: tally?.runs.size ?? 0,
+		serviceRuns: tally ? serviceRuns(tally) : 0,
+		tracked: row?.tracked ?? false,
+	};
+}
+
+function rowValues(
+	candidate: AreaCandidate,
+	row: AreaCompetitor | undefined,
+	tally: Tally | undefined,
+	tracked: boolean,
+	answered: string[],
+): RowValues {
+	return {
+		answerRuns: candidate.answerRuns,
+		tracked,
+		aliases:
+			answered.length > 0
+				? answered.filter((name) => lower(name) !== lower(candidate.name)).slice(0, MAX_ALIASES)
+				: (row?.aliases ?? []),
+		services: [...new Set([...(row?.services ?? []), ...(tally ? tallyServices(tally) : [])])].sort(),
+		cid: row?.cid ?? tally?.cid ?? null,
+		website: row?.website ?? tally?.website ?? null,
+	};
+}
+
+/** The rows one area's ranking adds, changes and drops. */
+function planArea(rows: AreaCompetitor[], tallies: Map<string, Tally>, context: PlanContext): AreaChanges {
+	const byPlace = new Map(rows.map((row) => [row.placeId, row]));
+	const candidates = [...new Set([...byPlace.keys(), ...tallies.keys()])].flatMap(
+		(placeId) => candidateFor(placeId, byPlace.get(placeId), tallies.get(placeId), context) ?? [],
+	);
+	const tracked = trackedInArea(candidates, context.settings);
+	const changes: AreaChanges = { inserts: [], updates: [], deletes: [] };
+	for (const candidate of candidates) {
+		const row = byPlace.get(candidate.placeId);
+		const tally = tallies.get(candidate.placeId);
+		if (row && !tally && droppable(row)) {
+			changes.deletes.push(row.id);
+			continue;
+		}
+		const answered = context.names.get(candidate.placeId) ?? [];
+		const values = rowValues(candidate, row, tally, tracked.has(candidate.placeId), answered);
+		if (!row) changes.inserts.push({ placeId: candidate.placeId, name: candidate.name, ...values });
+		else if (changed(row, values)) changes.updates.push({ id: row.id, values });
+	}
+	return changes;
+}
+
+/** No longer named nor seeded, so it can't be tracked: only a staff decision or Elmo's competitor keeps it. */
+const droppable = (row: AreaCompetitor) => row.status === "auto" && row.seedRank === null && !row.ownsCompetitor;
 
 const sameList = (a: readonly string[], b: readonly string[]) =>
 	a.length === b.length && a.every((value, i) => value === b[i]);
@@ -271,17 +314,10 @@ interface Wanted {
 	aliases: string[];
 }
 
-/**
- * Makes Elmo's competitors match what the areas track: adds each business tracked somewhere and
- * anchors it on its listing, keeps the domains and aliases of the ones discovery added, and removes
- * those no area tracks any more. Competitors staff added themselves are never changed or removed.
- */
-async function syncCompetitors(
-	subjectId: string,
-	rows: AreaCompetitor[],
-): Promise<{ added: string[]; removed: string[] }> {
+/** Elmo's competitors the tracked rows call for, by lower-case name, the most-named listing's first. */
+function wantedCompetitors(rows: AreaCompetitor[]): Map<string, Wanted> {
 	const wanted = new Map<string, Wanted>();
-	for (const row of [...rows].filter((row) => row.tracked).sort((a, b) => b.answerRuns - a.answerRuns)) {
+	for (const row of rows.filter((row) => row.tracked).sort((a, b) => b.answerRuns - a.answerRuns)) {
 		const entry = wanted.get(lower(row.name)) ?? {
 			name: row.name,
 			placeId: row.placeId,
@@ -296,66 +332,93 @@ async function syncCompetitors(
 			.slice(0, MAX_ALIASES);
 		wanted.set(lower(row.name), entry);
 	}
+	return wanted;
+}
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+const rowsNamed = (subjectId: string, key: string) =>
+	and(eq(areaCompetitors.subjectId, subjectId), sql`lower(${areaCompetitors.name}) = ${key}`);
+
+/** Adds the competitor, or brings one discovery added up to date, and anchors it on its listing. */
+async function keepCompetitor(
+	tx: Tx,
+	subjectId: string,
+	want: Wanted,
+	have: Competitor | undefined,
+	owned: boolean,
+): Promise<boolean> {
+	if (!have) {
+		await tx
+			.insert(competitors)
+			.values({ brandId: subjectId, name: want.name, domains: want.domains, aliases: want.aliases });
+	} else if (!sameList(have.domains, want.domains) || !sameList(have.aliases, want.aliases)) {
+		await tx
+			.update(competitors)
+			.set({ domains: want.domains, aliases: want.aliases })
+			.where(eq(competitors.id, have.id));
+	}
+	if (!owned)
+		await tx
+			.update(areaCompetitors)
+			.set({ ownsCompetitor: true })
+			.where(rowsNamed(subjectId, lower(want.name)));
+	await tx
+		.insert(placeAnchors)
+		.values({
+			subjectId,
+			competitorName: want.name,
+			placeId: want.placeId,
+			cid: want.cid,
+			searchQuery: want.name,
+			confirmedBy: DISCOVERY_ACTOR,
+		})
+		.onConflictDoNothing();
+	return !have;
+}
+
+/** Removes a competitor discovery added, with the anchor it gave it. */
+async function releaseCompetitor(tx: Tx, subjectId: string, key: string): Promise<string[]> {
+	const gone = await tx
+		.delete(competitors)
+		.where(and(eq(competitors.brandId, subjectId), sql`lower(${competitors.name}) = ${key}`))
+		.returning({ name: competitors.name });
+	await tx
+		.delete(placeAnchors)
+		.where(
+			and(
+				eq(placeAnchors.subjectId, subjectId),
+				sql`lower(${placeAnchors.competitorName}) = ${key}`,
+				eq(placeAnchors.confirmedBy, DISCOVERY_ACTOR),
+			),
+		);
+	await tx.update(areaCompetitors).set({ ownsCompetitor: false }).where(rowsNamed(subjectId, key));
+	return gone.map(({ name }) => name);
+}
+
+/**
+ * Makes Elmo's competitors match what the areas track: adds each business tracked somewhere and
+ * anchors it on its listing, keeps the domains and aliases of the ones discovery added, and removes
+ * those no area tracks any more. Competitors staff added themselves are never changed or removed.
+ */
+async function syncCompetitors(
+	subjectId: string,
+	rows: AreaCompetitor[],
+): Promise<{ added: string[]; removed: string[] }> {
+	const wanted = wantedCompetitors(rows);
 	const owned = new Set(rows.filter((row) => row.ownsCompetitor).map((row) => lower(row.name)));
 	const added: string[] = [];
 	const removed: string[] = [];
-	const byName = (name: string) => sql`lower(${areaCompetitors.name}) = ${name}`;
-
 	await db.transaction(async (tx) => {
 		const current = await tx.select().from(competitors).where(eq(competitors.brandId, subjectId));
 		const currentByName = new Map(current.map((competitor) => [lower(competitor.name), competitor]));
 		for (const [key, want] of wanted) {
 			const have = currentByName.get(key);
 			if (have && !owned.has(key)) continue;
-			if (!have) {
-				await tx
-					.insert(competitors)
-					.values({ brandId: subjectId, name: want.name, domains: want.domains, aliases: want.aliases });
-				added.push(want.name);
-			} else if (!sameList(have.domains, want.domains) || !sameList(have.aliases, want.aliases)) {
-				await tx
-					.update(competitors)
-					.set({ domains: want.domains, aliases: want.aliases })
-					.where(eq(competitors.id, have.id));
-			}
-			if (!owned.has(key)) {
-				await tx
-					.update(areaCompetitors)
-					.set({ ownsCompetitor: true })
-					.where(and(eq(areaCompetitors.subjectId, subjectId), byName(key)));
-			}
-			await tx
-				.insert(placeAnchors)
-				.values({
-					subjectId,
-					competitorName: want.name,
-					placeId: want.placeId,
-					cid: want.cid,
-					searchQuery: want.name,
-					confirmedBy: DISCOVERY_ACTOR,
-				})
-				.onConflictDoNothing();
+			if (await keepCompetitor(tx, subjectId, want, have, owned.has(key))) added.push(want.name);
 		}
 		for (const key of owned) {
-			if (wanted.has(key)) continue;
-			const gone = await tx
-				.delete(competitors)
-				.where(and(eq(competitors.brandId, subjectId), sql`lower(${competitors.name}) = ${key}`))
-				.returning({ name: competitors.name });
-			await tx
-				.delete(placeAnchors)
-				.where(
-					and(
-						eq(placeAnchors.subjectId, subjectId),
-						sql`lower(${placeAnchors.competitorName}) = ${key}`,
-						eq(placeAnchors.confirmedBy, DISCOVERY_ACTOR),
-					),
-				);
-			await tx
-				.update(areaCompetitors)
-				.set({ ownsCompetitor: false })
-				.where(and(eq(areaCompetitors.subjectId, subjectId), byName(key)));
-			removed.push(...gone.map(({ name }) => name));
+			if (!wanted.has(key)) removed.push(...(await releaseCompetitor(tx, subjectId, key)));
 		}
 	});
 	return { added, removed };

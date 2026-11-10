@@ -13,6 +13,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { PlaceCandidate, PlacesProvider } from "../../providers/places";
 import { deriveLocalMentions } from "../local-mentions";
+import { PLACES_CALLS_PER_DAY } from "../places/usage";
 import {
 	answerNamedBusinesses,
 	localMentions,
@@ -24,7 +25,6 @@ import {
 import { withSubject } from "../tenancy";
 import { type Extract, extractNamedBusinesses } from "./derive";
 import { NAMED_BUSINESSES_VERSION } from "./extract";
-import { PLACES_CALLS_PER_DAY } from "../places/usage";
 import { resolveNamedBusinesses } from "./resolve";
 
 const ORG = "named-businesses-test-org";

@@ -59,7 +59,10 @@ function LocalCompetitorsPage() {
 	};
 
 	const setStatus = (competitor: Competitor, status: Status) =>
-		act(() => setCompetitorStatusFn({ data: { brandId, id: competitor.id, status } }), "Couldn't change the competitor.");
+		act(
+			() => setCompetitorStatusFn({ data: { brandId, id: competitor.id, status } }),
+			"Couldn't change the competitor.",
+		);
 
 	return (
 		<div className="max-w-5xl space-y-6">
@@ -267,7 +270,8 @@ function SettingsCard({
 
 function foundBy(competitor: Competitor): string {
 	const parts = [];
-	if (competitor.answerRuns > 0) parts.push(`Named in ${competitor.answerRuns} run${competitor.answerRuns === 1 ? "" : "s"}`);
+	if (competitor.answerRuns > 0)
+		parts.push(`Named in ${competitor.answerRuns} run${competitor.answerRuns === 1 ? "" : "s"}`);
 	if (competitor.seedRank !== null) parts.push(`Google #${competitor.seedRank}`);
 	return parts.join(" · ") || "—";
 }
@@ -319,7 +323,9 @@ function AreaTable({
 									<TableCell>
 										<div className="font-medium">{competitor.name}</div>
 										{competitor.website && (
-											<div className="text-muted-foreground text-xs">{competitor.website.replace(/^https?:\/\//, "")}</div>
+											<div className="text-muted-foreground text-xs">
+												{competitor.website.replace(/^https?:\/\//, "")}
+											</div>
 										)}
 										{competitor.aliases.length > 0 && (
 											<div className="text-muted-foreground text-xs">Also {competitor.aliases.join(", ")}</div>
@@ -334,15 +340,30 @@ function AreaTable({
 										<div className="flex justify-end gap-2">
 											{competitor.status === "auto" ? (
 												<>
-													<Button variant="outline" size="sm" disabled={busy} onClick={() => onStatus(competitor, "pinned")}>
+													<Button
+														variant="outline"
+														size="sm"
+														disabled={busy}
+														onClick={() => onStatus(competitor, "pinned")}
+													>
 														Pin
 													</Button>
-													<Button variant="outline" size="sm" disabled={busy} onClick={() => onStatus(competitor, "ignored")}>
+													<Button
+														variant="outline"
+														size="sm"
+														disabled={busy}
+														onClick={() => onStatus(competitor, "ignored")}
+													>
 														Ignore
 													</Button>
 												</>
 											) : (
-												<Button variant="outline" size="sm" disabled={busy} onClick={() => onStatus(competitor, "auto")}>
+												<Button
+													variant="outline"
+													size="sm"
+													disabled={busy}
+													onClick={() => onStatus(competitor, "auto")}
+												>
 													{competitor.status === "pinned" ? "Unpin" : "Stop Ignoring"}
 												</Button>
 											)}

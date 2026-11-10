@@ -1,8 +1,8 @@
 import {
 	IconBriefcase,
 	IconBuilding,
-	IconBuildings,
 	IconBuildingStore,
+	IconBuildings,
 	IconCalendarDollar,
 	IconChartBar,
 	IconCode,

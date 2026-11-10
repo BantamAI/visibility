@@ -103,9 +103,7 @@ export const saveDiscoverySettingsFn = createServerFn({ method: "POST" })
 	});
 
 export const setCompetitorStatusFn = createServerFn({ method: "POST" })
-	.validator(
-		z.object({ brandId: z.string(), id: z.string().uuid(), status: z.enum(["auto", "pinned", "ignored"]) }),
-	)
+	.validator(z.object({ brandId: z.string(), id: z.string().uuid(), status: z.enum(["auto", "pinned", "ignored"]) }))
 	.handler(async ({ data }) => {
 		const session = await requireBrandSession(data.brandId);
 		await withSubject(data.brandId, async () => {

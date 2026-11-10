@@ -35,7 +35,10 @@ export function servicesOf(tags: readonly string[], services: readonly string[])
 }
 
 /** Each area's businesses, by Place ID, with the runs that name them. */
-export function tallySightings(sightings: readonly Sighting[], services: readonly string[]): Map<string, Map<string, Tally>> {
+export function tallySightings(
+	sightings: readonly Sighting[],
+	services: readonly string[],
+): Map<string, Map<string, Tally>> {
 	const areas = new Map<string, Map<string, Tally>>();
 	for (const sighting of sightings) {
 		const area = areas.get(sighting.areaId) ?? new Map<string, Tally>();

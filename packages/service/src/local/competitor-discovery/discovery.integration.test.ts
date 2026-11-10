@@ -196,9 +196,9 @@ describe("competitor discovery", () => {
 			["Triangle Rooter", 1],
 		]);
 		expect(await rowsIn(durham)).toEqual([]);
-		expect(await owner.select().from(competitorSeedSearches).where(eq(competitorSeedSearches.subjectId, S))).toHaveLength(
-			2,
-		);
+		expect(
+			await owner.select().from(competitorSeedSearches).where(eq(competitorSeedSearches.subjectId, S)),
+		).toHaveLength(2);
 
 		expect(await seed(provider)).toEqual({ searched: 0, found: 0 });
 		expect(searched).toHaveLength(2);
@@ -233,21 +233,52 @@ describe("competitor discovery", () => {
 		const result = await discover();
 		expect(result.added).toEqual(["Bull City Drain"]);
 		expect(await tracked(durham)).toEqual(["Bull City Drain"]);
-		expect((await rowsIn(durham))[0]).toMatchObject({ answerRuns: 3, aliases: ["Bull City Drain Cleaning"], services: ["plumber"] });
+		expect((await rowsIn(durham))[0]).toMatchObject({
+			answerRuns: 3,
+			aliases: ["Bull City Drain Cleaning"],
+			services: ["plumber"],
+		});
 		expect(await tracked(raleigh)).toEqual(["Capital Drains", "Triangle Rooter"]);
 		expect((await rowsIn(raleigh)).find((row) => row.name === "Bull City Drain")).toMatchObject({
 			answerRuns: 1,
 			tracked: false,
 		});
-		expect((await elmoCompetitors()).find((c) => c.name === "Bull City Drain")?.aliases).toEqual(["Bull City Drain Cleaning"]);
+		expect((await elmoCompetitors()).find((c) => c.name === "Bull City Drain")?.aliases).toEqual([
+			"Bull City Drain Cleaning",
+		]);
 	});
 
 	it("counts a card in the answer near the area, but not one placed elsewhere", async () => {
 		const runId = await runNaming(raleigh, []);
 		await owner.insert(answerBusinesses).values([
-			{ runId, subjectId: S, placement: "answer", position: 1, name: "Triangle Rooter", placeId: "ChIJtrianglerooter0001", ...RALEIGH },
-			{ runId, subjectId: S, placement: "answer", position: 2, name: "Mile High Plumbing", placeId: "ChIJmilehighplumbing01", lat: 39.7392, lng: -104.9903 },
-			{ runId, subjectId: S, placement: "local_pack", position: 1, name: "Pack Plumbing", placeId: "ChIJpackplumbing00001", ...RALEIGH },
+			{
+				runId,
+				subjectId: S,
+				placement: "answer",
+				position: 1,
+				name: "Triangle Rooter",
+				placeId: "ChIJtrianglerooter0001",
+				...RALEIGH,
+			},
+			{
+				runId,
+				subjectId: S,
+				placement: "answer",
+				position: 2,
+				name: "Mile High Plumbing",
+				placeId: "ChIJmilehighplumbing01",
+				lat: 39.7392,
+				lng: -104.9903,
+			},
+			{
+				runId,
+				subjectId: S,
+				placement: "local_pack",
+				position: 1,
+				name: "Pack Plumbing",
+				placeId: "ChIJpackplumbing00001",
+				...RALEIGH,
+			},
 		]);
 		await discover();
 		const rows = await rowsIn(raleigh);

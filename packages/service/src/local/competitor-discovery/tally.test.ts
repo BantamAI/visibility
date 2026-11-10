@@ -27,9 +27,9 @@ describe("tallySightings", () => {
 		);
 		const raleigh = tallies.get("raleigh")?.get("oak-city");
 		expect(raleigh?.runs.size).toBe(4);
-		expect(Object.fromEntries([...(raleigh?.runsByService ?? [])].map(([service, runs]) => [service, runs.size]))).toEqual(
-			{ plumber: 2, "Water Heater Repair": 1, "": 1 },
-		);
+		expect(
+			Object.fromEntries([...(raleigh?.runsByService ?? [])].map(([service, runs]) => [service, runs.size])),
+		).toEqual({ plumber: 2, "Water Heater Repair": 1, "": 1 });
 		expect(raleigh && serviceRuns(raleigh)).toBe(2);
 		expect(tallies.get("durham")?.get("oak-city")?.runs.size).toBe(1);
 	});
