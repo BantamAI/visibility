@@ -10,6 +10,7 @@ import {
 	businessContacts,
 	localMentions,
 	placeAnchors,
+	refUsZctas,
 	runLocations,
 	samplePoints,
 	subjectServiceAreas,
@@ -176,6 +177,43 @@ describe("local mentions", () => {
 			expect.objectContaining({ competitorName: RIVAL, counted: false, method: "text+jev" }),
 			expect.objectContaining({ competitorName: null, counted: true, method: "text+jev" }),
 		]);
+	});
+
+	it("counts another listing of a business's name nearby, placed by the card's ZIP", async () => {
+		const area = { subjectId: A, name: "Raleigh", centerLat: 35.7796, centerLng: -78.6382, radiusMeters: 16000 };
+		const [raleigh] = await owner
+			.insert(subjectServiceAreas)
+			.values({ ...area, timezone: "America/New_York" })
+			.returning();
+		await owner
+			.insert(refUsZctas)
+			.values({ zcta: "27601", lat: 35.7727, lng: -78.6347, landAreaM2: 2_000_000, vintage: 2025 })
+			.onConflictDoNothing();
+		await owner.insert(placeAnchors).values({
+			subjectId: A,
+			competitorName: RIVAL,
+			placeId: "ChIJrivalsecondlist01",
+			cid: "42",
+			searchQuery: RIVAL,
+			confirmedBy: "staff",
+		});
+		const sure = { mentioned: true, probability: 0.97, sentiment: "positive" } as const;
+		await owner
+			.update(runMentions)
+			.set(judged("judge-3", { ...assessments, competitors: { [RIVAL]: sure } }))
+			.where(eq(runMentions.runId, run));
+		try {
+			expect(await derive(A)).toBe(1);
+			expect((await mentionsOf(run)).find((row) => row.competitorName === RIVAL)).toMatchObject({
+				counted: true,
+				method: "text+jev",
+				review: "other_listing",
+			});
+		} finally {
+			await owner.delete(placeAnchors).where(eq(placeAnchors.subjectId, A));
+			await owner.delete(subjectServiceAreas).where(eq(subjectServiceAreas.id, raleigh.id));
+			await owner.delete(refUsZctas).where(eq(refUsZctas.zcta, "27601"));
+		}
 	});
 
 	it("matches only the subject's own runs", async () => {
