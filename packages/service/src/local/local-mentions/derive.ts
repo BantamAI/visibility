@@ -119,6 +119,7 @@ async function matchChunk(
 		.select({
 			runId: answerNamedBusinesses.runId,
 			name: answerNamedBusinesses.name,
+			placed: sql<boolean>`${answerNamedBusinesses.phone} IS NOT NULL OR ${answerNamedBusinesses.address} IS NOT NULL`,
 			resolution: placeResolutions.resolution,
 			placeId: placeResolutions.placeId,
 			cid: placeResolutions.cid,
@@ -130,6 +131,7 @@ async function matchChunk(
 				eq(placeResolutions.subjectId, answerNamedBusinesses.subjectId),
 				eq(placeResolutions.nameKey, answerNamedBusinesses.nameKey),
 				sql`${placeResolutions.phone} IS NOT DISTINCT FROM ${answerNamedBusinesses.phone}`,
+				sql`${placeResolutions.address} IS NOT DISTINCT FROM ${answerNamedBusinesses.address}`,
 			),
 		)
 		.where(inArray(answerNamedBusinesses.runId, runIds));
@@ -144,19 +146,15 @@ async function matchChunk(
 		: [];
 	const nearArea = nearAreaByZip(areas, new Map(zipPoints.map(({ zcta, lat, lng }) => [zcta, { lat, lng }])));
 	const rows = runs.flatMap(({ runId, assessments }) =>
-		matchLocalMentions(
-			businesses,
-			cardsByRun.get(runId) ?? [],
-			assessments,
-			nearArea,
-			namedByRun.get(runId) ?? [],
-		).map(({ card, ...match }) => ({
-			runId,
-			subjectId,
-			...match,
-			cardPlacement: card?.placement ?? null,
-			cardPosition: card?.position ?? null,
-		})),
+		matchLocalMentions(businesses, cardsByRun.get(runId) ?? [], assessments, nearArea, namedByRun.get(runId) ?? []).map(
+			({ card, ...match }) => ({
+				runId,
+				subjectId,
+				...match,
+				cardPlacement: card?.placement ?? null,
+				cardPosition: card?.position ?? null,
+			}),
+		),
 	);
 	await db.transaction(async (tx) => {
 		await tx.delete(localMentions).where(inArray(localMentions.runId, runIds));

@@ -193,6 +193,7 @@ describe("matching a located answer to tracked businesses", () => {
 describe("resolving the names an answer gives through Google", () => {
 	const named = (fields: Partial<ResolvedName>): ResolvedName => ({
 		name: "Oak City Plumbing",
+		placed: true,
 		resolution: "matched",
 		placeId: subject.placeId,
 		cid: subject.cid,
@@ -202,7 +203,18 @@ describe("resolving the names an answer gives through Google", () => {
 		match([business], [], assessments(mentioned(probability)), nearRaleigh, names)[0];
 
 	it("ties a text mention to the business's own listing", () => {
-		expect(resolve(0.85, [named({})])).toMatchObject({ counted: true, method: "resolved", confidence: 0.9, review: null });
+		expect(resolve(0.85, [named({})])).toMatchObject({
+			counted: true,
+			method: "resolved",
+			confidence: 0.9,
+			review: null,
+		});
+	});
+
+	it("doesn't take a bare name found near the areas as the business: every market has one", () => {
+		const bare = named({ placed: false });
+		expect(resolve(0.9, [bare])).toMatchObject({ counted: true, method: "text+jev", review: "unresolved" });
+		expect(resolve(0.6, [bare])).toMatchObject({ counted: false, method: "text+jev", review: "doubtful" });
 	});
 
 	it("counts a doubtful mention once its name resolves to the business's listing", () => {
@@ -224,8 +236,8 @@ describe("resolving the names an answer gives through Google", () => {
 		expect(resolve(0.9, [named({})], unanchored)).toMatchObject({ counted: true, method: "resolved", review: null });
 	});
 
-	it("doesn't count a name Google places only in another city", () => {
-		const elsewhere = named({ resolution: "elsewhere", placeId: null, cid: null });
+	it.each([true, false])("doesn't count a name Google places only in another city (placed: %s)", (placed) => {
+		const elsewhere = named({ placed, resolution: "elsewhere", placeId: null, cid: null });
 		expect(resolve(0.95, [elsewhere])).toMatchObject({
 			counted: false,
 			method: "text+jev",

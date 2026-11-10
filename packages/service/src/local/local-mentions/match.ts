@@ -24,6 +24,8 @@ export type MatchableCard = Pick<
 /** A business the answer's text names, and the listing Google says it is near the subject's areas. */
 export interface ResolvedName {
 	name: string;
+	/** Whether the answer gives its phone or says where it is, so Google's listing is the answer's, not just any of that name. */
+	placed: boolean;
 	/** Null until it's looked up. */
 	resolution: PlaceResolution | null;
 	placeId: string | null;
@@ -133,15 +135,16 @@ const isOwnListing = (name: ResolvedName, business: TrackedBusiness) =>
 /**
  * What Google says about the names the answer gives for the business: its own listing, another
  * listing of that name nearby (a branch), or listings of that name only elsewhere (a namesake).
- * Null when no name the answer gives for it has been looked up.
+ * A bare name proves nothing by being found nearby: there's a Roto-Rooter in every market. Only a
+ * name the answer places, by phone or address, ties the mention to a listing. Null when Google
+ * says nothing either way.
  */
 function resolvedMatch(business: TrackedBusiness, named: ResolvedName[], probability: number): Outcome | null {
 	const linked = named.filter((name) => name.resolution !== null && sameBrand(name.name, business));
+	const placedNearby = linked.filter((name) => name.placed && name.resolution === "matched");
 	const resolved = { counted: true, method: "resolved" as const, confidence: RESOLVED_CONFIDENCE };
-	if (linked.some((name) => name.resolution === "matched" && isOwnListing(name, business)))
-		return { ...resolved, review: null };
-	if (linked.some((name) => name.resolution === "matched"))
-		return { ...resolved, review: anchored(business) ? "other_listing" : null };
+	if (placedNearby.some((name) => isOwnListing(name, business))) return { ...resolved, review: null };
+	if (placedNearby.length > 0) return { ...resolved, review: anchored(business) ? "other_listing" : null };
 	if (linked.length > 0 && linked.every((name) => name.resolution === "elsewhere"))
 		return { counted: false, method: "text+jev", confidence: probability, review: "namesake_place" };
 	return null;

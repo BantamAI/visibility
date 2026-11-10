@@ -13,6 +13,12 @@ export {
 	subjectsWithLocatedRuns,
 	trackedBusinesses,
 } from "./derive";
-export { type LocalMatch, type MatchableCard, matchLocalMentions, type ResolvedName, type TrackedBusiness } from "./match";
+export {
+	type LocalMatch,
+	type MatchableCard,
+	matchLocalMentions,
+	type ResolvedName,
+	type TrackedBusiness,
+} from "./match";
 
 export const DERIVE_LOCAL_MENTIONS_QUEUE = "derive-local-mentions";
