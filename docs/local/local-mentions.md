@@ -10,6 +10,10 @@ Name matching alone can't tell a subject's plumber from a same-named business in
    - A card whose name starts with the business's name and whose ZIP is near the subject's areas is another listing of the business, such as a second location or a chain's other branch in the market. The mention counts.
    - A card of that name placed elsewhere, or with another listing's ID and no address, is a namesake. So is a card where the name sits inside a longer one ("Harris Brothers Plumbing" for "Brothers Plumbing"). The mention doesn't count.
    - With no such card, the mention counts only when the judge is sure of it (probability at least 0.8).
+4. **Then the names Google resolves.** Each answer's businesses are listed and looked up on Google (`docs/local/named-businesses.md`). A confirmed text mention with no card evidence either way is checked against the names the answer gives that start with the business's name or an alias:
+   - If the answer places one of them, by phone or address, and Google finds that listing near the subject's areas, the mention counts as `resolved`. It's flagged `other_listing` when that listing isn't the anchored one.
+   - If Google finds every one of them only outside the areas, the name is a namesake's and the mention doesn't count.
+   - A bare name found nearby proves nothing, because every market has a Roto-Rooter, so it leaves the judge's word as it was.
 
 Only cards in the answer are matched. The map pack beside an AI Overview is Google's ordinary local ranking, not the AI's.
 
@@ -22,7 +26,7 @@ Only cards in the answer are matched. The map pack beside an AI Overview is Goog
 | `phone` | 0.95 | Yes |
 | `url` | 0.9 | Yes |
 | `text+jev` | Jev's probability | As above |
-| `resolved` | – | Set by E53-S33, which resolves unmatched names through Places |
+| `resolved` | 0.9 | Yes |
 
 A matched card's placement and position are stored with the row, so card position counts toward average position.
 
@@ -32,10 +36,11 @@ Nothing the judge confirms is dropped. Rows that need a person's eye carry a `re
 
 | Review | Counted | Meaning |
 |---|---|---|
-| `unresolved` | Yes | The judge is sure, but nothing ties the name to the business's listing. E53-S33 resolves these. |
+| `unresolved` | Yes | The judge is sure, but nothing ties the name to the business's listing. |
 | `doubtful` | No | The judge couldn't rule the name out but isn't sure of it. |
 | `other_listing` | Yes | Counted for a card of the same name nearby that isn't the anchored listing. |
 | `namesake_card` | No | Ruled out by a namesake's card. |
+| `namesake_place` | No | Google finds the name the answer gives only outside the areas. |
 
 Elmo's own `run_mentions` still counts a name the judge can't rule out, by design, so Elmo's dashboards are unchanged. Local reports read `local_mentions`.
 
@@ -55,21 +60,24 @@ Enter the phone and address of the subject and each competitor on the brand's **
 
 ## When matching runs
 
-Matching needs both a run's cards and its judgement. Every 5 minutes, `derive-local-mentions` matches up to 2,000 located runs per subject, newest first. It picks runs never matched, and runs whose judgement, cards, or anything matching reads has changed since: the businesses' names, aliases, websites, anchors, phones and the subject's areas. `run_locations.local_mentions_stamp` records what each run was matched against. A change to matching bumps `LOCAL_MENTIONS_VERSION`, and every located run is matched again.
+Matching needs both a run's cards and its judgement. Every 5 minutes, `derive-local-mentions` matches up to 2,000 located runs per subject, newest first. It picks runs never matched, and runs whose judgement, cards, named businesses, or anything matching reads has changed since: the businesses' names, aliases, websites, anchors, phones and the subject's areas. `run_locations.local_mentions_stamp` records what each run was matched against. A name whose resolution changes clears the stamp of each run that gives it. A change to matching bumps `LOCAL_MENTIONS_VERSION`, and every located run is matched again.
 
 ## Evaluation
 
 `packages/service/scripts/local-matching-eval/` holds an eval set of 132 hand-labelled items from 57 SP5-L answers (Raleigh, Denver and Naperville; AI Mode, AI Overviews, Claude and Gemini). Each area is set up as a subject tracking six businesses it names often, anchored on Place IDs found with Places Text Search. Each answer is judged as its own area's and as another area's, so chains (Roto-Rooter, Mr. Rooter, Benjamin Franklin) and names such as "Blanton" and "Brothers Plumbing" appear as businesses of the same name elsewhere. Each label was checked by reading the passage; judgement calls carry a note in `dataset.json`.
 
-`run.ts` calls Jev for real and scores three setups:
+`run.ts` calls Jev for real and scores four setups:
 
 | Setup | Precision | Recall |
 |---|---|---|
 | Elmo's judge (name and website only) | 0.561 | 1.000 |
-| Judge told where the business is | 0.860–0.871 | 1.000 |
-| Local matching (cards, then that judge) | 0.961 | 1.000 |
+| Judge told where the business is | 0.841–0.871 | 1.000 |
+| Cards, then that judge | 0.961 | 1.000 |
+| Local matching (cards, that judge, then names through Places) | 0.961 | 1.000 |
 
-Run twice on November 9, 2026; Jev's judgements vary slightly between runs, and the ranges show it. The three remaining false positives are a Roto-Rooter franchise in the Denver area counted as the tracked company-owned branch, a bare "Roto-Rooter" in a Naperville answer judged as Denver's, and a plumber named Duane Blanton taken for J. Blanton Plumbing.
+Run on November 9, 2026; Jev's judgements vary slightly between runs, and the ranges show it. Resolving names ties 19 text mentions to a listing and rules out 3 namesakes by where Google places them, all correctly, but it doesn't change the score: the three false positives it leaves were already there. They are a Roto-Rooter franchise in the Denver area counted as the tracked company-owned branch, a bare "Roto-Rooter" in a Denver answer judged as Raleigh's, and a plumber named Duane Blanton taken for J. Blanton Plumbing.
+
+Before the rule that a bare name proves nothing, resolving names lowered precision to 0.902, since a bare chain name always finds a listing near the subject.
 
 Caveats:
 
@@ -77,11 +85,14 @@ Caveats:
 - No phones were entered for the eval's businesses, so phone matching isn't exercised. Every card match was by CID.
 - Langfuse isn't wired into this repo, so results are recorded here rather than there.
 
-To rebuild the set (it keeps existing labels) or rerun the scores, from `packages/service`:
+To rebuild the set (it keeps existing labels), list and resolve its names, or rerun the scores, from `packages/service`:
 
 ```sh
 pnpm exec tsx --env-file=../../.env scripts/local-matching-eval/build.ts ../lib/scripts/location-probe/out/runs.jsonl
+pnpm exec tsx --env-file=../../.env scripts/local-matching-eval/resolve.ts
 pnpm exec tsx --env-file=../../.env scripts/local-matching-eval/run.ts
 ```
+
+`resolve.ts` keeps what it finds in `named.json` and only calls for what's new. Delete the file after changing extraction. It needs a real LLM: prefix it with `ONBOARDING_LLM_TARGET=claude:anthropic-api` when `.env` names the stub. It looks up only the names that could be a tracked business of the area an answer is judged as, since only those affect the score.
 
 New items are labelled `proposed` until checked.
