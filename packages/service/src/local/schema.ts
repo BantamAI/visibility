@@ -604,3 +604,139 @@ export const placeResolutions = pgTable(
 ).enableRLS();
 
 export type PlaceResolutionRecord = typeof placeResolutions.$inferSelect;
+
+/**
+ * What a subject sells, such as "plumber" or "water heater repair". Competitors are seeded by
+ * searching Google for each service in each area, and a prompt tagged `service:<name>` counts
+ * toward that service.
+ */
+export const subjectServices = pgTable(
+	"subject_services",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id")
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		name: text("name").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("subject_services_subject_id_idx").on(table.subjectId),
+		unique("subject_services_id_subject_id_key").on(table.id, table.subjectId),
+		uniqueIndex("subject_services_subject_name_idx").on(table.subjectId, sql`lower(${table.name})`),
+		check("subject_services_name_check", sql`btrim(${table.name}) <> '' AND ${table.name} = btrim(${table.name})`),
+	],
+).enableRLS();
+
+export type SubjectService = typeof subjectServices.$inferSelect;
+
+/** How a subject's competitors are discovered; a subject without a row uses the defaults. */
+export const competitorDiscoverySettings = pgTable(
+	"competitor_discovery_settings",
+	{
+		subjectId: text("subject_id")
+			.primaryKey()
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		/** Runs of one service in one area that must name a business before it's tracked. */
+		minRuns: smallint("min_runs").notNull(),
+		/** Automatic competitors tracked per area, besides pinned ones. */
+		perArea: smallint("per_area").notNull(),
+		/** How far back runs count. */
+		windowDays: smallint("window_days").notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		check("competitor_discovery_settings_min_runs_check", sql`${table.minRuns} BETWEEN 1 AND 100`),
+		check("competitor_discovery_settings_per_area_check", sql`${table.perArea} BETWEEN 1 AND 50`),
+		check("competitor_discovery_settings_window_days_check", sql`${table.windowDays} BETWEEN 7 AND 365`),
+	],
+).enableRLS();
+
+/** One Places search for a service in an area, so each pair is searched once. */
+export const competitorSeedSearches = pgTable(
+	"competitor_seed_searches",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id").notNull(),
+		areaId: uuid("area_id").notNull(),
+		serviceId: uuid("service_id").notNull(),
+		searchQuery: text("search_query").notNull(),
+		/** Listings kept from the search: near the area, and not the subject. */
+		found: smallint("found").notNull(),
+		searchedAt: timestamp("searched_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("competitor_seed_searches_subject_id_idx").on(table.subjectId),
+		uniqueIndex("competitor_seed_searches_area_service_idx").on(table.areaId, table.serviceId),
+		foreignKey({
+			name: "competitor_seed_searches_area_fk",
+			columns: [table.areaId, table.subjectId],
+			foreignColumns: [subjectServiceAreas.id, subjectServiceAreas.subjectId],
+		}).onDelete("cascade"),
+		foreignKey({
+			name: "competitor_seed_searches_service_fk",
+			columns: [table.serviceId, table.subjectId],
+			foreignColumns: [subjectServices.id, subjectServices.subjectId],
+		}).onDelete("cascade"),
+	],
+).enableRLS();
+
+/** `auto`: tracked while it ranks among the area's top; `pinned`: always tracked; `ignored`: never. */
+export const areaCompetitorStatus = pgEnum("area_competitor_status", ["auto", "pinned", "ignored"]);
+export type AreaCompetitorStatus = (typeof areaCompetitorStatus.enumValues)[number];
+
+/**
+ * A business that competes with the subject in one of its areas, by Place ID: found by seeding from
+ * Places or named in the area's answers. Tracked ones are kept in Elmo's `competitors` under `name`,
+ * so the judge looks for them; reports read which areas each is tracked in from here.
+ */
+export const areaCompetitors = pgTable(
+	"area_competitors",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id").notNull(),
+		areaId: uuid("area_id").notNull(),
+		placeId: text("place_id").notNull(),
+		cid: text("cid"),
+		/** Set when the row is made and kept, since Elmo's competitors and anchors are keyed by it. */
+		name: text("name").notNull(),
+		/** Other names the area's answers give it, most often first. */
+		aliases: text("aliases").array().notNull().default([]),
+		website: text("website"),
+		status: areaCompetitorStatus("status").default("auto").notNull(),
+		statusBy: text("status_by"),
+		statusAt: timestamp("status_at", { withTimezone: true }),
+		/** Its place in Google's results for the best-ranked service it was seeded for; null when not seeded. */
+		seedRank: smallint("seed_rank"),
+		/** Distinct runs in the area, within the window, that name it. */
+		answerRuns: integer("answer_runs").default(0).notNull(),
+		/** The services it was seeded for or named in runs of. */
+		services: text("services").array().notNull().default([]),
+		tracked: boolean("tracked").default(false).notNull(),
+		/** Discovery added Elmo's competitor of this name, so it removes it once no area tracks it. */
+		ownsCompetitor: boolean("owns_competitor").default(false).notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		index("area_competitors_subject_id_idx").on(table.subjectId),
+		uniqueIndex("area_competitors_area_place_idx").on(table.areaId, table.placeId),
+		foreignKey({
+			name: "area_competitors_area_fk",
+			columns: [table.areaId, table.subjectId],
+			foreignColumns: [subjectServiceAreas.id, subjectServiceAreas.subjectId],
+		}).onDelete("cascade"),
+		check("area_competitors_name_check", sql`btrim(${table.name}) <> ''`),
+		check("area_competitors_answer_runs_check", sql`${table.answerRuns} >= 0`),
+		check("area_competitors_status_check", sql`(${table.status} = 'auto') = (${table.statusBy} IS NULL)`),
+	],
+).enableRLS();
+
+export type AreaCompetitor = typeof areaCompetitors.$inferSelect;
