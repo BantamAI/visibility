@@ -19,6 +19,7 @@ import {
 	runMentions,
 } from "@workspace/lib/db/schema";
 import { type MentionConfig, mentionConfigFrom } from "@workspace/lib/mentions";
+import { loadLocalContexts, localizeMentionConfig } from "@workspace/service/local/local-mentions";
 import { computeSystemTags } from "@workspace/lib/tag-utils";
 import { and, eq, gte, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import type { Job, PgBoss } from "pg-boss";
@@ -154,7 +155,8 @@ async function loadBrand(
 	const [brand] = await conn.select().from(brands).where(eq(brands.id, brandId)).limit(1);
 	if (!brand) return null;
 	const brandCompetitors = await conn.select().from(competitors).where(eq(competitors.brandId, brandId));
-	const config = mentionConfigFrom(brand, brandCompetitors);
+	const local = await loadLocalContexts(conn, [brandId]);
+	const config = localizeMentionConfig(mentionConfigFrom(brand, brandCompetitors), local.get(brandId));
 	return { brand, config, current: currentAnalysisVersions(config, analyzer.judgeVersion) };
 }
 
@@ -233,10 +235,11 @@ export async function requestStaleReprocesses(
 	analyzer: MentionAnalyzer = mentionAnalyzer(),
 	{ everyBrand = false } = {},
 ): Promise<number> {
-	const [allBrands, allCompetitors, enabledPrompts] = await Promise.all([
+	const [allBrands, allCompetitors, enabledPrompts, local] = await Promise.all([
 		conn.select().from(brands),
 		conn.select().from(competitors),
 		conn.select({ id: prompts.id, brandId: prompts.brandId }).from(prompts).where(eq(prompts.enabled, true)),
+		loadLocalContexts(conn),
 	]);
 	const competitorsByBrand = byBrand(allCompetitors);
 	const promptsByBrand = byBrand(enabledPrompts);
@@ -245,7 +248,7 @@ export async function requestStaleReprocesses(
 		// Not yet adopted at startup; its history is taken as is until then.
 		if (brand.analysisVersions === null || !brand.enabled) continue;
 		const current = currentAnalysisVersions(
-			mentionConfigFrom(brand, competitorsByBrand.get(brand.id) ?? []),
+			localizeMentionConfig(mentionConfigFrom(brand, competitorsByBrand.get(brand.id) ?? []), local.get(brand.id)),
 			analyzer.judgeVersion,
 		);
 		const stale = staleLayers(brand.analysisVersions, current);

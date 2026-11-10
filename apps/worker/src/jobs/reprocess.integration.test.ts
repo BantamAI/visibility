@@ -18,6 +18,7 @@ import {
 } from "@workspace/lib/db/schema";
 import { jevAnalyzer, stubTransport } from "@workspace/lib/mention-judge";
 import { mentionConfigFrom } from "@workspace/lib/mentions";
+import { subjectServiceAreas } from "@workspace/service/local/schema";
 import { asc, eq, sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cuedAnalyzer } from "../mention-judge/__fixtures__/cued-judge";
@@ -485,6 +486,32 @@ describe("requestStaleReprocesses", () => {
 		const afterEdit = fakeBoss();
 		await requestStaleReprocesses(db, afterEdit.boss, cuedAnalyzer);
 		expect(sentFor(afterEdit.send, brandId).map((data) => data.layers)).toEqual([["interpretation"]]);
+	});
+
+	it("re-judges a subject that becomes local with its whereabouts, then settles", async () => {
+		await insertLegacyRuns([legacyRun("Acme fixed our leak.", new Date())]);
+		const first = fakeBoss();
+		await requestStaleReprocesses(db, first.boss, cuedAnalyzer);
+		await replay(sentFor(first.send, brandId)[0]);
+
+		await db.insert(subjectServiceAreas).values({
+			subjectId: brandId,
+			name: "Raleigh",
+			centerLat: 35.78,
+			centerLng: -78.64,
+			radiusMeters: 16000,
+			timezone: "America/New_York",
+		});
+		const local = fakeBoss();
+		await requestStaleReprocesses(db, local.boss, cuedAnalyzer);
+		expect(sentFor(local.send, brandId).map((data) => data.layers)).toEqual([["interpretation"]]);
+
+		await replay(sentFor(local.send, brandId)[0]);
+		const [judged] = await runsInWalkOrder();
+		expect(judged.mentionsStamp).not.toBe((await currentVersions(brandId))[MENTIONS_KEY]);
+		const settled = fakeBoss();
+		await requestStaleReprocesses(db, settled.boss, cuedAnalyzer);
+		expect(sentFor(settled.send, brandId)).toEqual([]);
 	});
 
 	it("keeps the extracted history of a brand that predates stamping, and re-judges its mentions", async () => {

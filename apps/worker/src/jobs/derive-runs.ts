@@ -25,6 +25,7 @@ import {
 import { type MentionConfig, mentionConfigFrom, type RunMentionAssessments } from "@workspace/lib/mentions";
 import { insertRunsCitations, markDirty, REFRESH_ROLLUPS_QUEUE } from "@workspace/lib/rollups";
 import { type Citation, extractorFor, extractRun } from "@workspace/lib/text-extraction";
+import { loadLocalContexts, localizeMentionConfig } from "@workspace/service/local/local-mentions";
 import { and, eq, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import type { Job, PgBoss, QueueOptions } from "pg-boss";
 import { getBoss } from "../boss";
@@ -234,7 +235,8 @@ async function loadTarget(conn: DbConnection, brandId: string, analyzer: Mention
 	const [brand] = await conn.select().from(brands).where(eq(brands.id, brandId)).limit(1);
 	if (!brand) return null;
 	const brandCompetitors = await conn.select().from(competitors).where(eq(competitors.brandId, brandId));
-	const config = mentionConfigFrom(brand, brandCompetitors);
+	const local = await loadLocalContexts(conn, [brandId]);
+	const config = localizeMentionConfig(mentionConfigFrom(brand, brandCompetitors), local.get(brandId));
 	return { config, target: currentAnalysisVersions(config, analyzer.judgeVersion) };
 }
 
