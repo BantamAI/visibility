@@ -35,8 +35,18 @@ describe("searchText", () => {
 				primaryType: "corporate_office",
 				types: ["corporate_office", "point_of_interest", "service", "establishment"],
 				mapsUrl: expect.stringMatching(/^https:\/\/maps\.google\.com\/\?cid=7793879817120868320&/),
+				website: null,
 			},
 		]);
+	});
+
+	it("returns the website a place lists", async () => {
+		const body = JSON.stringify({
+			places: [{ id: "ChIJoakcityoakcity0001", displayName: { text: "Oak City Plumbing" }, websiteUri: "https://oakcity.example/" }],
+		});
+		const { impl } = fakeFetch(200, body);
+		const [candidate] = (await googlePlacesProvider("key", impl).searchText("Oak City Plumbing", null)).data;
+		expect(candidate.website).toBe("https://oakcity.example/");
 	});
 
 	it("skips a place with no id or name", async () => {

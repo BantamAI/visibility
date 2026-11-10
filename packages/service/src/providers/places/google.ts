@@ -23,7 +23,7 @@ export const PLACES_SKU_COST_USD: Record<PlacesSku, number> = {
 /** Text Search caps a bias circle's radius. */
 const MAX_BIAS_RADIUS_M = 50_000;
 
-// Phone numbers lift the call to the Enterprise SKU; they're what tells two same-named businesses apart.
+// Phone numbers and websites lift the call to the Enterprise SKU; phones are what tell two same-named businesses apart.
 const CANDIDATE_FIELDS = [
 	"places.id",
 	"places.displayName",
@@ -34,6 +34,7 @@ const CANDIDATE_FIELDS = [
 	"places.googleMapsUri",
 	"places.nationalPhoneNumber",
 	"places.internationalPhoneNumber",
+	"places.websiteUri",
 ].join(",");
 
 export class PlacesApiError extends Error {
@@ -56,6 +57,7 @@ interface ApiPlace {
 	googleMapsUri?: string;
 	nationalPhoneNumber?: string;
 	internationalPhoneNumber?: string;
+	websiteUri?: string;
 }
 
 export function candidateFrom(place: ApiPlace): PlaceCandidate | null {
@@ -75,6 +77,7 @@ export function candidateFrom(place: ApiPlace): PlaceCandidate | null {
 		primaryType: textOrNull(place.primaryType),
 		types: place.types ?? [],
 		mapsUrl: textOrNull(place.googleMapsUri),
+		website: textOrNull(place.websiteUri),
 	};
 }
 
