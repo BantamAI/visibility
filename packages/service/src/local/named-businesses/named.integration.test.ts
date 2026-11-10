@@ -1,4 +1,12 @@
-import { brands, organization, promptRuns, prompts, runExtractions, runMentions, usageEvents } from "@workspace/lib/db/schema";
+import {
+	brands,
+	organization,
+	promptRuns,
+	prompts,
+	runExtractions,
+	runMentions,
+	usageEvents,
+} from "@workspace/lib/db/schema";
 import type { RunMentionAssessments } from "@workspace/lib/mentions";
 import { createOwnerDb } from "@workspace/lib/test/integration/owner-db";
 import { asc, eq, inArray } from "drizzle-orm";
@@ -24,13 +32,13 @@ const SUBJECT_PLACE = "ChIJoakcityoakcity0001";
 
 const owner = createOwnerDb();
 
-/** Lists the businesses an answer names by the lines of its text that start with "- ". */
+/** Lists the businesses an answer names by its lines that start with "- ": name | phone | address. */
 const listing: Extract = async (prompt) => {
 	const answer = prompt.slice(prompt.indexOf("<answer>"), prompt.indexOf("</answer>"));
 	const lines = answer.split("\n").filter((line) => line.startsWith("- "));
 	const businesses = lines.map((line) => {
-		const [name, phone] = line.slice(2).split(" | ");
-		return { name, phone: phone ?? null, address: null, website: null };
+		const [name, phone, address] = line.slice(2).split(" | ");
+		return { name, phone: phone ?? null, address: address ?? null, website: null };
 	});
 	return { object: { businesses }, modelVersion: "test-model" };
 };
@@ -81,7 +89,13 @@ async function saveRun(text: string | null): Promise<string> {
 		runId: run.id,
 		subjectId: S,
 		pointId: crypto.randomUUID(),
-		requestedLocation: { pointId: "p", latitude: 35.78, longitude: -78.64, country: "US", timezone: "America/New_York" },
+		requestedLocation: {
+			pointId: "p",
+			latitude: 35.78,
+			longitude: -78.64,
+			country: "US",
+			timezone: "America/New_York",
+		},
 		locationMethod: "api_user_location",
 		fidelityTier: "T4",
 		businessesVersion: 1,
@@ -103,7 +117,9 @@ const versionOf = async (runId: string) =>
 beforeAll(async () => {
 	await cleanUp();
 	await owner.insert(organization).values({ id: ORG, name: "Named Businesses Test", slug: ORG, createdAt: new Date() });
-	await owner.insert(brands).values({ id: S, name: "Oak City Plumbing", website: "https://oakcity.example", organizationId: ORG });
+	await owner
+		.insert(brands)
+		.values({ id: S, name: "Oak City Plumbing", website: "https://oakcity.example", organizationId: ORG });
 	await owner.insert(prompts).values({ brandId: S, value: "best plumber near me" });
 	await owner.insert(subjectServiceAreas).values({
 		subjectId: S,
@@ -142,7 +158,7 @@ describe("businesses named in located answers", () => {
 
 	beforeAll(async () => {
 		first = await saveRun("Try these:\n- Oak City Plumbing | (919) 555-0100\n- Harris Brothers Plumbing");
-		second = await saveRun("Call:\n- Oak City Plumbing, LLC\n- Brothers Plumbing");
+		second = await saveRun("Call:\n- Oak City Plumbing, LLC |  | Raleigh, NC\n- Brothers Plumbing");
 	});
 
 	it("lists each answer's businesses once, in the order named", async () => {
@@ -179,12 +195,16 @@ describe("businesses named in located answers", () => {
 		await owner.delete(promptRuns).where(eq(promptRuns.id, later));
 	});
 
-	it("looks each name up once near the subject's areas, and ties the subject's mention to its listing", async () => {
+	it("looks each name up once near the subject's areas, and ties a mention the answer places to its listing", async () => {
 		const sure = { mentioned: true, probability: 0.9, sentiment: "positive" } as const;
-		const assessments: RunMentionAssessments = { brand: sure, competitors: {}, judged: { brand: "b", competitors: {} } };
-		await owner.insert(runMentions).values(
-			[first, second].map((runId) => ({ runId, brandMentioned: true, assessments, stamp: "judge-1" })),
-		);
+		const assessments: RunMentionAssessments = {
+			brand: sure,
+			competitors: {},
+			judged: { brand: "b", competitors: {} },
+		};
+		await owner
+			.insert(runMentions)
+			.values([first, second].map((runId) => ({ runId, brandMentioned: true, assessments, stamp: "judge-1" })));
 		const match = () => withSubject(S, () => deriveLocalMentions(S, 100));
 		const subjectRow = async (runId: string) =>
 			(await owner.select().from(localMentions).where(eq(localMentions.runId, runId)))[0];
@@ -193,7 +213,7 @@ describe("businesses named in located answers", () => {
 
 		const { provider, searched } = placesWith({
 			"Oak City Plumbing": [place("Oak City Plumbing", SUBJECT_PLACE, 35.79, -78.65)],
-			"Oak City Plumbing, LLC": [place("Oak City Plumbing", SUBJECT_PLACE, 35.79, -78.65)],
+			"Oak City Plumbing, LLC, Raleigh, NC": [place("Oak City Plumbing", SUBJECT_PLACE, 35.79, -78.65)],
 			"Brothers Plumbing": [place("Brothers Plumbing", "ChIJbrothersdenver001", 39.74, -104.99)],
 		});
 		expect(await resolve(provider)).toEqual({ looked: 4, matched: 1 });
@@ -202,25 +222,32 @@ describe("businesses named in located answers", () => {
 			"Brothers Plumbing",
 			"Harris Brothers Plumbing",
 			"Oak City Plumbing",
-			"Oak City Plumbing, LLC",
+			"Oak City Plumbing, LLC, Raleigh, NC",
 		]);
 		const resolutions = await owner
 			.select()
 			.from(placeResolutions)
 			.where(eq(placeResolutions.subjectId, S))
 			.orderBy(asc(placeResolutions.nameKey), asc(placeResolutions.phone));
-		expect(resolutions.map(({ nameKey, phone, resolution }) => [nameKey, phone, resolution])).toEqual([
-			["brothers plumbing", null, "elsewhere"],
-			["harris brothers plumbing", null, "none"],
-			["oak city plumbing", "+19195550100", "none"],
-			["oak city plumbing", null, "matched"],
-		]);
+		expect(resolutions.map(({ nameKey, phone, address, resolution }) => [nameKey, phone, address, resolution])).toEqual(
+			[
+				["brothers plumbing", null, null, "elsewhere"],
+				["harris brothers plumbing", null, null, "none"],
+				["oak city plumbing", "+19195550100", null, "none"],
+				["oak city plumbing", null, "Raleigh, NC", "matched"],
+			],
+		);
 		const calls = await owner.select().from(usageEvents).where(eq(usageEvents.brandId, S));
 		expect(calls.filter((call) => call.eventType === "places_call")).toHaveLength(4);
 
 		expect(await resolve(provider)).toEqual({ looked: 0, matched: 0 });
 		expect(await match()).toBe(2);
-		expect(await subjectRow(second)).toMatchObject({ counted: true, method: "resolved", confidence: 0.9, review: null });
+		expect(await subjectRow(second)).toMatchObject({
+			counted: true,
+			method: "resolved",
+			confidence: 0.9,
+			review: null,
+		});
 		expect(await subjectRow(first)).toMatchObject({ method: "text+jev", review: "unresolved" });
 	});
 

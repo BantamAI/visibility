@@ -21,6 +21,7 @@ CREATE TABLE "place_resolutions" (
 	"subject_id" text NOT NULL,
 	"name_key" text NOT NULL,
 	"phone" text,
+	"address" text,
 	"resolution" "place_resolution" NOT NULL,
 	"place_id" text,
 	"cid" text,
@@ -36,7 +37,7 @@ ALTER TABLE "answer_named_businesses" ADD CONSTRAINT "answer_named_businesses_ru
 ALTER TABLE "place_resolutions" ADD CONSTRAINT "place_resolutions_subject_id_brands_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."brands"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "answer_named_businesses_subject_id_name_key_idx" ON "answer_named_businesses" USING btree ("subject_id","name_key");--> statement-breakpoint
 CREATE INDEX "place_resolutions_subject_id_idx" ON "place_resolutions" USING btree ("subject_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "place_resolutions_subject_name_phone_idx" ON "place_resolutions" USING btree ("subject_id","name_key",coalesce("phone", ''));--> statement-breakpoint
+CREATE UNIQUE INDEX "place_resolutions_subject_name_idx" ON "place_resolutions" USING btree ("subject_id","name_key",coalesce("phone", ''),coalesce("address", ''));--> statement-breakpoint
 CREATE TRIGGER answer_named_businesses_subject BEFORE INSERT OR UPDATE ON "answer_named_businesses"
 	FOR EACH ROW EXECUTE FUNCTION tenancy.subject_from_run();
 --> statement-breakpoint

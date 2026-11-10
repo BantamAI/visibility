@@ -14,6 +14,13 @@ export {
 	namedBusinessesSchema,
 } from "./extract";
 export { nameKey, sameBusinessName, startsWithName } from "./names";
-export { PLACES_CALLS_PER_DAY, pickCandidate, type Resolved, type ResolvedNames, resolveNamedBusinesses } from "./resolve";
+export {
+	PLACES_CALLS_PER_DAY,
+	pickCandidate,
+	type Resolved,
+	type ResolvedNames,
+	resolveNamedBusinesses,
+	searchQuery,
+} from "./resolve";
 
 export const RESOLVE_NAMED_BUSINESSES_QUEUE = "resolve-named-businesses";

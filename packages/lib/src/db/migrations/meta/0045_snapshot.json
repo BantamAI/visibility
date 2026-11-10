@@ -1,5 +1,5 @@
 {
-  "id": "dd9d0271-f154-4f6a-99d6-0cbb5b579958",
+  "id": "3328e701-77db-4a88-993c-51ab8bdc8f47",
   "prevId": "a5c4d173-3d9f-4534-9b52-d8b14a727209",
   "version": "7",
   "dialect": "postgresql",
@@ -5686,6 +5686,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "resolution": {
           "name": "resolution",
           "type": "place_resolution",
@@ -5735,8 +5741,8 @@
           "method": "btree",
           "with": {}
         },
-        "place_resolutions_subject_name_phone_idx": {
-          "name": "place_resolutions_subject_name_phone_idx",
+        "place_resolutions_subject_name_idx": {
+          "name": "place_resolutions_subject_name_idx",
           "columns": [
             {
               "expression": "subject_id",
@@ -5752,6 +5758,12 @@
             },
             {
               "expression": "coalesce(\"phone\", '')",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "coalesce(\"address\", '')",
               "asc": true,
               "isExpression": true,
               "nulls": "last"

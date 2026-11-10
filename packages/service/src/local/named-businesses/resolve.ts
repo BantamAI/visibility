@@ -4,7 +4,13 @@ import { and, asc, desc, eq, gte, inArray, sql } from "drizzle-orm";
 import type { PlaceCandidate, PlacesProvider } from "../../providers/places";
 import { type AreaCircle, NEAR_AREA_FACTOR } from "../local-mentions/near";
 import { PLACES_USAGE_EVENT, recordPlacesUsage } from "../places/usage";
-import { answerNamedBusinesses, type PlaceResolution, placeResolutions, runLocations, subjectServiceAreas } from "../schema";
+import {
+	answerNamedBusinesses,
+	type PlaceResolution,
+	placeResolutions,
+	runLocations,
+	subjectServiceAreas,
+} from "../schema";
 import { distanceMeters } from "../service-areas/geo";
 import { nameKey, sameBusinessName } from "./names";
 
@@ -57,14 +63,32 @@ export const PLACES_CALLS_PER_DAY = 200;
 
 const daysAgo = (now: Date, days: number) => new Date(now.getTime() - days * 86_400_000);
 
+/** What a name is looked up by: the name, and the phone and address the answer gives with it. */
+interface NameKey {
+	nameKey: string;
+	phone: string | null;
+	address: string | null;
+}
+
+type KeyColumns = typeof answerNamedBusinesses | typeof placeResolutions;
+
+/** Matches the key's values, or another table's columns of the same key. */
+const sameKey = (table: KeyColumns, key: Record<keyof NameKey, unknown>) =>
+	and(
+		sql`${table.nameKey} = ${key.nameKey}`,
+		sql`${table.phone} IS NOT DISTINCT FROM ${key.phone}`,
+		sql`${table.address} IS NOT DISTINCT FROM ${key.address}`,
+	);
+
 /** Names the subject's answers give that were never looked up, or were looked up too long ago, newest first. */
-async function dueNames(subjectId: string, limit: number, now: Date) {
+async function dueNames(subjectId: string, limit: number, now: Date): Promise<(NameKey & { name: string })[]> {
 	const stale = sql`(${placeResolutions.resolution} = 'matched' AND ${placeResolutions.resolvedAt} < ${daysAgo(now, MATCHED_MAX_AGE_DAYS)})
 		OR (${placeResolutions.resolution} <> 'matched' AND ${placeResolutions.resolvedAt} < ${daysAgo(now, UNMATCHED_MAX_AGE_DAYS)})`;
 	const latest = db
 		.select({
 			nameKey: answerNamedBusinesses.nameKey,
 			phone: answerNamedBusinesses.phone,
+			address: answerNamedBusinesses.address,
 			name: sql<string>`(array_agg(${answerNamedBusinesses.name} ORDER BY ${runLocations.createdAt} DESC))[1]`.as(
 				"name",
 			),
@@ -73,23 +97,20 @@ async function dueNames(subjectId: string, limit: number, now: Date) {
 		.from(answerNamedBusinesses)
 		.innerJoin(runLocations, eq(runLocations.runId, answerNamedBusinesses.runId))
 		.where(eq(answerNamedBusinesses.subjectId, subjectId))
-		.groupBy(answerNamedBusinesses.nameKey, answerNamedBusinesses.phone)
+		.groupBy(answerNamedBusinesses.nameKey, answerNamedBusinesses.phone, answerNamedBusinesses.address)
 		.as("latest");
 	return db
-		.select({ nameKey: latest.nameKey, phone: latest.phone, name: latest.name })
+		.select({ nameKey: latest.nameKey, phone: latest.phone, address: latest.address, name: latest.name })
 		.from(latest)
-		.leftJoin(
-			placeResolutions,
-			and(
-				eq(placeResolutions.subjectId, subjectId),
-				eq(placeResolutions.nameKey, latest.nameKey),
-				sql`${placeResolutions.phone} IS NOT DISTINCT FROM ${latest.phone}`,
-			),
-		)
+		.leftJoin(placeResolutions, and(eq(placeResolutions.subjectId, subjectId), sameKey(placeResolutions, latest)))
 		.where(sql`${placeResolutions.id} IS NULL OR ${stale}`)
 		.orderBy(desc(latest.lastSeen), asc(latest.nameKey))
 		.limit(limit);
 }
+
+/** The name, then where the answer places it, so Google finds a namesake in that city rather than one nearby. */
+export const searchQuery = (key: { name: string; address: string | null }) =>
+	key.address ? `${key.name}, ${key.address}` : key.name;
 
 async function callsToday(subjectId: string, now: Date): Promise<number> {
 	const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -112,9 +133,10 @@ export interface ResolvedNames {
 }
 
 /**
- * Looks up on Google the names the subject's answers give that aren't resolved yet, leaning toward
- * its primary area, and stores the Place ID of the listing each refers to. Runs whose answers give a
- * name whose resolution changed are matched again. Runs in the caller's subject scope.
+ * Looks up on Google the names the subject's answers give that aren't resolved yet, with where the
+ * answer places each, leaning toward its primary area, and stores the Place ID of the listing each
+ * refers to. Runs whose answers give a name whose resolution changed are matched again. Runs in the
+ * caller's subject scope.
  */
 export async function resolveNamedBusinesses(
 	provider: PlacesProvider,
@@ -135,7 +157,7 @@ export async function resolveNamedBusinesses(
 	const circles = areas.map((area) => ({ lat: area.centerLat, lng: area.centerLng, radiusMeters: area.radiusMeters }));
 	const bias = { lat: primary.centerLat, lng: primary.centerLng, radiusMeters: primary.radiusMeters };
 	for (const due of await dueNames(subjectId, allowance, now)) {
-		const candidates = await recordPlacesUsage(subjectId, await provider.searchText(due.name, bias));
+		const candidates = await recordPlacesUsage(subjectId, await provider.searchText(searchQuery(due), bias));
 		const resolved = pickCandidate(due.name, due.phone, candidates, circles);
 		await storeResolution(subjectId, due, resolved, now);
 		result.looked++;
@@ -146,7 +168,7 @@ export async function resolveNamedBusinesses(
 
 async function storeResolution(
 	subjectId: string,
-	key: { nameKey: string; phone: string | null; name: string },
+	key: NameKey & { name: string },
 	resolved: Resolved,
 	now: Date,
 ): Promise<void> {
@@ -154,17 +176,14 @@ async function storeResolution(
 		const [previous] = await tx
 			.select()
 			.from(placeResolutions)
-			.where(
-				and(
-					eq(placeResolutions.subjectId, subjectId),
-					eq(placeResolutions.nameKey, key.nameKey),
-					sql`${placeResolutions.phone} IS NOT DISTINCT FROM ${key.phone}`,
-				),
-			)
+			.where(and(eq(placeResolutions.subjectId, subjectId), sameKey(placeResolutions, key)))
 			.for("update");
-		const values = { ...resolved, searchQuery: key.name, resolvedAt: now };
+		const values = { ...resolved, searchQuery: searchQuery(key), resolvedAt: now };
 		if (previous) await tx.update(placeResolutions).set(values).where(eq(placeResolutions.id, previous.id));
-		else await tx.insert(placeResolutions).values({ subjectId, nameKey: key.nameKey, phone: key.phone, ...values });
+		else {
+			const { nameKey, phone, address } = key;
+			await tx.insert(placeResolutions).values({ subjectId, nameKey, phone, address, ...values });
+		}
 		const unchanged =
 			previous &&
 			previous.resolution === resolved.resolution &&
@@ -174,13 +193,7 @@ async function storeResolution(
 		const runs = tx
 			.select({ runId: answerNamedBusinesses.runId })
 			.from(answerNamedBusinesses)
-			.where(
-				and(
-					eq(answerNamedBusinesses.subjectId, subjectId),
-					eq(answerNamedBusinesses.nameKey, key.nameKey),
-					sql`${answerNamedBusinesses.phone} IS NOT DISTINCT FROM ${key.phone}`,
-				),
-			);
+			.where(and(eq(answerNamedBusinesses.subjectId, subjectId), sameKey(answerNamedBusinesses, key)));
 		await tx.update(runLocations).set({ localMentionsStamp: null }).where(inArray(runLocations.runId, runs));
 	});
 }

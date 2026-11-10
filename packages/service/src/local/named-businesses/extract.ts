@@ -51,7 +51,7 @@ Leave out:
 For each business give:
 - name: exactly as the answer writes it
 - phone: only if the answer gives one for it, as written; otherwise null
-- address: only if the answer gives a street address or a city for it, as written; otherwise null
+- address: where the answer places it, as written: its street address, or else the city or town the answer puts it in, including a city that heads the list or paragraph it's in ("plumbers in Naperville"); null if the answer doesn't say
 - website: only if the answer gives a link or domain for it; otherwise null
 
 Never add details the answer doesn't give. If it names no business, return an empty list.

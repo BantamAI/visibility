@@ -546,6 +546,7 @@ export const answerNamedBusinesses = pgTable(
 		nameKey: text("name_key").notNull(),
 		/** E.164, as the answer gives it. */
 		phone: text("phone"),
+		/** Where the answer places it: a street address, or the city it lists it in. */
 		address: text("address"),
 		website: text("website"),
 	},
@@ -568,9 +569,9 @@ export const placeResolution = pgEnum("place_resolution", ["matched", "elsewhere
 export type PlaceResolution = (typeof placeResolution.enumValues)[number];
 
 /**
- * What Places Text Search found for a name (and phone) an answer gives, near the subject's areas, so
- * each name is looked up once rather than once per answer. Google lets Place IDs be kept
- * indefinitely; nothing else from the response is stored. Keyed by `name_key` and phone.
+ * What Places Text Search found for a name an answer gives, with the phone and address it gives, near
+ * the subject's areas, so each is looked up once rather than once per answer. Google lets Place IDs
+ * be kept indefinitely; nothing else from the response is stored. The address is the answer's.
  */
 export const placeResolutions = pgTable(
 	"place_resolutions",
@@ -582,6 +583,7 @@ export const placeResolutions = pgTable(
 		nameKey: text("name_key").notNull(),
 		/** E.164; null when the answer gave none. */
 		phone: text("phone"),
+		address: text("address"),
 		resolution: placeResolution("resolution").notNull(),
 		placeId: text("place_id"),
 		cid: text("cid"),
@@ -590,10 +592,11 @@ export const placeResolutions = pgTable(
 	},
 	(table) => [
 		index("place_resolutions_subject_id_idx").on(table.subjectId),
-		uniqueIndex("place_resolutions_subject_name_phone_idx").on(
+		uniqueIndex("place_resolutions_subject_name_idx").on(
 			table.subjectId,
 			table.nameKey,
 			sql`coalesce(${table.phone}, '')`,
+			sql`coalesce(${table.address}, '')`,
 		),
 		check("place_resolutions_matched_check", sql`(${table.resolution} = 'matched') = (${table.placeId} IS NOT NULL)`),
 		check("place_resolutions_phone_check", sql`${table.phone} ~ '^\\+[0-9]{8,15}$'`),
