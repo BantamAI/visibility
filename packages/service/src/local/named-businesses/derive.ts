@@ -102,28 +102,32 @@ export async function extractNamedBusinesses(
 		.orderBy(desc(runLocations.createdAt))
 		.limit(allowance);
 
+	/** The businesses in one answer; null when the model's output can't be read. Throws on any other failure. */
+	const list = async (runId: string, text: string): Promise<NamedBusiness[] | null> => {
+		try {
+			const listed = await extract(extractionPrompt(text));
+			await recordExtraction(subjectId, brand.organizationId, listed.modelVersion);
+			return namedBusinessesFrom(listed.object);
+		} catch (error) {
+			if (!(error instanceof Error && BAD_OUTPUT.has(error.name))) throw error;
+			await recordExtraction(subjectId, brand.organizationId, undefined);
+			result.failed.push({ runId, error });
+			return null;
+		}
+	};
+
 	let stopped: unknown = null;
 	let next = 0;
 	const work = async () => {
 		while (next < runs.length && stopped === null) {
 			const { runId, text } = runs[next++];
-			let named: NamedBusiness[] = [];
-			if (text?.trim()) {
-				try {
-					const listed = await extract(extractionPrompt(text));
-					await recordExtraction(subjectId, brand.organizationId, listed.modelVersion);
-					named = namedBusinessesFrom(listed.object);
-				} catch (error) {
-					if (!(error instanceof Error && BAD_OUTPUT.has(error.name))) {
-						stopped = error;
-						return;
-					}
-					await recordExtraction(subjectId, brand.organizationId, undefined);
-					result.failed.push({ runId, error });
-				}
+			try {
+				const named = text?.trim() ? await list(runId, text) : [];
+				await storeNamed(subjectId, runId, named ?? []);
+				result.extracted++;
+			} catch (error) {
+				stopped = error;
 			}
-			await storeNamed(subjectId, runId, named);
-			result.extracted++;
 		}
 	};
 	await Promise.all(Array.from({ length: CONCURRENCY }, work));
