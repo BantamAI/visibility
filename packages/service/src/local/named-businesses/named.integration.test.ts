@@ -24,7 +24,8 @@ import {
 import { withSubject } from "../tenancy";
 import { type Extract, extractNamedBusinesses } from "./derive";
 import { NAMED_BUSINESSES_VERSION } from "./extract";
-import { PLACES_CALLS_PER_DAY, resolveNamedBusinesses } from "./resolve";
+import { PLACES_CALLS_PER_DAY } from "../places/usage";
+import { resolveNamedBusinesses } from "./resolve";
 
 const ORG = "named-businesses-test-org";
 const S = "named-businesses-test-s";
@@ -68,6 +69,7 @@ const place = (name: string, placeId: string, lat: number, lng: number): PlaceCa
 	primaryType: "plumber",
 	types: ["plumber"],
 	mapsUrl: null,
+	website: null,
 });
 
 async function saveRun(text: string | null): Promise<string> {
