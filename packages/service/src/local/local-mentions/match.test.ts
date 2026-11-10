@@ -1,6 +1,12 @@
 import type { MentionAssessment, RunMentionAssessments } from "@workspace/lib/mentions";
 import { describe, expect, it } from "vitest";
-import { type MatchableCard, matchLocalMentions as match, type NearArea, type TrackedBusiness } from "./match";
+import {
+	type MatchableCard,
+	matchLocalMentions as match,
+	type NearArea,
+	type ResolvedName,
+	type TrackedBusiness,
+} from "./match";
 
 /** Places cards by the city in their address: Raleigh is the area. */
 const nearRaleigh: NearArea = (card) => (card.address ? card.address.includes("Raleigh") : null);
@@ -181,5 +187,89 @@ describe("matching a located answer to tracked businesses", () => {
 
 	it("says nothing about a business the answer neither names nor shows", () => {
 		expect(matchLocalMentions([subject, rival], [card({})], assessments(undefined))).toEqual([]);
+	});
+});
+
+describe("resolving the names an answer gives through Google", () => {
+	const named = (fields: Partial<ResolvedName>): ResolvedName => ({
+		name: "Oak City Plumbing",
+		placed: true,
+		resolution: "matched",
+		placeId: subject.placeId,
+		cid: subject.cid,
+		...fields,
+	});
+	const resolve = (probability: number, names: ResolvedName[], business = subject) =>
+		match([business], [], assessments(mentioned(probability)), nearRaleigh, names)[0];
+
+	it("ties a text mention to the business's own listing", () => {
+		expect(resolve(0.85, [named({})])).toMatchObject({
+			counted: true,
+			method: "resolved",
+			confidence: 0.9,
+			review: null,
+		});
+	});
+
+	it("doesn't take a bare name found near the areas as the business: every market has one", () => {
+		const bare = named({ placed: false });
+		expect(resolve(0.9, [bare])).toMatchObject({ counted: true, method: "text+jev", review: "unresolved" });
+		expect(resolve(0.6, [bare])).toMatchObject({ counted: false, method: "text+jev", review: "doubtful" });
+	});
+
+	it("counts a doubtful mention once its name resolves to the business's listing", () => {
+		expect(resolve(0.6, [named({})])).toMatchObject({ counted: true, method: "resolved", review: null });
+	});
+
+	it("matches the business by the longer name an answer gives it", () => {
+		const longer = named({ name: "Oak City Plumbing & Drain, LLC", placeId: null, cid: subject.cid });
+		expect(resolve(0.9, [longer])).toMatchObject({ counted: true, method: "resolved", review: null });
+	});
+
+	it("counts another listing of the name near the areas, flagged", () => {
+		const branch = named({ placeId: "ChIJoakcitybranch0003", cid: "3333" });
+		expect(resolve(0.9, [branch])).toMatchObject({ counted: true, method: "resolved", review: "other_listing" });
+	});
+
+	it("counts a listing near the areas for a business not yet anchored", () => {
+		const unanchored = { ...subject, placeId: null, cid: null };
+		expect(resolve(0.9, [named({})], unanchored)).toMatchObject({ counted: true, method: "resolved", review: null });
+	});
+
+	it.each([true, false])("doesn't count a name Google places only in another city (placed: %s)", (placed) => {
+		const elsewhere = named({ placed, resolution: "elsewhere", placeId: null, cid: null });
+		expect(resolve(0.95, [elsewhere])).toMatchObject({
+			counted: false,
+			method: "text+jev",
+			confidence: 0.95,
+			review: "namesake_place",
+		});
+	});
+
+	it("ignores a longer name that belongs to another company", () => {
+		const other = named({ name: "North Oak City Plumbing", placeId: "ChIJnorthoakcity00004" });
+		expect(resolve(0.9, [other])).toMatchObject({ counted: true, method: "text+jev", review: "unresolved" });
+	});
+
+	it("leaves the judge's word until a name is looked up, or when Google finds none", () => {
+		expect(resolve(0.9, [named({ resolution: null, placeId: null, cid: null })])).toMatchObject({
+			review: "unresolved",
+		});
+		expect(resolve(0.6, [named({ resolution: "none", placeId: null, cid: null })])).toMatchObject({
+			counted: false,
+			review: "doubtful",
+		});
+	});
+
+	it("keeps a card's evidence ahead of Google's", () => {
+		const namesake = card({ name: "Oak City Plumbing", cid: "9999", address: "1 Main St, Durham, NC 27701" });
+		const [result] = match([subject], [namesake], assessments(mentioned(0.9)), nearRaleigh, [named({})]);
+		expect(result).toMatchObject({ counted: false, review: "namesake_card" });
+	});
+
+	it("doesn't override a judge who rules the business out", () => {
+		const ruledOut: MentionAssessment = { mentioned: false, probability: 0.1, sentiment: "neutral" };
+		const [result] = match([subject], [], assessments(ruledOut), nearRaleigh, [named({})]);
+		expect(result).toMatchObject({ counted: false, method: "text+jev", review: null });
 	});
 });

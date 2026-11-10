@@ -1,6 +1,7 @@
 import { type MentionAssessment, type RunMentionAssessments, wholeWordPattern } from "@workspace/lib/mentions";
 import type { BusinessCard, CardPlacement } from "../answer-businesses/card";
-import type { LocalMatchMethod, LocalMentionReview } from "../schema";
+import { startsWithName } from "../named-businesses/names";
+import type { LocalMatchMethod, LocalMentionReview, PlaceResolution } from "../schema";
 
 /** The subject (no `competitorName`) or one of its tracked competitors, with what identifies it locally. */
 export interface TrackedBusiness {
@@ -19,6 +20,17 @@ export type MatchableCard = Pick<
 	BusinessCard,
 	"placement" | "position" | "name" | "placeId" | "cid" | "phone" | "website" | "address"
 >;
+
+/** A business the answer's text names, and the listing Google says it is near the subject's areas. */
+export interface ResolvedName {
+	name: string;
+	/** Whether the answer gives its phone or says where it is, so Google's listing is the answer's, not just any of that name. */
+	placed: boolean;
+	/** Null until it's looked up. */
+	resolution: PlaceResolution | null;
+	placeId: string | null;
+	cid: string | null;
+}
 
 /** Whether a card's business is in or near the subject's areas; null when its address doesn't say. */
 export type NearArea = (card: MatchableCard) => boolean | null;
@@ -97,19 +109,9 @@ function assessmentOf(business: TrackedBusiness, assessments: RunMentionAssessme
 	return business.competitorName === null ? assessments.brand : assessments.competitors[business.competitorName];
 }
 
-const comparable = (value: string) =>
-	value
-		.toLowerCase()
-		.replace(/[^\p{L}\p{N}]+/gu, " ")
-		.trim();
-
 /** "Roto-Rooter Plumbing & Water Cleanup" is a Roto-Rooter; "Harris Brothers Plumbing" isn't a Brothers Plumbing. */
-function sameBrand(card: MatchableCard, business: TrackedBusiness): boolean {
-	const name = comparable(card.name);
-	return [business.name, ...business.aliases]
-		.map(comparable)
-		.filter(Boolean)
-		.some((term) => name === term || name.startsWith(`${term} `));
+function sameBrand(name: string, business: TrackedBusiness): boolean {
+	return [business.name, ...business.aliases].some((term) => startsWithName(name, term));
 }
 
 /**
@@ -119,17 +121,47 @@ function sameBrand(card: MatchableCard, business: TrackedBusiness): boolean {
  */
 export const SURE_TEXT_MATCH = 0.8;
 
+/** The answer names the business and Google places that name near the subject: as sure as its website on a card. */
+export const RESOLVED_CONFIDENCE = 0.9;
+
+type Outcome = Pick<LocalMatch, "counted" | "method" | "confidence" | "review">;
+
+const anchored = (business: TrackedBusiness) => business.placeId !== null || business.cid !== null;
+
+const isOwnListing = (name: ResolvedName, business: TrackedBusiness) =>
+	(business.placeId !== null && name.placeId === business.placeId) ||
+	(business.cid !== null && name.cid === business.cid);
+
+/**
+ * What Google says about the names the answer gives for the business: its own listing, another
+ * listing of that name nearby (a branch), or listings of that name only elsewhere (a namesake).
+ * A bare name proves nothing by being found nearby: there's a Roto-Rooter in every market. Only a
+ * name the answer places, by phone or address, ties the mention to a listing. Null when Google
+ * says nothing either way.
+ */
+function resolvedMatch(business: TrackedBusiness, named: ResolvedName[], probability: number): Outcome | null {
+	const linked = named.filter((name) => name.resolution !== null && sameBrand(name.name, business));
+	const placedNearby = linked.filter((name) => name.placed && name.resolution === "matched");
+	const resolved = { counted: true, method: "resolved" as const, confidence: RESOLVED_CONFIDENCE };
+	if (placedNearby.some((name) => isOwnListing(name, business))) return { ...resolved, review: null };
+	if (placedNearby.length > 0) return { ...resolved, review: anchored(business) ? "other_listing" : null };
+	if (linked.length > 0 && linked.every((name) => name.resolution === "elsewhere"))
+		return { counted: false, method: "text+jev", confidence: probability, review: "namesake_place" };
+	return null;
+}
+
 function textMatch(
 	business: TrackedBusiness,
 	assessment: MentionAssessment,
 	cards: MatchableCard[],
 	nearArea: NearArea,
+	named: ResolvedName[],
 ): LocalMatch {
 	const base = { competitorName: business.competitorName, method: "text+jev" as const, card: null };
 	const confidence = assessment.probability;
 	if (!assessment.mentioned) return { ...base, counted: false, confidence, review: null };
 	const namesakes = cards.filter((card) => namesIt(card, business));
-	const brand = namesakes.filter((card) => sameBrand(card, business));
+	const brand = namesakes.filter((card) => sameBrand(card.name, business));
 	// Another listing of the same name nearby: a second location or branch of the business.
 	if (brand.some((card) => nearArea(card) === true))
 		return { ...base, counted: true, confidence, review: "other_listing" };
@@ -138,8 +170,10 @@ function textMatch(
 		return near === false || (near === null && otherListing(card, business));
 	});
 	// The answer shows a namesake's card, or another company whose name contains this one: the name means that.
-	if (elsewhere || namesakes.some((card) => !sameBrand(card, business)))
+	if (elsewhere || namesakes.some((card) => !sameBrand(card.name, business)))
 		return { ...base, counted: false, confidence, review: "namesake_card" };
+	const resolved = resolvedMatch(business, named, confidence);
+	if (resolved) return { ...base, ...resolved };
 	if (confidence < SURE_TEXT_MATCH) return { ...base, counted: false, confidence, review: "doubtful" };
 	// Counted, but nothing ties it to the business's listing yet.
 	return { ...base, counted: true, confidence, review: "unresolved" };
@@ -148,14 +182,16 @@ function textMatch(
 /**
  * Matches a located run's answer cards and the judge's assessments to the subject and its tracked
  * competitors: a card that carries a business's Place ID, CID, phone or website first, then the
- * judge's reading of the text, checked against the cards that share the name. Only cards in the
- * answer count; the map pack beside an AI Overview is Google's ordinary local ranking, not the AI's.
+ * judge's reading of the text, checked against the cards that share the name, then against the
+ * listings Google finds for the names the answer gives. Only cards in the answer count; the map pack
+ * beside an AI Overview is Google's ordinary local ranking, not the AI's.
  */
 export function matchLocalMentions(
 	businesses: TrackedBusiness[],
 	cards: MatchableCard[],
 	assessments: RunMentionAssessments | null,
 	nearArea: NearArea,
+	named: ResolvedName[] = [],
 ): LocalMatch[] {
 	const answerCards = cards.filter((card) => card.placement === "answer").sort((a, b) => a.position - b.position);
 	return businesses.flatMap((business): LocalMatch[] => {
@@ -174,6 +210,6 @@ export function matchLocalMentions(
 			];
 		}
 		const assessment = assessmentOf(business, assessments);
-		return assessment ? [textMatch(business, assessment, answerCards, nearArea)] : [];
+		return assessment ? [textMatch(business, assessment, answerCards, nearArea, named)] : [];
 	});
 }

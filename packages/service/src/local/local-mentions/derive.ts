@@ -4,18 +4,20 @@ import { brands, competitors, runMentions } from "@workspace/lib/db/schema";
 import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import {
 	answerBusinesses,
+	answerNamedBusinesses,
 	businessContacts,
 	localMentions,
 	placeAnchors,
+	placeResolutions,
 	refUsZctas,
 	runLocations,
 	subjectServiceAreas,
 } from "../schema";
-import { type MatchableCard, matchLocalMentions, type TrackedBusiness } from "./match";
+import { type MatchableCard, matchLocalMentions, type ResolvedName, type TrackedBusiness } from "./match";
 import { type AreaCircle, nearAreaByZip, zipOf } from "./near";
 
 /** Bump when matching changes, so every located run is matched again. */
-export const LOCAL_MENTIONS_VERSION = 1;
+export const LOCAL_MENTIONS_VERSION = 2;
 
 const sameName = (a: string | null, b: string | null) =>
 	a === null || b === null ? a === b : a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -82,7 +84,8 @@ export async function deriveLocalMentions(subjectId: string, limit: number): Pro
 			.where(eq(subjectServiceAreas.subjectId, subjectId))
 	).sort((a, b) => a.lat - b.lat || a.lng - b.lng || a.radiusMeters - b.radiusMeters);
 	const prefix = localMentionsPrefix(businesses, areas);
-	const runStamp = sql<string>`${prefix}::text || ':' || ${runMentions.stamp} || ':' || ${runLocations.businessesVersion}`;
+	// A name's resolution changing clears the stamps of the runs that give it, rather than joining in here.
+	const runStamp = sql<string>`${prefix}::text || ':' || ${runMentions.stamp} || ':' || ${runLocations.businessesVersion} || ':' || coalesce(${runLocations.namedBusinessesVersion}::text, '-')`;
 	const stale = await db
 		.select({ runId: runLocations.runId, stamp: runStamp, assessments: runMentions.assessments })
 		.from(runLocations)
@@ -112,6 +115,28 @@ async function matchChunk(
 	const cards = await db.select().from(answerBusinesses).where(inArray(answerBusinesses.runId, runIds));
 	const cardsByRun = new Map<string, MatchableCard[]>();
 	for (const card of cards) cardsByRun.set(card.runId, [...(cardsByRun.get(card.runId) ?? []), card]);
+	const named = await db
+		.select({
+			runId: answerNamedBusinesses.runId,
+			name: answerNamedBusinesses.name,
+			placed: sql<boolean>`${answerNamedBusinesses.phone} IS NOT NULL OR ${answerNamedBusinesses.address} IS NOT NULL`,
+			resolution: placeResolutions.resolution,
+			placeId: placeResolutions.placeId,
+			cid: placeResolutions.cid,
+		})
+		.from(answerNamedBusinesses)
+		.leftJoin(
+			placeResolutions,
+			and(
+				eq(placeResolutions.subjectId, answerNamedBusinesses.subjectId),
+				eq(placeResolutions.nameKey, answerNamedBusinesses.nameKey),
+				sql`${placeResolutions.phone} IS NOT DISTINCT FROM ${answerNamedBusinesses.phone}`,
+				sql`${placeResolutions.address} IS NOT DISTINCT FROM ${answerNamedBusinesses.address}`,
+			),
+		)
+		.where(inArray(answerNamedBusinesses.runId, runIds));
+	const namedByRun = new Map<string, ResolvedName[]>();
+	for (const { runId, ...name } of named) namedByRun.set(runId, [...(namedByRun.get(runId) ?? []), name]);
 	const cardZips = [...new Set(cards.flatMap((card) => zipOf(card.address) ?? []))];
 	const zipPoints = cardZips.length
 		? await db
@@ -121,13 +146,15 @@ async function matchChunk(
 		: [];
 	const nearArea = nearAreaByZip(areas, new Map(zipPoints.map(({ zcta, lat, lng }) => [zcta, { lat, lng }])));
 	const rows = runs.flatMap(({ runId, assessments }) =>
-		matchLocalMentions(businesses, cardsByRun.get(runId) ?? [], assessments, nearArea).map(({ card, ...match }) => ({
-			runId,
-			subjectId,
-			...match,
-			cardPlacement: card?.placement ?? null,
-			cardPosition: card?.position ?? null,
-		})),
+		matchLocalMentions(businesses, cardsByRun.get(runId) ?? [], assessments, nearArea, namedByRun.get(runId) ?? []).map(
+			({ card, ...match }) => ({
+				runId,
+				subjectId,
+				...match,
+				cardPlacement: card?.placement ?? null,
+				cardPosition: card?.position ?? null,
+			}),
+		),
 	);
 	await db.transaction(async (tx) => {
 		await tx.delete(localMentions).where(inArray(localMentions.runId, runIds));

@@ -175,6 +175,8 @@ export const runLocations = pgTable(
 		businessesVersion: smallint("businesses_version"),
 		/** What its `local_mentions` were derived from (see `localMentionsStamp`); null until they are. */
 		localMentionsStamp: text("local_mentions_stamp"),
+		/** The extraction version its `answer_named_businesses` were listed with; null until they are. */
+		namedBusinessesVersion: smallint("named_businesses_version"),
 		createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 	},
 	(table) => [
@@ -479,13 +481,15 @@ export type LocalMatchMethod = (typeof localMatchMethod.enumValues)[number];
 /**
  * Why a row needs a person's eye: `unresolved`, counted on the judge's word alone; `doubtful`, a name
  * the judge couldn't rule out, uncounted; `other_listing`, counted for a card of the same name nearby
- * that isn't the anchored listing; `namesake_card`, uncounted for a card of a namesake elsewhere.
+ * that isn't the anchored listing; `namesake_card`, uncounted for a card of a namesake elsewhere;
+ * `namesake_place`, uncounted because Google places the name the answer gives only outside the areas.
  */
 export const localMentionReview = pgEnum("local_mention_review", [
 	"unresolved",
 	"doubtful",
 	"other_listing",
 	"namesake_card",
+	"namesake_place",
 ]);
 export type LocalMentionReview = (typeof localMentionReview.enumValues)[number];
 
@@ -524,3 +528,79 @@ export const localMentions = pgTable(
 ).enableRLS();
 
 export type LocalMention = typeof localMentions.$inferSelect;
+
+/**
+ * The businesses a located run's answer text names, as an LLM lists them, in the order named. Derived
+ * from the run's text, so a new extraction version lists them again. The trigger sets `subject_id`.
+ * `name_key` joins a name to its `place_resolutions`.
+ */
+export const answerNamedBusinesses = pgTable(
+	"answer_named_businesses",
+	{
+		runId: uuid("run_id")
+			.references(() => promptRuns.id, { onDelete: "cascade" })
+			.notNull(),
+		subjectId: text("subject_id").notNull(),
+		position: smallint("position").notNull(),
+		name: text("name").notNull(),
+		nameKey: text("name_key").notNull(),
+		/** E.164, as the answer gives it. */
+		phone: text("phone"),
+		/** Where the answer places it: a street address, or the city it lists it in. */
+		address: text("address"),
+		website: text("website"),
+	},
+	(table) => [
+		primaryKey({ name: "answer_named_businesses_pk", columns: [table.runId, table.position] }),
+		index("answer_named_businesses_subject_id_name_key_idx").on(table.subjectId, table.nameKey),
+		check("answer_named_businesses_position_check", sql`${table.position} >= 1`),
+		check("answer_named_businesses_name_key_check", sql`btrim(${table.nameKey}) <> ''`),
+		check("answer_named_businesses_phone_check", sql`${table.phone} ~ '^\\+[0-9]{8,15}$'`),
+	],
+).enableRLS();
+
+export type AnswerNamedBusiness = typeof answerNamedBusinesses.$inferSelect;
+
+/**
+ * `matched`: a listing of that name (and phone, if the answer gave one) in or near the subject's areas;
+ * `elsewhere`: listings of that name only outside them; `none`: no listing of that name.
+ */
+export const placeResolution = pgEnum("place_resolution", ["matched", "elsewhere", "none"]);
+export type PlaceResolution = (typeof placeResolution.enumValues)[number];
+
+/**
+ * What Places Text Search found for a name an answer gives, with the phone and address it gives, near
+ * the subject's areas, so each is looked up once rather than once per answer. Google lets Place IDs
+ * be kept indefinitely; nothing else from the response is stored. The address is the answer's.
+ */
+export const placeResolutions = pgTable(
+	"place_resolutions",
+	{
+		id: uuid("id").defaultRandom().primaryKey().notNull(),
+		subjectId: text("subject_id")
+			.references(() => brands.id, { onDelete: "cascade" })
+			.notNull(),
+		nameKey: text("name_key").notNull(),
+		/** E.164; null when the answer gave none. */
+		phone: text("phone"),
+		address: text("address"),
+		resolution: placeResolution("resolution").notNull(),
+		placeId: text("place_id"),
+		cid: text("cid"),
+		searchQuery: text("search_query").notNull(),
+		resolvedAt: timestamp("resolved_at", { withTimezone: true }).defaultNow().notNull(),
+	},
+	(table) => [
+		index("place_resolutions_subject_id_idx").on(table.subjectId),
+		uniqueIndex("place_resolutions_subject_name_idx").on(
+			table.subjectId,
+			table.nameKey,
+			sql`coalesce(${table.phone}, '')`,
+			sql`coalesce(${table.address}, '')`,
+		),
+		check("place_resolutions_matched_check", sql`(${table.resolution} = 'matched') = (${table.placeId} IS NOT NULL)`),
+		check("place_resolutions_phone_check", sql`${table.phone} ~ '^\\+[0-9]{8,15}$'`),
+	],
+).enableRLS();
+
+export type PlaceResolutionRecord = typeof placeResolutions.$inferSelect;

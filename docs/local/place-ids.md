@@ -41,4 +41,4 @@ Every call records a `usage_events` row (`provider` `google-places`, `event_type
 
 Every request names its fields in a field mask, since Google bills a call at the tier of the costliest field asked for. Phone numbers lift Text Search to Enterprise; they're worth it, because a phone is the surest way to tell two same-named businesses apart.
 
-Places calls are made by staff or by the daily refresh, not by scans, so they're outside the vendor spend stops (`docs/local/vendor-spend.md`). To cap them, set a per-day request quota on the key in Google Cloud.
+Places calls are made by staff, by the daily refresh, and by the job that looks up the businesses answers name (`docs/local/named-businesses.md`). That job stops for the day once a subject has made 200 calls. None of these are runs, so they're outside the vendor spend stops (`docs/local/vendor-spend.md`). To cap all Places spend, set a per-day request quota on the key in Google Cloud.
