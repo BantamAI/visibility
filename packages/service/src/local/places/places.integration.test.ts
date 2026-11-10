@@ -38,6 +38,7 @@ function candidate(placeId: string, name: string, lat: number, lng: number): Pla
 		primaryType: "plumber",
 		types: ["plumber"],
 		mapsUrl: null,
+		website: null,
 	};
 }
 

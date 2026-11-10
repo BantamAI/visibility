@@ -1,9 +1,8 @@
 import { db } from "@workspace/lib/db/db";
-import { usageEvents } from "@workspace/lib/db/schema";
-import { and, asc, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { PlaceCandidate, PlacesProvider } from "../../providers/places";
 import { type AreaCircle, NEAR_AREA_FACTOR } from "../local-mentions/near";
-import { PLACES_USAGE_EVENT, recordPlacesUsage } from "../places/usage";
+import { PLACES_CALLS_PER_DAY, placesCallsToday, recordPlacesUsage } from "../places/usage";
 import {
 	answerNamedBusinesses,
 	type PlaceResolution,
@@ -54,12 +53,6 @@ export function pickCandidate(
 const MATCHED_MAX_AGE_DAYS = 365;
 /** A name with no listing nearby may get one: a new business, or one Google lists late. */
 const UNMATCHED_MAX_AGE_DAYS = 30;
-
-/**
- * Text Search Enterprise is $0.035 a call, so this caps a subject's lookups at about $7 a day. Each
- * name is looked up once, so after the first scans most days need a handful.
- */
-export const PLACES_CALLS_PER_DAY = 200;
 
 const daysAgo = (now: Date, days: number) => new Date(now.getTime() - days * 86_400_000);
 
@@ -112,21 +105,6 @@ async function dueNames(subjectId: string, limit: number, now: Date): Promise<(N
 export const searchQuery = (key: { name: string; address: string | null }) =>
 	key.address ? `${key.name}, ${key.address}` : key.name;
 
-async function callsToday(subjectId: string, now: Date): Promise<number> {
-	const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-	const [row] = await db
-		.select({ calls: sql<number>`count(*)`.mapWith(Number) })
-		.from(usageEvents)
-		.where(
-			and(
-				eq(usageEvents.brandId, subjectId),
-				eq(usageEvents.eventType, PLACES_USAGE_EVENT),
-				gte(usageEvents.createdAt, dayStart),
-			),
-		);
-	return row?.calls ?? 0;
-}
-
 export interface ResolvedNames {
 	looked: number;
 	matched: number;
@@ -152,7 +130,7 @@ export async function resolveNamedBusinesses(
 		.orderBy(desc(subjectServiceAreas.isPrimary), asc(subjectServiceAreas.createdAt));
 	const [primary] = areas;
 	if (!primary) return result;
-	const allowance = Math.min(limit, PLACES_CALLS_PER_DAY - (await callsToday(subjectId, now)));
+	const allowance = Math.min(limit, PLACES_CALLS_PER_DAY - (await placesCallsToday(subjectId, now)));
 	if (allowance <= 0) return result;
 	const circles = areas.map((area) => ({ lat: area.centerLat, lng: area.centerLng, radiusMeters: area.radiusMeters }));
 	const bias = { lat: primary.centerLat, lng: primary.centerLng, radiusMeters: primary.radiusMeters };

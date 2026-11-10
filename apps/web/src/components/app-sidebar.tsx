@@ -1,6 +1,7 @@
 import {
 	IconBriefcase,
 	IconBuilding,
+	IconBuildingStore,
 	IconBuildings,
 	IconCalendarDollar,
 	IconChartBar,
@@ -126,6 +127,11 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 					title: "Place IDs",
 					link: { to: "/app/org/$org/brand/$brand/settings/place-ids", params },
 					icon: IconMapPinCheck,
+				},
+				{
+					title: "Local Competitors",
+					link: { to: "/app/org/$org/brand/$brand/settings/local-competitors", params },
+					icon: IconBuildingStore,
 				},
 				{
 					title: "Run Plan",

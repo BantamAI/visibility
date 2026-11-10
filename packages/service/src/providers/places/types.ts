@@ -20,6 +20,7 @@ export interface PlaceCandidate {
 	primaryType: string | null;
 	types: string[];
 	mapsUrl: string | null;
+	website: string | null;
 }
 
 export type PlaceIdCheck = { status: "current"; placeId: string } | { status: "not_found" };

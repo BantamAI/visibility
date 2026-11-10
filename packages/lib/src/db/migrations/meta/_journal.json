@@ -323,6 +323,13 @@
       "when": 1794275263430,
       "tag": "0045_named_businesses",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1794279313428,
+      "tag": "0046_competitor_discovery",
+      "breakpoints": true
     }
   ]
 }

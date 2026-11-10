@@ -15,7 +15,6 @@ export {
 } from "./extract";
 export { nameKey, sameBusinessName, startsWithName } from "./names";
 export {
-	PLACES_CALLS_PER_DAY,
 	pickCandidate,
 	type Resolved,
 	type ResolvedNames,

@@ -19,6 +19,7 @@ function candidate(name: string, at: { lat: number; lng: number } | null, fields
 		primaryType: "plumber",
 		types: ["plumber"],
 		mapsUrl: null,
+		website: null,
 		...fields,
 	} satisfies PlaceCandidate;
 }

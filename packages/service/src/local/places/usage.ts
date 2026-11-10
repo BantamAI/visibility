@@ -1,6 +1,6 @@
 import { db } from "@workspace/lib/db/db";
 import { brands, usageEvents } from "@workspace/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { PLACES_SKU_COST_USD, type PlacesResponse } from "../../providers/places";
 
 export const PLACES_PROVIDER = "google-places";
@@ -28,4 +28,26 @@ export async function recordPlacesUsage<T>(subjectId: string, response: PlacesRe
 		console.error("[places] Couldn't record a Places call's usage:", error);
 	}
 	return response.data;
+}
+
+/**
+ * Text Search Enterprise is $0.035 a call, so this caps a subject's lookups at about $7 a day. Staff
+ * searches, name lookups and competitor seeding share it.
+ */
+export const PLACES_CALLS_PER_DAY = 200;
+
+/** The subject's Places calls since midnight UTC, whoever made them. */
+export async function placesCallsToday(subjectId: string, now: Date): Promise<number> {
+	const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+	const [row] = await db
+		.select({ calls: sql<number>`count(*)`.mapWith(Number) })
+		.from(usageEvents)
+		.where(
+			and(
+				eq(usageEvents.brandId, subjectId),
+				eq(usageEvents.eventType, PLACES_USAGE_EVENT),
+				gte(usageEvents.createdAt, dayStart),
+			),
+		);
+	return row?.calls ?? 0;
 }

@@ -1,6 +1,6 @@
 # Named businesses
 
-The mention judge only answers for businesses we already track, so an answer's other businesses are invisible to it. Every located answer's text is read by an LLM that lists each business it names, and each name is looked up on Google, so that untracked competitors are captured (for competitor discovery, E53-S6) and tracked ones can be tied to a listing (`docs/local/local-mentions.md`).
+The mention judge only answers for businesses we already track, so an answer's other businesses are invisible to it. Every located answer's text is read by an LLM that lists each business it names, and each name is looked up on Google, so that untracked competitors are captured (`docs/local/competitor-discovery.md`) and tracked ones can be tied to a listing (`docs/local/local-mentions.md`).
 
 ## Listing
 
@@ -33,4 +33,4 @@ Names are normalized by lower-casing them, reading "&" as "and", dropping punctu
 
 Each listing is one LLM call, recorded as a `usage_events` row with `event_type` `named_businesses_extraction` and the model version. Its cost is left empty, since the structured-output path doesn't report tokens. Each lookup is a Text Search Enterprise call ($0.035), recorded as a `places_call` like every other Places call.
 
-Per subject per day, at most `EXTRACTIONS_PER_DAY` (1,000) answers are listed and `PLACES_CALLS_PER_DAY` (200) Places calls are made, counting staff's own searches on the Place IDs page. That's about $7 a day of Places spend at most. Each name is looked up only once, so after a subject's first scans most days need only a few lookups.
+Per subject per day, at most `EXTRACTIONS_PER_DAY` (1,000) answers are listed and `PLACES_CALLS_PER_DAY` (200) Places calls are made, counting staff's own searches on the Place IDs page and competitor seeding. That's about $7 a day of Places spend at most. Each name is looked up only once, so after a subject's first scans most days need only a few lookups.
