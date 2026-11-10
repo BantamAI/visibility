@@ -64,9 +64,15 @@ export function scansFor(plan: RunPlan, points: readonly PlannerPoint[]): ScanSp
 					reason: u.reason,
 					standInPointId: u.standIn?.pointId ?? null,
 				}));
-			const estimatedCostUsd =
-				series.costPerRunUsd === null ? null : series.costPerRunUsd * areaPoints.length * series.repeats;
 			for (const promptId of series.promptIds) {
+				const scoped = series.scopedPrompts?.[promptId];
+				const scanPoints = scoped ? areaPoints.filter((point) => scoped.pointIds.includes(point.id)) : areaPoints;
+				if (scanPoints.length === 0) continue;
+				const scanUncovered = scoped
+					? areaUncovered.filter((u) => scoped.uncoveredPointIds.includes(u.pointId))
+					: areaUncovered;
+				const estimatedCostUsd =
+					series.costPerRunUsd === null ? null : series.costPerRunUsd * scanPoints.length * series.repeats;
 				specs.push({
 					areaId,
 					promptId,
@@ -75,8 +81,8 @@ export function scansFor(plan: RunPlan, points: readonly PlannerPoint[]): ScanSp
 					pointKind: series.pointKind,
 					repeats: series.repeats,
 					intervalDays: series.intervalDays,
-					points: areaPoints,
-					uncovered: areaUncovered,
+					points: scanPoints,
+					uncovered: scanUncovered,
 					estimatedCostUsd,
 				});
 			}
