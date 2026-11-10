@@ -1,6 +1,14 @@
 import type { MentionAssessment, RunMentionAssessments } from "@workspace/lib/mentions";
 import { describe, expect, it } from "vitest";
-import { type MatchableCard, matchLocalMentions, type TrackedBusiness } from "./match";
+import { type MatchableCard, matchLocalMentions as match, type NearArea, type TrackedBusiness } from "./match";
+
+/** Places cards by the city in their address: Raleigh is the area. */
+const nearRaleigh: NearArea = (card) => (card.address ? card.address.includes("Raleigh") : null);
+const matchLocalMentions = (
+	businesses: TrackedBusiness[],
+	cards: MatchableCard[],
+	assessments: RunMentionAssessments | null,
+) => match(businesses, cards, assessments, nearRaleigh);
 
 const subject: TrackedBusiness = {
 	competitorName: null,
@@ -31,6 +39,7 @@ function card(fields: Partial<MatchableCard>): MatchableCard {
 		cid: null,
 		phone: null,
 		website: null,
+		address: null,
 		...fields,
 	};
 }
@@ -90,7 +99,7 @@ describe("matching a located answer to tracked businesses", () => {
 		const matches = matchLocalMentions(
 			[subject, rival],
 			[card({ position: 1, cid: rival.cid })],
-			assessments(mentioned(0.8)),
+			assessments(mentioned(0.9)),
 		);
 		expect(matches).toEqual([
 			expect.objectContaining({ competitorName: null, method: "text+jev", counted: true }),
@@ -98,17 +107,25 @@ describe("matching a located answer to tracked businesses", () => {
 		]);
 	});
 
-	it("counts a text mention the judge confirms, flagged until it's tied to a listing", () => {
-		expect(matchLocalMentions([subject], [], assessments(mentioned(0.82)))).toEqual([
+	it("counts a text mention the judge is sure of, flagged until it's tied to a listing", () => {
+		expect(matchLocalMentions([subject], [], assessments(mentioned(0.92)))).toEqual([
 			{
 				competitorName: null,
 				counted: true,
 				method: "text+jev",
-				confidence: 0.82,
+				confidence: 0.92,
 				review: "unresolved",
 				card: null,
 			},
 		]);
+	});
+
+	it("keeps a name the judge can't rule out but isn't sure of, uncounted and flagged", () => {
+		expect(matchLocalMentions([subject], [], assessments(mentioned(0.6)))[0]).toMatchObject({
+			counted: false,
+			confidence: 0.6,
+			review: "doubtful",
+		});
 	});
 
 	it("keeps a name the judge rules out, uncounted", () => {
@@ -120,22 +137,40 @@ describe("matching a located answer to tracked businesses", () => {
 		});
 	});
 
-	it("doesn't count a name when the answer's card for it is a namesake's listing", () => {
-		const namesake = card({ name: "Oak City Plumbing", placeId: "ChIJnamesakenamesak04" });
-		expect(matchLocalMentions([subject], [namesake], assessments(mentioned()))[0]).toMatchObject({
-			counted: false,
-			method: "text+jev",
-			review: "conflicting_card",
+	it("counts another listing of the same name nearby, such as a second location", () => {
+		const branch = card({ name: "Oak City Plumbing", cid: "3333", address: "2709 Campbell Rd, Raleigh, NC 27606" });
+		expect(matchLocalMentions([subject], [branch], assessments(mentioned(0.5)))[0]).toMatchObject({
+			counted: true,
+			review: "other_listing",
+			card: null,
 		});
 	});
 
-	it("finds a namesake's card by an alias too", () => {
-		const namesake = card({ name: "Triangle Rooter & Drain of Durham", cid: "9999" });
-		const [match] = matchLocalMentions([rival], [namesake], assessments(undefined, { "Triangle Rooter": mentioned() }));
-		expect(match).toMatchObject({ counted: false, review: "conflicting_card" });
+	it.each([
+		["placed elsewhere", { address: "1 Main St, Charlotte, NC 28202" }],
+		["of another listing, unplaced", { placeId: "ChIJnamesakenamesak04" }],
+	])("doesn't count a name when the answer's card for it is a namesake's, %s", (_, fields) => {
+		const namesake = card({ name: "Oak City Plumbing of Charlotte", ...fields });
+		expect(matchLocalMentions([subject], [namesake], assessments(mentioned()))[0]).toMatchObject({
+			counted: false,
+			method: "text+jev",
+			review: "namesake_card",
+		});
 	});
 
-	it("can't rule out a namesake card for a business with no Place ID or CID", () => {
+	it("doesn't count a name that's part of another company's, as its card shows", () => {
+		const longer = card({ name: "Harris Triangle Rooter Services", address: "5 Elm St, Raleigh, NC 27601" });
+		const [match] = matchLocalMentions([rival], [longer], assessments(undefined, { "Triangle Rooter": mentioned() }));
+		expect(match).toMatchObject({ counted: false, review: "namesake_card" });
+	});
+
+	it("finds a namesake's card by an alias too", () => {
+		const namesake = card({ name: "Triangle Rooter & Drain of Durham", address: "9 Oak St, Durham, NC 27701" });
+		const [match] = matchLocalMentions([rival], [namesake], assessments(undefined, { "Triangle Rooter": mentioned() }));
+		expect(match).toMatchObject({ counted: false, review: "namesake_card" });
+	});
+
+	it("can't rule out an unplaced namesake card for a business with no Place ID or CID", () => {
 		const unanchored = { ...subject, placeId: null, cid: null };
 		const namesake = card({ name: "Oak City Plumbing", placeId: "ChIJnamesakenamesak04" });
 		expect(matchLocalMentions([unanchored], [namesake], assessments(mentioned()))[0]).toMatchObject({

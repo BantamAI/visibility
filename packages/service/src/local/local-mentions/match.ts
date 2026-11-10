@@ -17,8 +17,11 @@ export interface TrackedBusiness {
 
 export type MatchableCard = Pick<
 	BusinessCard,
-	"placement" | "position" | "name" | "placeId" | "cid" | "phone" | "website"
+	"placement" | "position" | "name" | "placeId" | "cid" | "phone" | "website" | "address"
 >;
+
+/** Whether a card's business is in or near the subject's areas; null when its address doesn't say. */
+export type NearArea = (card: MatchableCard) => boolean | null;
 
 export interface LocalMatch {
 	competitorName: string | null;
@@ -94,13 +97,50 @@ function assessmentOf(business: TrackedBusiness, assessments: RunMentionAssessme
 	return business.competitorName === null ? assessments.brand : assessments.competitors[business.competitorName];
 }
 
-function textMatch(business: TrackedBusiness, assessment: MentionAssessment, cards: MatchableCard[]): LocalMatch {
+const comparable = (value: string) =>
+	value
+		.toLowerCase()
+		.replace(/[^\p{L}\p{N}]+/gu, " ")
+		.trim();
+
+/** "Roto-Rooter Plumbing & Water Cleanup" is a Roto-Rooter; "Harris Brothers Plumbing" isn't a Brothers Plumbing. */
+function sameBrand(card: MatchableCard, business: TrackedBusiness): boolean {
+	const name = comparable(card.name);
+	return [business.name, ...business.aliases]
+		.map(comparable)
+		.filter(Boolean)
+		.some((term) => name === term || name.startsWith(`${term} `));
+}
+
+/**
+ * Below this, the judge can't rule the name out but isn't sure of it either. Elmo counts such a
+ * name; with nothing else to go on, a local mention doesn't, since chains and common words make
+ * doubtful names mostly namesakes.
+ */
+export const SURE_TEXT_MATCH = 0.8;
+
+function textMatch(
+	business: TrackedBusiness,
+	assessment: MentionAssessment,
+	cards: MatchableCard[],
+	nearArea: NearArea,
+): LocalMatch {
 	const base = { competitorName: business.competitorName, method: "text+jev" as const, card: null };
 	const confidence = assessment.probability;
 	if (!assessment.mentioned) return { ...base, counted: false, confidence, review: null };
-	// The answer shows a card for a namesake and none for this business: the name means the namesake.
-	if (cards.some((card) => namesIt(card, business) && otherListing(card, business)))
-		return { ...base, counted: false, confidence, review: "conflicting_card" };
+	const namesakes = cards.filter((card) => namesIt(card, business));
+	const brand = namesakes.filter((card) => sameBrand(card, business));
+	// Another listing of the same name nearby: a second location or branch of the business.
+	if (brand.some((card) => nearArea(card) === true))
+		return { ...base, counted: true, confidence, review: "other_listing" };
+	const elsewhere = brand.some((card) => {
+		const near = nearArea(card);
+		return near === false || (near === null && otherListing(card, business));
+	});
+	// The answer shows a namesake's card, or another company whose name contains this one: the name means that.
+	if (elsewhere || namesakes.some((card) => !sameBrand(card, business)))
+		return { ...base, counted: false, confidence, review: "namesake_card" };
+	if (confidence < SURE_TEXT_MATCH) return { ...base, counted: false, confidence, review: "doubtful" };
 	// Counted, but nothing ties it to the business's listing yet.
 	return { ...base, counted: true, confidence, review: "unresolved" };
 }
@@ -108,13 +148,14 @@ function textMatch(business: TrackedBusiness, assessment: MentionAssessment, car
 /**
  * Matches a located run's answer cards and the judge's assessments to the subject and its tracked
  * competitors: a card that carries a business's Place ID, CID, phone or website first, then the
- * judge's reading of the text. Only cards in the answer count; the map pack beside an AI Overview
- * is Google's ordinary local ranking, not the AI's.
+ * judge's reading of the text, checked against the cards that share the name. Only cards in the
+ * answer count; the map pack beside an AI Overview is Google's ordinary local ranking, not the AI's.
  */
 export function matchLocalMentions(
 	businesses: TrackedBusiness[],
 	cards: MatchableCard[],
 	assessments: RunMentionAssessments | null,
+	nearArea: NearArea,
 ): LocalMatch[] {
 	const answerCards = cards.filter((card) => card.placement === "answer").sort((a, b) => a.position - b.position);
 	return businesses.flatMap((business): LocalMatch[] => {
@@ -133,6 +174,6 @@ export function matchLocalMentions(
 			];
 		}
 		const assessment = assessmentOf(business, assessments);
-		return assessment ? [textMatch(business, assessment, answerCards)] : [];
+		return assessment ? [textMatch(business, assessment, answerCards, nearArea)] : [];
 	});
 }

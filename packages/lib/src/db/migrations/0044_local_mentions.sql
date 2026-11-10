@@ -1,5 +1,5 @@
 CREATE TYPE "public"."local_match_method" AS ENUM('place_id', 'cid', 'phone', 'url', 'text+jev', 'resolved');--> statement-breakpoint
-CREATE TYPE "public"."local_mention_review" AS ENUM('unresolved', 'conflicting_card');--> statement-breakpoint
+CREATE TYPE "public"."local_mention_review" AS ENUM('unresolved', 'doubtful', 'other_listing', 'namesake_card');--> statement-breakpoint
 CREATE TABLE "business_contacts" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"subject_id" text NOT NULL,

@@ -1,5 +1,5 @@
 {
-  "id": "7561c1e7-ffe1-4b60-9b6a-609cc535ffe9",
+  "id": "a5c4d173-3d9f-4534-9b52-d8b14a727209",
   "prevId": "53bb627e-048b-4fdd-be05-984af70781b2",
   "version": "7",
   "dialect": "postgresql",
@@ -6505,7 +6505,9 @@
       "schema": "public",
       "values": [
         "unresolved",
-        "conflicting_card"
+        "doubtful",
+        "other_listing",
+        "namesake_card"
       ]
     },
     "public.location_method": {

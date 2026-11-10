@@ -466,10 +466,27 @@ export const businessContacts = pgTable(
 
 export type BusinessContact = typeof businessContacts.$inferSelect;
 
-export const localMatchMethod = pgEnum("local_match_method", ["place_id", "cid", "phone", "url", "text+jev", "resolved"]);
+export const localMatchMethod = pgEnum("local_match_method", [
+	"place_id",
+	"cid",
+	"phone",
+	"url",
+	"text+jev",
+	"resolved",
+]);
 export type LocalMatchMethod = (typeof localMatchMethod.enumValues)[number];
 
-export const localMentionReview = pgEnum("local_mention_review", ["unresolved", "conflicting_card"]);
+/**
+ * Why a row needs a person's eye: `unresolved`, counted on the judge's word alone; `doubtful`, a name
+ * the judge couldn't rule out, uncounted; `other_listing`, counted for a card of the same name nearby
+ * that isn't the anchored listing; `namesake_card`, uncounted for a card of a namesake elsewhere.
+ */
+export const localMentionReview = pgEnum("local_mention_review", [
+	"unresolved",
+	"doubtful",
+	"other_listing",
+	"namesake_card",
+]);
 export type LocalMentionReview = (typeof localMentionReview.enumValues)[number];
 
 /**

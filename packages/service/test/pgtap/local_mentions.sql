@@ -63,7 +63,7 @@ SELECT throws_ok(
 );
 SELECT lives_ok(
 	$$INSERT INTO local_mentions (run_id, subject_id, competitor_name, counted, method, confidence, review)
-		VALUES ('53000000-0000-0000-0000-00000000000a', 'local-mentions-a', 'Rival', true, 'text+jev', 0.8, 'unresolved')$$,
+		VALUES ('53000000-0000-0000-0000-00000000000a', 'local-mentions-a', 'Rival', true, 'text+jev', 0.9, 'unresolved')$$,
 	'subject can record its own run''s mentions'
 );
 SELECT throws_ok(

@@ -2,8 +2,17 @@ import { createHash } from "node:crypto";
 import { db } from "@workspace/lib/db/db";
 import { brands, competitors, runMentions } from "@workspace/lib/db/schema";
 import { and, desc, eq, inArray, isNotNull, sql } from "drizzle-orm";
-import { answerBusinesses, businessContacts, localMentions, placeAnchors, runLocations } from "../schema";
+import {
+	answerBusinesses,
+	businessContacts,
+	localMentions,
+	placeAnchors,
+	refUsZctas,
+	runLocations,
+	subjectServiceAreas,
+} from "../schema";
 import { type MatchableCard, matchLocalMentions, type TrackedBusiness } from "./match";
+import { type AreaCircle, nearAreaByZip, zipOf } from "./near";
 
 /** Bump when matching changes, so every located run is matched again. */
 export const LOCAL_MENTIONS_VERSION = 1;
@@ -46,8 +55,8 @@ export async function trackedBusinesses(subjectId: string): Promise<TrackedBusin
 }
 
 /** Changes when matching or anything it matches on does; a run's stamp adds its judgement and cards. */
-export function localMentionsPrefix(businesses: TrackedBusiness[]): string {
-	const digest = createHash("sha256").update(JSON.stringify(businesses)).digest("hex").slice(0, 16);
+export function localMentionsPrefix(businesses: TrackedBusiness[], areas: AreaCircle[]): string {
+	const digest = createHash("sha256").update(JSON.stringify({ businesses, areas })).digest("hex").slice(0, 16);
 	return `${LOCAL_MENTIONS_VERSION}:${digest}`;
 }
 
@@ -62,7 +71,17 @@ const CHUNK_RUNS = 200;
 export async function deriveLocalMentions(subjectId: string, limit: number): Promise<number> {
 	const businesses = await trackedBusinesses(subjectId);
 	if (businesses.length === 0) return 0;
-	const prefix = localMentionsPrefix(businesses);
+	const areas: AreaCircle[] = (
+		await db
+			.select({
+				lat: subjectServiceAreas.centerLat,
+				lng: subjectServiceAreas.centerLng,
+				radiusMeters: subjectServiceAreas.radiusMeters,
+			})
+			.from(subjectServiceAreas)
+			.where(eq(subjectServiceAreas.subjectId, subjectId))
+	).sort((a, b) => a.lat - b.lat || a.lng - b.lng || a.radiusMeters - b.radiusMeters);
+	const prefix = localMentionsPrefix(businesses, areas);
 	const runStamp = sql<string>`${prefix}::text || ':' || ${runMentions.stamp} || ':' || ${runLocations.businessesVersion}`;
 	const stale = await db
 		.select({ runId: runLocations.runId, stamp: runStamp, assessments: runMentions.assessments })
@@ -79,21 +98,30 @@ export async function deriveLocalMentions(subjectId: string, limit: number): Pro
 		.orderBy(desc(runLocations.createdAt))
 		.limit(limit);
 	for (let i = 0; i < stale.length; i += CHUNK_RUNS)
-		await matchChunk(subjectId, businesses, stale.slice(i, i + CHUNK_RUNS));
+		await matchChunk(subjectId, businesses, areas, stale.slice(i, i + CHUNK_RUNS));
 	return stale.length;
 }
 
 async function matchChunk(
 	subjectId: string,
 	businesses: TrackedBusiness[],
+	areas: AreaCircle[],
 	runs: { runId: string; stamp: string; assessments: (typeof runMentions.$inferSelect)["assessments"] }[],
 ): Promise<void> {
 	const runIds = runs.map((run) => run.runId);
 	const cards = await db.select().from(answerBusinesses).where(inArray(answerBusinesses.runId, runIds));
 	const cardsByRun = new Map<string, MatchableCard[]>();
 	for (const card of cards) cardsByRun.set(card.runId, [...(cardsByRun.get(card.runId) ?? []), card]);
+	const cardZips = [...new Set(cards.flatMap((card) => zipOf(card.address) ?? []))];
+	const zipPoints = cardZips.length
+		? await db
+				.select({ zcta: refUsZctas.zcta, lat: refUsZctas.lat, lng: refUsZctas.lng })
+				.from(refUsZctas)
+				.where(inArray(refUsZctas.zcta, cardZips))
+		: [];
+	const nearArea = nearAreaByZip(areas, new Map(zipPoints.map(({ zcta, lat, lng }) => [zcta, { lat, lng }])));
 	const rows = runs.flatMap(({ runId, assessments }) =>
-		matchLocalMentions(businesses, cardsByRun.get(runId) ?? [], assessments).map(({ card, ...match }) => ({
+		matchLocalMentions(businesses, cardsByRun.get(runId) ?? [], assessments, nearArea).map(({ card, ...match }) => ({
 			runId,
 			subjectId,
 			...match,
