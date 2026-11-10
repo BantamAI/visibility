@@ -14,7 +14,7 @@ Elmo replaces a brand's competitor rows every time competitors are saved, so a c
 
 Google's [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies) let Place IDs be stored indefinitely, and coordinates for at most 30 days. Nothing else from a Places response may be cached, so `place_anchors` holds only the Place ID and the CID. Names, addresses and phones are shown from a live search and never saved. The subject's own name, phone, address and service area come from the facts API (linked clients) or manual entry (prospects).
 
-The CID is read from the place's `googleMapsUri` (`https://maps.google.com/?cid=…`), since some answer cards link by CID instead of Place ID. Google's policy names only the Place ID as exempt, so the CID is treated as the Place ID's companion: it's replaced whenever the Place ID is.
+The CID is read from the place's `googleMapsUri` (`https://maps.google.com/?cid=…&g_mp=…`), since some answer cards link by CID instead of Place ID. Google's policy names only the Place ID as exempt, so the CID is treated as the Place ID's companion: it's replaced whenever the Place ID is.
 
 `geocodeAddress()` returns Google's coordinates for an address (for location canaries, E53-S27). Whoever stores them must drop or refresh them within 30 days.
 

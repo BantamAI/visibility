@@ -20,24 +20,29 @@ const header = (sent: Sent, name: string) => new Headers(sent.init.headers).get(
 describe("searchText", () => {
 	it("returns candidates with Place ID, CID, E.164 phone, address, coordinates and categories", async () => {
 		const { impl } = fakeFetch(200, fixture("text-search.json"));
-		const { data, sku } = await googlePlacesProvider("key", impl).searchText("Acme Plumbing", null);
+		const { data, sku } = await googlePlacesProvider("key", impl).searchText("Googleplex", null);
 
 		expect(sku).toBe("text_search_enterprise");
 		expect(data).toEqual([
 			{
-				placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4",
-				cid: "10281119596374313554",
-				name: "Acme Plumbing",
-				phone: "+16145550142",
-				address: "123 Example St, Columbus, OH 43215, USA",
-				lat: 39.9612,
-				lng: -82.9988,
-				primaryType: "plumber",
-				types: ["plumber", "point_of_interest", "establishment"],
-				mapsUrl: "https://maps.google.com/?cid=10281119596374313554",
+				placeId: "ChIJj61dQgK6j4AR4GeTYWZsKWw",
+				cid: "7793879817120868320",
+				name: "Googleplex",
+				phone: "+16502530000",
+				address: "1600 Amphitheatre Pkwy, Mountain View, CA 94043",
+				lat: 37.4220541,
+				lng: -122.08532419999999,
+				primaryType: "corporate_office",
+				types: ["corporate_office", "point_of_interest", "service", "establishment"],
+				mapsUrl: expect.stringMatching(/^https:\/\/maps\.google\.com\/\?cid=7793879817120868320&/),
 			},
-			expect.objectContaining({ placeId: "ChIJrTLr-GyuEmsRBfy61i59si0", name: "Acme Plumbing & Drain", phone: null }),
 		]);
+	});
+
+	it("skips a place with no id or name", async () => {
+		const body = JSON.stringify({ places: [{ displayName: { text: "No Id" } }, { id: "ChIJnonamenonamenoname" }] });
+		const { impl } = fakeFetch(200, body);
+		expect((await googlePlacesProvider("key", impl).searchText("x", null)).data).toEqual([]);
 	});
 
 	it("asks only for the fields it reads, and leans toward the area without passing Google's radius cap", async () => {
@@ -75,13 +80,13 @@ describe("searchText", () => {
 describe("checkPlaceId", () => {
 	it("refreshes with the free IDs-only field mask", async () => {
 		const { impl, sent } = fakeFetch(200, fixture("place-details-ids-only.json"));
-		const result = await googlePlacesProvider("key", impl).checkPlaceId("ChIJN1t_tDeuEmsRUsoyG83frY4");
+		const result = await googlePlacesProvider("key", impl).checkPlaceId("ChIJj61dQgK6j4AR4GeTYWZsKWw");
 
 		expect(result).toEqual({
-			data: { status: "current", placeId: "ChIJN1t_tDeuEmsRUsoyG83frY4" },
+			data: { status: "current", placeId: "ChIJj61dQgK6j4AR4GeTYWZsKWw" },
 			sku: "place_details_ids_only",
 		});
-		expect(sent[0].url).toBe("https://places.googleapis.com/v1/places/ChIJN1t_tDeuEmsRUsoyG83frY4");
+		expect(sent[0].url).toBe("https://places.googleapis.com/v1/places/ChIJj61dQgK6j4AR4GeTYWZsKWw");
 		expect(header(sent[0], "X-Goog-FieldMask")).toBe("id");
 	});
 
@@ -95,8 +100,8 @@ describe("checkPlaceId", () => {
 describe("mapsCid", () => {
 	it("reads the CID from the place's Maps link", async () => {
 		const { impl, sent } = fakeFetch(200, fixture("place-details-maps-uri.json"));
-		const result = await googlePlacesProvider("key", impl).mapsCid("ChIJN1t_tDeuEmsRUsoyG83frY4");
-		expect(result).toEqual({ data: "10281119596374313554", sku: "place_details_pro" });
+		const result = await googlePlacesProvider("key", impl).mapsCid("ChIJj61dQgK6j4AR4GeTYWZsKWw");
+		expect(result).toEqual({ data: "7793879817120868320", sku: "place_details_pro" });
 		expect(header(sent[0], "X-Goog-FieldMask")).toBe("id,googleMapsUri");
 	});
 });
@@ -122,7 +127,7 @@ describe("geocode", () => {
 	});
 
 	it("throws when Google refuses the request", async () => {
-		const { impl } = fakeFetch(200, JSON.stringify({ status: "REQUEST_DENIED", error_message: "bad key" }));
+		const { impl } = fakeFetch(200, fixture("geocode-request-denied.json"));
 		await expect(googlePlacesProvider("key", impl).geocode("x")).rejects.toThrow("REQUEST_DENIED");
 	});
 });

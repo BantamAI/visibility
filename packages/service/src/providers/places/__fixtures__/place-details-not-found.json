@@ -1,7 +1,7 @@
 {
 	"error": {
 		"code": 404,
-		"message": "Requested entity was not found.",
+		"message": "The provided Place ID is no longer valid. Please refresh cached Place IDs as per https://developers.google.com/maps/documentation/places/web-service/place-id#save-id.",
 		"status": "NOT_FOUND"
 	}
 }
