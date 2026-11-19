@@ -3,6 +3,7 @@
  * returning it whole would make whatever the generator wrote part of this
  * contract.
  */
+import type { LocalOpportunity, LocalSource } from "@workspace/service/local/opportunities";
 import type { CitedPage, ReportOpportunity } from "./opportunities";
 import { resolveOpportunities } from "./opportunities";
 
@@ -10,12 +11,13 @@ import { resolveOpportunities } from "./opportunities";
 type OpportunitiesStatus = "ready" | "insufficient-data";
 
 interface PublishedOpportunity {
-	category: ReportOpportunity["category"];
+	category: ReportOpportunity["category"] | LocalOpportunity["category"];
 	title: string;
 	why: string;
 	relatedPrompts: Array<{ text: string; promptId: string | null }>;
 	yourCitations: CitedPage[];
 	competitorCitations: CitedPage[];
+	sources: LocalSource[];
 }
 
 export interface PublishedOpportunities {
@@ -48,6 +50,7 @@ export async function publishedOpportunities(brandId: string): Promise<Published
 			})),
 			yourCitations: item.yourCitations ?? [],
 			competitorCitations: item.competitorCitations ?? [],
+			sources: "sources" in item ? item.sources : [],
 		})),
 		risks: result.report?.risks ?? [],
 	};

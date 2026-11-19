@@ -1681,13 +1681,43 @@
 				},
 				"required": ["url", "domain", "title"]
 			},
+			"OpportunitySource": {
+				"type": "object",
+				"properties": {
+					"domain": {
+						"type": "string"
+					},
+					"category": {
+						"type": "string",
+						"description": "The kind of source, such as `listings`, `reviews` or `local-news`."
+					},
+					"pages": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/CitedPage"
+						},
+						"description": "Its pages the brand's located answers cite most."
+					}
+				},
+				"required": ["domain", "category", "pages"]
+			},
 			"Opportunity": {
 				"type": "object",
 				"properties": {
 					"category": {
 						"type": "string",
-						"description": "Which workstream this belongs to: `creation` is net-new content, `existing-content` is a page that could win the mention with a refresh, `outreach` is earning a placement on a third-party site assistants cite, `social` is the community conversations they pull from.",
-						"enum": ["creation", "existing-content", "outreach", "social"]
+						"description": "Which workstream this belongs to: `creation` is net-new content, `existing-content` is a page that could win the mention with a refresh, `outreach` is earning a placement on a third-party site assistants cite, `social` is the community conversations they pull from. A brand with a service area gets the local workstreams instead: `listings`, `reviews`, `gbp` (its Google Business Profile), `local-press-community` and `service-pages`.",
+						"enum": [
+							"creation",
+							"existing-content",
+							"outreach",
+							"social",
+							"listings",
+							"reviews",
+							"gbp",
+							"local-press-community",
+							"service-pages"
+						]
 					},
 					"title": {
 						"type": "string",
@@ -1717,6 +1747,13 @@
 							"$ref": "#/components/schemas/CitedPage"
 						},
 						"description": "Pages on competitor domains cited for those prompts."
+					},
+					"sources": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/OpportunitySource"
+						},
+						"description": "The cited sources a local opportunity is based on. Empty for a brand without a service area."
 					}
 				},
 				"required": ["category", "title", "why", "relatedPrompts", "yourCitations", "competitorCitations"]

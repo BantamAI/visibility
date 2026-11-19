@@ -18,6 +18,7 @@ export function phrasingOf(tags: readonly string[]): Phrasing {
 /** One located answer whose local mentions have been matched. */
 export interface MetricRun {
 	runId: string;
+	promptId: string;
 	model: string;
 	areaId: string;
 	phrasing: Phrasing;

@@ -14,6 +14,7 @@ import {
 let id = 0;
 const run = (overrides: Partial<MetricRun> = {}): MetricRun => ({
 	runId: `run-${++id}`,
+	promptId: "prompt-1",
 	model: "chatgpt",
 	areaId: "raleigh",
 	phrasing: "near-me",

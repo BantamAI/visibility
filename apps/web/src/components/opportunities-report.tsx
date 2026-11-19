@@ -4,8 +4,11 @@
  * each card leads with a plain-language "why", then three drill-downs — Prompts /
  * Your citations / Competitor citations — to explore the underlying data.
  */
+
+import type { LocalOpportunitiesReport } from "@workspace/service/local/opportunities";
 import { useState } from "react";
 import { BrandPromptLink } from "@/components/brand-prompt-link";
+import { LOCAL_CATEGORY_META, LocalSourceList } from "@/components/local-opportunities";
 import type { CitedPage, OpportunitiesReport as OpportunitiesReportData, ReportPrompt } from "@/server/opportunities";
 
 const CATEGORY_META = [
@@ -31,8 +34,9 @@ const CATEGORY_META = [
 	},
 ] as const;
 
-type Opportunity = OpportunitiesReportData["opportunities"][number];
-type Tab = "prompts" | "your" | "comp";
+type Report = OpportunitiesReportData | LocalOpportunitiesReport;
+type Opportunity = Report["opportunities"][number];
+type Tab = "prompts" | "sources" | "your" | "comp";
 
 function Bullet() {
 	return <span className="mt-2 size-1.5 shrink-0 rounded-full bg-muted-foreground/50" aria-hidden />;
@@ -76,8 +80,10 @@ function Panel({ children }: { children: React.ReactNode }) {
 
 function OpportunityCard({ o }: { o: Opportunity }) {
 	const [open, setOpen] = useState<Tab | null>(null);
+	const sources = "sources" in o ? o.sources : null;
 	const tabs: { key: Tab; label: string; count: number }[] = [
 		{ key: "prompts", label: "Prompts", count: o.relatedPrompts.length },
+		...(sources ? [{ key: "sources" as const, label: "Sources", count: sources.length }] : []),
 		{ key: "your", label: "Your citations", count: o.yourCitations.length },
 		{ key: "comp", label: "Competitor citations", count: o.competitorCitations.length },
 	];
@@ -110,6 +116,11 @@ function OpportunityCard({ o }: { o: Opportunity }) {
 						)}
 					</Panel>
 				)}
+				{open === "sources" && sources && (
+					<Panel>
+						<LocalSourceList sources={sources} />
+					</Panel>
+				)}
 				{open === "your" && (
 					<Panel>
 						{o.yourCitations.length === 0 ? (
@@ -133,7 +144,8 @@ function OpportunityCard({ o }: { o: Opportunity }) {
 	);
 }
 
-export function OpportunitiesReport({ report }: { report: OpportunitiesReportData }) {
+export function OpportunitiesReport({ report }: { report: Report }) {
+	const categories = "variant" in report ? LOCAL_CATEGORY_META : CATEGORY_META;
 	return (
 		<div className="space-y-8">
 			{report.summary.length > 0 && (
@@ -145,8 +157,8 @@ export function OpportunitiesReport({ report }: { report: OpportunitiesReportDat
 				</section>
 			)}
 
-			{CATEGORY_META.map((c) => {
-				const opps = report.opportunities.filter((o) => o.category === c.key);
+			{categories.map((c) => {
+				const opps: Opportunity[] = report.opportunities.filter((o) => o.category === c.key);
 				if (opps.length === 0) return null;
 				return (
 					<section key={c.key} className="space-y-3">
