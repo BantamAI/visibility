@@ -9,6 +9,7 @@ import { categorizeDomain } from "@workspace/lib/citations/domain-lists";
 import { db } from "@workspace/lib/db/db";
 import { brandOpportunities, brands, competitors } from "@workspace/lib/db/schema";
 import { runStructuredCompletionPrompt } from "@workspace/lib/onboarding";
+import { type LocalOpportunitiesReport, resolveLocalOpportunities } from "@workspace/service/local/opportunities";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { isBrandedPrompt } from "@/lib/prompt-tags";
@@ -115,7 +116,7 @@ export interface OpportunitiesReport extends Omit<RawReport, "opportunities"> {
 
 type OpportunitiesReason = "insufficient-data" | null;
 export interface OpportunitiesResponse {
-	report: OpportunitiesReport | null;
+	report: OpportunitiesReport | LocalOpportunitiesReport | null;
 	reason: OpportunitiesReason;
 	generatedFor: { brandName: string } | null;
 	lastEvaluatedAt: string | null;
@@ -540,6 +541,9 @@ async function generateValidReport(prompt: string): Promise<{ report: RawReport;
 
 /** Generates inline, with no queue: the freshness gate is what bounds the spend. */
 export async function resolveOpportunities(brandId: string, timezone = "UTC"): Promise<OpportunitiesResponse> {
+	const local = await resolveLocalOpportunities(brandId);
+	if (local) return local;
+
 	const [latest] = await db
 		.select()
 		.from(brandOpportunities)
