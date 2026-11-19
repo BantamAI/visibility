@@ -13,6 +13,7 @@ import {
 	IconListDetails,
 	IconMapPin,
 	IconMapPinCheck,
+	IconMapPins,
 	IconMessageQuestion,
 	IconMessages,
 	IconMoodSmile,
@@ -82,6 +83,11 @@ function brandGroups(organization: OrganizationSummary, brand: BrandWithPrompts)
 	if (brand.onboarded) {
 		dashboard.push(
 			{ title: "Visibility", link: { to: "/app/org/$org/brand/$brand/visibility", params }, icon: IconChartBar },
+			{
+				title: "Local Visibility",
+				link: { to: "/app/org/$org/brand/$brand/local-visibility", params },
+				icon: IconMapPins,
+			},
 			{
 				title: "Share of Voice",
 				link: { to: "/app/org/$org/brand/$brand/share-of-voice", params },

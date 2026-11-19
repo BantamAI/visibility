@@ -10,6 +10,7 @@ import { Switch } from "@workspace/ui/components/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table";
 import { useEffect, useState } from "react";
 import { useBrandId } from "@/hooks/use-brand-id";
+import { TIER_LABELS } from "@/lib/fidelity-tiers";
 import { pageHead } from "@/lib/route-head";
 import { useWriteErrorMessage } from "@/lib/write-errors";
 import { getRecentScans, getRunPlan, previewRunPlanFn, saveRunScheduleFn } from "@/server/run-plan";
@@ -34,14 +35,6 @@ type Settings = {
 	scanIntervalDays: number;
 	centroidIntervalDays: number;
 	repeats: number;
-};
-
-const TIER_LABELS: Record<string, string> = {
-	T1: "T1 · Exact Point",
-	T2: "T2 · City Exit",
-	T3: "T3 · State Exit",
-	T4: "T4 · API Approximation",
-	T5: "T5 · City in Prompt",
 };
 
 const POINT_KINDS: Record<string, string> = { centroid: "cities", grid: "grid", zip: "ZIPs" };

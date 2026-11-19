@@ -85,6 +85,7 @@ import { Route as ApiV1PromptsPromptIdRunsRunIdRouteImport } from './routes/api/
 import { Route as AuthedAppOrgOrgBrandBrandIndexRouteImport } from './routes/_authed/app/org/$org/brand/$brand/index'
 import { Route as AuthedAppOrgOrgBrandBrandSplatRouteImport } from './routes/_authed/app/org/$org/brand/$brand/$'
 import { Route as AuthedAppOrgOrgBrandBrandCitationsRouteImport } from './routes/_authed/app/org/$org/brand/$brand/citations'
+import { Route as AuthedAppOrgOrgBrandBrandLocalVisibilityRouteImport } from './routes/_authed/app/org/$org/brand/$brand/local-visibility'
 import { Route as AuthedAppOrgOrgBrandBrandOpportunitiesRouteImport } from './routes/_authed/app/org/$org/brand/$brand/opportunities'
 import { Route as AuthedAppOrgOrgBrandBrandQueryFanOutRouteImport } from './routes/_authed/app/org/$org/brand/$brand/query-fan-out'
 import { Route as AuthedAppOrgOrgBrandBrandResponsesRouteImport } from './routes/_authed/app/org/$org/brand/$brand/responses'
@@ -515,6 +516,12 @@ const AuthedAppOrgOrgBrandBrandCitationsRoute =
     path: '/citations',
     getParentRoute: () => AuthedAppOrgOrgBrandBrandRoute,
   } as any)
+const AuthedAppOrgOrgBrandBrandLocalVisibilityRoute =
+  AuthedAppOrgOrgBrandBrandLocalVisibilityRouteImport.update({
+    id: '/local-visibility',
+    path: '/local-visibility',
+    getParentRoute: () => AuthedAppOrgOrgBrandBrandRoute,
+  } as any)
 const AuthedAppOrgOrgBrandBrandOpportunitiesRoute =
   AuthedAppOrgOrgBrandBrandOpportunitiesRouteImport.update({
     id: '/opportunities',
@@ -705,6 +712,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/prompts/$promptId/runs/': typeof ApiV1PromptsPromptIdRunsIndexRoute
   '/app/org/$org/brand/$brand/$': typeof AuthedAppOrgOrgBrandBrandSplatRoute
   '/app/org/$org/brand/$brand/citations': typeof AuthedAppOrgOrgBrandBrandCitationsRoute
+  '/app/org/$org/brand/$brand/local-visibility': typeof AuthedAppOrgOrgBrandBrandLocalVisibilityRoute
   '/app/org/$org/brand/$brand/opportunities': typeof AuthedAppOrgOrgBrandBrandOpportunitiesRoute
   '/app/org/$org/brand/$brand/query-fan-out': typeof AuthedAppOrgOrgBrandBrandQueryFanOutRoute
   '/app/org/$org/brand/$brand/responses': typeof AuthedAppOrgOrgBrandBrandResponsesRoute
@@ -795,6 +803,7 @@ export interface FileRoutesByTo {
   '/api/v1/prompts/$promptId/runs': typeof ApiV1PromptsPromptIdRunsIndexRoute
   '/app/org/$org/brand/$brand/$': typeof AuthedAppOrgOrgBrandBrandSplatRoute
   '/app/org/$org/brand/$brand/citations': typeof AuthedAppOrgOrgBrandBrandCitationsRoute
+  '/app/org/$org/brand/$brand/local-visibility': typeof AuthedAppOrgOrgBrandBrandLocalVisibilityRoute
   '/app/org/$org/brand/$brand/opportunities': typeof AuthedAppOrgOrgBrandBrandOpportunitiesRoute
   '/app/org/$org/brand/$brand/query-fan-out': typeof AuthedAppOrgOrgBrandBrandQueryFanOutRoute
   '/app/org/$org/brand/$brand/responses': typeof AuthedAppOrgOrgBrandBrandResponsesRoute
@@ -893,6 +902,7 @@ export interface FileRoutesById {
   '/api/v1/prompts/$promptId/runs/': typeof ApiV1PromptsPromptIdRunsIndexRoute
   '/_authed/app/org/$org/brand/$brand/$': typeof AuthedAppOrgOrgBrandBrandSplatRoute
   '/_authed/app/org/$org/brand/$brand/citations': typeof AuthedAppOrgOrgBrandBrandCitationsRoute
+  '/_authed/app/org/$org/brand/$brand/local-visibility': typeof AuthedAppOrgOrgBrandBrandLocalVisibilityRoute
   '/_authed/app/org/$org/brand/$brand/opportunities': typeof AuthedAppOrgOrgBrandBrandOpportunitiesRoute
   '/_authed/app/org/$org/brand/$brand/query-fan-out': typeof AuthedAppOrgOrgBrandBrandQueryFanOutRoute
   '/_authed/app/org/$org/brand/$brand/responses': typeof AuthedAppOrgOrgBrandBrandResponsesRoute
@@ -991,6 +1001,7 @@ export interface FileRouteTypes {
     | '/api/v1/prompts/$promptId/runs/'
     | '/app/org/$org/brand/$brand/$'
     | '/app/org/$org/brand/$brand/citations'
+    | '/app/org/$org/brand/$brand/local-visibility'
     | '/app/org/$org/brand/$brand/opportunities'
     | '/app/org/$org/brand/$brand/query-fan-out'
     | '/app/org/$org/brand/$brand/responses'
@@ -1081,6 +1092,7 @@ export interface FileRouteTypes {
     | '/api/v1/prompts/$promptId/runs'
     | '/app/org/$org/brand/$brand/$'
     | '/app/org/$org/brand/$brand/citations'
+    | '/app/org/$org/brand/$brand/local-visibility'
     | '/app/org/$org/brand/$brand/opportunities'
     | '/app/org/$org/brand/$brand/query-fan-out'
     | '/app/org/$org/brand/$brand/responses'
@@ -1178,6 +1190,7 @@ export interface FileRouteTypes {
     | '/api/v1/prompts/$promptId/runs/'
     | '/_authed/app/org/$org/brand/$brand/$'
     | '/_authed/app/org/$org/brand/$brand/citations'
+    | '/_authed/app/org/$org/brand/$brand/local-visibility'
     | '/_authed/app/org/$org/brand/$brand/opportunities'
     | '/_authed/app/org/$org/brand/$brand/query-fan-out'
     | '/_authed/app/org/$org/brand/$brand/responses'
@@ -1774,6 +1787,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAppOrgOrgBrandBrandCitationsRouteImport
       parentRoute: typeof AuthedAppOrgOrgBrandBrandRoute
     }
+    '/_authed/app/org/$org/brand/$brand/local-visibility': {
+      id: '/_authed/app/org/$org/brand/$brand/local-visibility'
+      path: '/local-visibility'
+      fullPath: '/app/org/$org/brand/$brand/local-visibility'
+      preLoaderRoute: typeof AuthedAppOrgOrgBrandBrandLocalVisibilityRouteImport
+      parentRoute: typeof AuthedAppOrgOrgBrandBrandRoute
+    }
     '/_authed/app/org/$org/brand/$brand/opportunities': {
       id: '/_authed/app/org/$org/brand/$brand/opportunities'
       path: '/opportunities'
@@ -1957,6 +1977,7 @@ const AuthedAppOrgOrgSettingsRouteWithChildren =
 interface AuthedAppOrgOrgBrandBrandRouteChildren {
   AuthedAppOrgOrgBrandBrandSplatRoute: typeof AuthedAppOrgOrgBrandBrandSplatRoute
   AuthedAppOrgOrgBrandBrandCitationsRoute: typeof AuthedAppOrgOrgBrandBrandCitationsRoute
+  AuthedAppOrgOrgBrandBrandLocalVisibilityRoute: typeof AuthedAppOrgOrgBrandBrandLocalVisibilityRoute
   AuthedAppOrgOrgBrandBrandOpportunitiesRoute: typeof AuthedAppOrgOrgBrandBrandOpportunitiesRoute
   AuthedAppOrgOrgBrandBrandQueryFanOutRoute: typeof AuthedAppOrgOrgBrandBrandQueryFanOutRoute
   AuthedAppOrgOrgBrandBrandResponsesRoute: typeof AuthedAppOrgOrgBrandBrandResponsesRoute
@@ -1984,6 +2005,8 @@ const AuthedAppOrgOrgBrandBrandRouteChildren: AuthedAppOrgOrgBrandBrandRouteChil
     AuthedAppOrgOrgBrandBrandSplatRoute: AuthedAppOrgOrgBrandBrandSplatRoute,
     AuthedAppOrgOrgBrandBrandCitationsRoute:
       AuthedAppOrgOrgBrandBrandCitationsRoute,
+    AuthedAppOrgOrgBrandBrandLocalVisibilityRoute:
+      AuthedAppOrgOrgBrandBrandLocalVisibilityRoute,
     AuthedAppOrgOrgBrandBrandOpportunitiesRoute:
       AuthedAppOrgOrgBrandBrandOpportunitiesRoute,
     AuthedAppOrgOrgBrandBrandQueryFanOutRoute:
