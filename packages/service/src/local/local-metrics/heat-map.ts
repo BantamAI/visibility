@@ -10,8 +10,10 @@ import {
 	runLocations,
 	samplePoints,
 	subjectServiceAreas,
+	type UncoveredScanPoint,
 } from "../schema";
 import { type Proportion, wilsonInterval } from "./interval";
+import { judgedBrand, subjectPosition } from "./judged";
 
 /** Only these routes place an answer at the point itself, so only their scans can be read as a map. */
 export const HEAT_MAP_TIERS: readonly FidelityTier[] = ["T1", "T2"];
@@ -92,9 +94,76 @@ export interface HeatMapPoint {
 	gap: boolean;
 }
 
-const judgedBrandPosition = sql<
-	string | null
->`CASE WHEN (${runMentions.assessments}->'brand'->>'mentioned')::boolean THEN ${runMentions.assessments}->'brand'->>'position' END`;
+interface ScanRunRow {
+	pointId: string;
+	location: { latitude: number; longitude: number };
+	status: "pending" | "answered" | "failed";
+	label: string | null;
+	matched: boolean;
+	mentioned: boolean;
+	cardPosition: number | null;
+	textPosition: string | null;
+}
+
+interface PointTally {
+	point: Omit<HeatMapPoint, "mentions" | "averagePosition">;
+	matched: number;
+	mentioned: number;
+	positionSum: number;
+	ranked: number;
+}
+
+const newTally = (run: ScanRunRow): PointTally => ({
+	point: {
+		pointId: run.pointId,
+		label: run.label,
+		lat: run.location.latitude,
+		lng: run.location.longitude,
+		pending: 0,
+		failed: 0,
+		standIn: false,
+		gap: false,
+	},
+	matched: 0,
+	mentioned: 0,
+	positionSum: 0,
+	ranked: 0,
+});
+
+function countRun(tally: PointTally, run: ScanRunRow) {
+	if (run.status === "failed") tally.point.failed++;
+	else if (run.status === "pending" || !run.matched) tally.point.pending++;
+	else {
+		tally.matched++;
+		if (!run.mentioned) return;
+		tally.mentioned++;
+		const { position } = subjectPosition(run.cardPosition, run.textPosition);
+		if (position === null) return;
+		tally.positionSum += position;
+		tally.ranked++;
+	}
+}
+
+const finishTally = ({ point, matched, mentioned, positionSum, ranked }: PointTally): HeatMapPoint => ({
+	...point,
+	mentions: wilsonInterval(mentioned, matched),
+	averagePosition: ranked === 0 ? null : positionSum / ranked,
+});
+
+function uncoveredPoint(u: UncoveredScanPoint, tallies: Map<string, PointTally>): HeatMapPoint {
+	const standIn = u.standInPointId ? tallies.get(u.standInPointId) : undefined;
+	const base = { pointId: u.pointId, label: u.label, lat: u.lat, lng: u.lng };
+	if (standIn) return { ...finishTally(standIn), ...base, standIn: true };
+	return {
+		...base,
+		mentions: wilsonInterval(0, 0),
+		averagePosition: null,
+		pending: 0,
+		failed: 0,
+		standIn: false,
+		gap: true,
+	};
+}
 
 /** Every point of a scan with how often its answers name the subject and where they rank it. */
 export async function scanHeatMap(scanId: string): Promise<{ scan: HeatMapScan; points: HeatMapPoint[] } | null> {
@@ -116,7 +185,7 @@ export async function scanHeatMap(scanId: string): Promise<{ scan: HeatMapScan; 
 			matched: sql<boolean>`${runLocations.localMentionsStamp} IS NOT NULL`,
 			mentioned: sql<boolean>`${localMentions.id} IS NOT NULL`,
 			cardPosition: localMentions.cardPosition,
-			textPosition: judgedBrandPosition,
+			textPosition: judgedBrand("position"),
 		})
 		.from(gridScanRuns)
 		.leftJoin(samplePoints, eq(samplePoints.id, gridScanRuns.pointId))
@@ -133,65 +202,13 @@ export async function scanHeatMap(scanId: string): Promise<{ scan: HeatMapScan; 
 		.where(eq(gridScanRuns.scanId, scanId))
 		.orderBy(asc(gridScanRuns.pointId), asc(gridScanRuns.repeat));
 
-	interface Tally {
-		point: Omit<HeatMapPoint, "mentions" | "averagePosition">;
-		matched: number;
-		mentioned: number;
-		positionSum: number;
-		ranked: number;
-	}
-	const tallies = new Map<string, Tally>();
+	const tallies = new Map<string, PointTally>();
 	for (const run of runs) {
-		const tally = tallies.get(run.pointId) ?? {
-			point: {
-				pointId: run.pointId,
-				label: run.label,
-				lat: run.location.latitude,
-				lng: run.location.longitude,
-				pending: 0,
-				failed: 0,
-				standIn: false,
-				gap: false,
-			},
-			matched: 0,
-			mentioned: 0,
-			positionSum: 0,
-			ranked: 0,
-		};
+		const tally = tallies.get(run.pointId) ?? newTally(run);
 		tallies.set(run.pointId, tally);
-		if (run.status === "failed") tally.point.failed++;
-		else if (run.status === "pending" || !run.matched) tally.point.pending++;
-		else {
-			tally.matched++;
-			if (!run.mentioned) continue;
-			tally.mentioned++;
-			const text = run.textPosition === null ? null : Number(run.textPosition);
-			const position = run.cardPosition ?? (Number.isInteger(text) ? text : null);
-			if (position !== null) {
-				tally.positionSum += position;
-				tally.ranked++;
-			}
-		}
+		countRun(tally, run);
 	}
-	const finish = ({ point, matched, mentioned, positionSum, ranked }: Tally): HeatMapPoint => ({
-		...point,
-		mentions: wilsonInterval(mentioned, matched),
-		averagePosition: ranked === 0 ? null : positionSum / ranked,
-	});
-	const points = [...tallies.values()].map(finish);
-	const uncovered = uncoveredPoints.map((u): HeatMapPoint => {
-		const standIn = u.standInPointId ? tallies.get(u.standInPointId) : undefined;
-		const base = { pointId: u.pointId, label: u.label, lat: u.lat, lng: u.lng };
-		if (standIn) return { ...finish(standIn), ...base, standIn: true };
-		return {
-			...base,
-			mentions: wilsonInterval(0, 0),
-			averagePosition: null,
-			pending: 0,
-			failed: 0,
-			standIn: false,
-			gap: true,
-		};
-	});
+	const points = [...tallies.values()].map(finishTally);
+	const uncovered = uncoveredPoints.map((u) => uncoveredPoint(u, tallies));
 	return { scan, points: [...points, ...uncovered] };
 }

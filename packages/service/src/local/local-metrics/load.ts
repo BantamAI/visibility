@@ -1,9 +1,9 @@
 import { db } from "@workspace/lib/db/db";
 import { promptRuns, prompts, runMentions } from "@workspace/lib/db/schema";
-import type { Sentiment } from "@workspace/lib/mentions";
 import type { FidelityTier } from "@workspace/lib/providers";
-import { and, eq, gte, inArray, isNotNull, lt, type SQL, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, lt, type SQL } from "drizzle-orm";
 import { areaCompetitors, localMentions, runLocations, samplePoints } from "../schema";
+import { judgedBrand, judgedSentiment, subjectPosition } from "./judged";
 import { computeLocalMetrics, type LocalMetrics, type MetricRun, phrasingOf } from "./metrics";
 
 export interface LocalMetricsScope {
@@ -18,13 +18,32 @@ export interface LocalMetricsScope {
 	promptIds?: readonly string[];
 }
 
-const SENTIMENTS = new Set<string>(["positive", "neutral", "negative", "mixed"]);
-
 const lower = (name: string) => name.trim().toLowerCase();
 
-/** The judge's reading of the subject, when it judged the answer to mention it. */
-const judgedBrand = (field: string) =>
-	sql<string | null>`CASE WHEN (${runMentions.assessments}->'brand'->>'mentioned')::boolean THEN ${runMentions.assessments}->'brand'->>${field} END`;
+interface CountedMention {
+	runId: string;
+	competitorName: string | null;
+	cardPosition: number | null;
+}
+
+/** The names of each area's tracked competitors, keyed by their lowercased name. */
+function trackedNamesByArea(tracked: readonly { areaId: string; name: string }[]) {
+	const byArea = new Map<string, Map<string, string>>();
+	for (const { areaId, name } of tracked) {
+		const names = byArea.get(areaId) ?? new Map<string, string>();
+		names.set(lower(name), name);
+		byArea.set(areaId, names);
+	}
+	return byArea;
+}
+
+function metricSubject(
+	row: CountedMention | undefined,
+	judged: { sentiment: string | null; position: string | null },
+): MetricRun["subject"] {
+	if (!row) return null;
+	return { ...subjectPosition(row.cardPosition, judged.position), sentiment: judgedSentiment(judged.sentiment) };
+}
 
 /**
  * The subject's located runs in scope whose local mentions have been matched, with what they count.
@@ -90,25 +109,14 @@ export async function loadMetricRuns(subjectId: string, scope: LocalMetricsScope
 			.where(and(eq(areaCompetitors.subjectId, subjectId), eq(areaCompetitors.tracked, true))),
 	]);
 
-	const trackedByArea = new Map<string, Map<string, string>>();
-	for (const { areaId, name } of tracked) {
-		const names = trackedByArea.get(areaId) ?? new Map<string, string>();
-		names.set(lower(name), name);
-		trackedByArea.set(areaId, names);
-	}
-	const mentionsByRun = new Map<string, typeof mentions>();
-	for (const mention of mentions) mentionsByRun.set(mention.runId, [...(mentionsByRun.get(mention.runId) ?? []), mention]);
+	const trackedByArea = trackedNamesByArea(tracked);
+	const mentionsByRun = new Map<string, CountedMention[]>();
+	for (const mention of mentions)
+		mentionsByRun.set(mention.runId, [...(mentionsByRun.get(mention.runId) ?? []), mention]);
 
 	return runs.map((run) => {
 		const counted = mentionsByRun.get(run.runId) ?? [];
-		const subjectRow = counted.find((mention) => mention.competitorName === null);
 		const areaTracked = trackedByArea.get(run.areaId);
-		const competitors = counted.flatMap(({ competitorName }) => {
-			const name = competitorName === null ? undefined : areaTracked?.get(lower(competitorName));
-			return name ? [name] : [];
-		});
-		const textPosition = run.textPosition === null ? null : Number(run.textPosition);
-		const position = subjectRow?.cardPosition ?? (Number.isInteger(textPosition) ? textPosition : null);
 		return {
 			runId: run.runId,
 			model: run.model,
@@ -116,14 +124,14 @@ export async function loadMetricRuns(subjectId: string, scope: LocalMetricsScope
 			phrasing: phrasingOf(run.tags),
 			tier: run.tier,
 			createdAt: run.createdAt,
-			subject: subjectRow
-				? {
-						position,
-						positionFrom: subjectRow.cardPosition !== null ? "card" : position !== null ? "text" : null,
-						sentiment: run.sentiment && SENTIMENTS.has(run.sentiment) ? (run.sentiment as Sentiment) : null,
-					}
-				: null,
-			competitors,
+			subject: metricSubject(
+				counted.find((mention) => mention.competitorName === null),
+				{ sentiment: run.sentiment, position: run.textPosition },
+			),
+			competitors: counted.flatMap(({ competitorName }) => {
+				const name = competitorName === null ? undefined : areaTracked?.get(lower(competitorName));
+				return name ? [name] : [];
+			}),
 		};
 	});
 }

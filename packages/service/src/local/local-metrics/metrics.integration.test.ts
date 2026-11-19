@@ -77,6 +77,34 @@ interface Answer {
 	subjectId?: string;
 }
 
+async function addMentions(runId: string, subjectId: string, opts: Answer) {
+	const card = (name: string | null) => (name === null ? opts.card : undefined);
+	const rows = [
+		...(opts.counted ?? []).map((name) => ({ name, counted: true })),
+		...(opts.notCounted ?? []).map((name) => ({ name, counted: false })),
+	];
+	for (const { name, counted } of rows)
+		await owner.insert(localMentions).values({
+			runId,
+			subjectId,
+			competitorName: name,
+			counted,
+			method: card(name) ? "place_id" : "text+jev",
+			confidence: counted ? 0.95 : 0.4,
+			cardPlacement: card(name) ? "answer" : null,
+			cardPosition: card(name) ?? null,
+		});
+}
+
+async function addJudgement(runId: string, judged: NonNullable<Answer["judged"]>) {
+	const assessments: RunMentionAssessments = {
+		brand: { mentioned: true, probability: 0.95, ...judged },
+		competitors: {},
+		judged: { brand: "x", competitors: {} },
+	};
+	await owner.insert(runMentions).values({ runId, brandMentioned: true, assessments });
+}
+
 async function answer(opts: Answer): Promise<string> {
 	const subjectId = opts.subjectId ?? S;
 	const tier = opts.tier ?? "T1";
@@ -102,29 +130,8 @@ async function answer(opts: Answer): Promise<string> {
 		fidelityTier: tier,
 		localMentionsStamp: opts.matched === false ? null : "test",
 	});
-	const rows = [
-		...(opts.counted ?? []).map((name) => ({ name, counted: true })),
-		...(opts.notCounted ?? []).map((name) => ({ name, counted: false })),
-	];
-	for (const { name, counted } of rows)
-		await owner.insert(localMentions).values({
-			runId: run.id,
-			subjectId,
-			competitorName: name,
-			counted,
-			method: name === null && opts.card ? "place_id" : "text+jev",
-			confidence: counted ? 0.95 : 0.4,
-			cardPlacement: name === null && opts.card ? "answer" : null,
-			cardPosition: name === null && opts.card ? opts.card : null,
-		});
-	if (opts.judged) {
-		const assessments: RunMentionAssessments = {
-			brand: { mentioned: true, probability: 0.95, ...opts.judged },
-			competitors: {},
-			judged: { brand: "x", competitors: {} },
-		};
-		await owner.insert(runMentions).values({ runId: run.id, brandMentioned: true, assessments });
-	}
+	await addMentions(run.id, subjectId, opts);
+	if (opts.judged) await addJudgement(run.id, opts.judged);
 	return run.id;
 }
 
@@ -262,8 +269,22 @@ describe("heat maps", () => {
 					pointsPlanned: 4,
 					createdAt,
 					uncovered: [
-						{ pointId: "00000000-0000-4000-8000-000000000001", label: "Lake", lat: 35.9, lng: -78.7, reason: "water", standInPointId: null },
-						{ pointId: "00000000-0000-4000-8000-000000000002", label: "Edge", lat: 35.95, lng: -78.7, reason: "no city", standInPointId: r0 },
+						{
+							pointId: "00000000-0000-4000-8000-000000000001",
+							label: "Lake",
+							lat: 35.9,
+							lng: -78.7,
+							reason: "water",
+							standInPointId: null,
+						},
+						{
+							pointId: "00000000-0000-4000-8000-000000000002",
+							label: "Edge",
+							lat: 35.95,
+							lng: -78.7,
+							reason: "no city",
+							standInPointId: r0,
+						},
 					],
 				})
 				.returning();
@@ -304,7 +325,11 @@ describe("heat maps", () => {
 		const result = await withSubject(S, () => scanHeatMap(scanId));
 		const byLabel = Object.fromEntries((result?.points ?? []).map((point) => [point.label, point]));
 		expect(byLabel["Raleigh 0"]).toMatchObject({ mentions: { successes: 2, trials: 2 }, averagePosition: 2 });
-		expect(byLabel["Raleigh 1"]).toMatchObject({ mentions: { successes: 0, trials: 1 }, failed: 1, averagePosition: null });
+		expect(byLabel["Raleigh 1"]).toMatchObject({
+			mentions: { successes: 0, trials: 1 },
+			failed: 1,
+			averagePosition: null,
+		});
 		expect(byLabel["Raleigh 2"]).toMatchObject({ mentions: { trials: 0 }, pending: 2 });
 		expect(byLabel.Edge).toMatchObject({ standIn: true, gap: false, mentions: { successes: 2, trials: 2 } });
 		expect(byLabel.Lake).toMatchObject({ gap: true, mentions: { trials: 0 } });
