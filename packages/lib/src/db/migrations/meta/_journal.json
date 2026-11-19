@@ -337,6 +337,13 @@
       "when": 1794316703898,
       "tag": "0047_service_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794317787432,
+      "tag": "0048_local_news_sources",
+      "breakpoints": true
     }
   ]
 }

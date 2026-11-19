@@ -2,7 +2,8 @@ import "../instrument.server.mjs";
 import { wrapFetchWithSentry } from "@sentry/tanstackstart-react";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { startCredentialRefresh } from "@workspace/lib/secrets";
-import { assertAppRole, UnsafeAppRoleError } from "@workspace/service/local/tenancy";
+import { installLocalCitationCategories, loadLocalNewsDomains } from "@workspace/service/local/citation-categories";
+import { assertAppRole, UnsafeAppRoleError, withAgency } from "@workspace/service/local/tenancy";
 
 // Not awaited, like the refresh below, but fatal when it finds the app connected as a
 // role that gets past row-level security.
@@ -10,6 +11,11 @@ void assertAppRole().catch((error) => {
 	console.error(error);
 	if (error instanceof UnsafeAppRoleError) process.exit(1);
 });
+
+installLocalCitationCategories();
+void withAgency({ actor: "web", reason: "startup: load local news sites" }, () => loadLocalNewsDomains()).catch(
+	(error) => console.error("Loading local news sites failed:", error),
+);
 
 // Not awaited: the app has to serve sign-in and settings whether or not the
 // credential store is reachable.

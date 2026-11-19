@@ -15,6 +15,7 @@
 	},
 	"exports": {
 		"./local/answer-businesses": "./src/local/answer-businesses/index.ts",
+		"./local/citation-categories": "./src/local/citation-categories/index.ts",
 		"./local/competitor-discovery": "./src/local/competitor-discovery/index.ts",
 		"./local/delete-brand": "./src/local/delete-brand.ts",
 		"./local/grid-scans": "./src/local/grid-scans/index.ts",

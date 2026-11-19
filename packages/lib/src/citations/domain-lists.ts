@@ -787,14 +787,35 @@ const DOMAIN_CATEGORY_CHECKS: [(domain: string) => boolean, CitationCategory][] 
 	[hasPrHostPrefix, "pr"],
 ];
 
-export function categorizeDomain(
+/** Gets the URL when there is one, and null when only the domain is known. */
+export type CitationCategoryOverride = (domain: string, url: string | null) => CitationCategory | null;
+
+let categoryOverride: CitationCategoryOverride | null = null;
+
+/** Claims domains or pages ahead of the curated lists, though never ahead of brand and competitor. */
+export function setCitationCategoryOverride(override: CitationCategoryOverride | null): void {
+	categoryOverride = override;
+}
+
+function categorize(
 	domain: string,
+	url: string | null,
 	brandDomains: Set<string>,
 	competitorDomains: Set<string>,
 ): CitationCategory {
 	if (inDomainSet(domain, brandDomains)) return "brand";
 	if (inDomainSet(domain, competitorDomains)) return "competitor";
+	const overridden = categoryOverride?.(domain, url);
+	if (overridden) return overridden;
 	return DOMAIN_CATEGORY_CHECKS.find(([matches]) => matches(domain))?.[1] ?? "other";
+}
+
+export function categorizeDomain(
+	domain: string,
+	brandDomains: Set<string>,
+	competitorDomains: Set<string>,
+): CitationCategory {
+	return categorize(domain, null, brandDomains, competitorDomains);
 }
 
 /**
@@ -831,7 +852,7 @@ export function classifyUrl(
 	brandDomains: Set<string>,
 	competitorDomains: Set<string>,
 ): CitationCategory {
-	const cat = categorizeDomain(domain, brandDomains, competitorDomains);
+	const cat = categorize(domain, url, brandDomains, competitorDomains);
 	if (cat !== "other") return cat;
 	const pt = inferPageType(url, title);
 	if (pt === "forum") return "social"; // a forum page on an unlisted domain is still community / UGC

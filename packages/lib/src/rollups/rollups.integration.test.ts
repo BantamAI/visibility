@@ -449,11 +449,11 @@ describe("rollups against postgres", () => {
 		expect(
 			pages.map((page) => [page.url, page.title, page.staticCategory, page.pageType, page.classifierVersion]),
 		).toEqual([
-			["https://docs.example.com/api", null, "developer", "doc", 1],
-			[GUIDE, "New guide title", "editorial", "howto", 1],
-			["https://google.com/search?q=best+crm", "best crm", "google", "search", 1],
+			["https://docs.example.com/api", null, "developer", "doc", CLASSIFIER_VERSION],
+			[GUIDE, "New guide title", "editorial", "howto", CLASSIFIER_VERSION],
+			["https://google.com/search?q=best+crm", "best crm", "google", "search", CLASSIFIER_VERSION],
 			// The domain is unlisted, so the page type is what makes this editorial.
-			["https://other.com/post", "Post", "editorial", "article", 1],
+			["https://other.com/post", "Post", "editorial", "article", CLASSIFIER_VERSION],
 		]);
 
 		const guide = pages.find((page) => page.url === GUIDE);

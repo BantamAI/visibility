@@ -7,6 +7,7 @@ import { PROCESS_PROMPT_QUEUE } from "@workspace/lib/queues/prompt-jobs";
 import { GENERATE_REPORT_QUEUE } from "@workspace/lib/queues/report-jobs";
 import { REFRESH_ROLLUPS_QUEUE, ROLLUP_CATCH_UP_QUEUE } from "@workspace/lib/rollups/constants";
 import { DERIVE_ANSWER_BUSINESSES_QUEUE } from "@workspace/service/local/answer-businesses";
+import { loadLocalNewsDomains } from "@workspace/service/local/citation-categories";
 import { DISCOVER_COMPETITORS_QUEUE } from "@workspace/service/local/competitor-discovery";
 import {
 	GRID_SCAN_RUN_QUEUE,
@@ -238,7 +239,14 @@ export async function registerHandlers(boss: PgBoss): Promise<void> {
 	await boss.work<RefreshRollupsData>(
 		REFRESH_ROLLUPS_QUEUE,
 		{ localConcurrency: 1 },
-		withSentry(REFRESH_ROLLUPS_QUEUE, asAgency(REFRESH_ROLLUPS_QUEUE, refreshRollupsJob)),
+		withSentry(
+			REFRESH_ROLLUPS_QUEUE,
+			// Every minute, so local news sites listed in the web app reach new pages here soon after.
+			asAgency(REFRESH_ROLLUPS_QUEUE, async (jobs: Job<RefreshRollupsData>[]) => {
+				await loadLocalNewsDomains();
+				return refreshRollupsJob(jobs);
+			}),
+		),
 	);
 	console.log(`Registered handler: ${REFRESH_ROLLUPS_QUEUE}`);
 
