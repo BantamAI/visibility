@@ -100,7 +100,7 @@ const MAX_LIST_PAGE_SIZE = 50;
  * stored, so they resolve through getEffectiveBrandedStatus; every other tag
  * matches against the prompt's own tags or its system tags.
  */
-function promptIdsMatchingTags(
+export function promptIdsMatchingTags(
 	allPrompts: { id: string; tags: string[] | null; systemTags: string[] | null }[],
 	tagFilter: string[],
 ): string[] {
