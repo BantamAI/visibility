@@ -51,6 +51,45 @@ interface Tally {
 const byCount = <T>(entries: Iterable<[T, number]>) =>
 	[...entries].sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
 
+const newTally = (): Tally => ({
+	subjectCited: false,
+	runs: new Set(),
+	engines: new Set(),
+	competitors: new Map(),
+	pages: new Map(),
+	categories: new Map(),
+});
+
+function addCompetitorCitation(tally: Tally, run: GapRun, citation: GapCitation) {
+	tally.runs.add(run.runId);
+	tally.engines.add(run.model);
+	for (const name of run.competitors) {
+		const named = tally.competitors.get(name) ?? new Set<string>();
+		named.add(run.runId);
+		tally.competitors.set(name, named);
+	}
+	const page = tally.pages.get(citation.url) ?? { title: null, runs: new Set<string>() };
+	page.title ??= citation.title;
+	page.runs.add(run.runId);
+	tally.pages.set(citation.url, page);
+	tally.categories.set(citation.category, (tally.categories.get(citation.category) ?? 0) + 1);
+}
+
+function toGap(domain: string, tally: Tally): CitationGap {
+	const competitors = byCount([...tally.competitors].map(([name, named]) => [name, named.size] as [string, number]));
+	return {
+		domain,
+		category: byCount(tally.categories)[0][0],
+		runs: tally.runs.size,
+		engines: [...tally.engines].sort(),
+		competitors: competitors.map(([name, count]) => ({ name, runs: count })),
+		pages: byCount([...tally.pages].map(([url, page]) => [url, page.runs.size] as [string, number]))
+			.slice(0, PAGES_SHOWN)
+			.map(([url, count]) => ({ url, title: tally.pages.get(url)?.title ?? null, runs: count })),
+		score: tally.runs.size * tally.engines.size * competitors.length,
+	};
+}
+
 /**
  * The sources cited in answers that name a tracked competitor but never in one that names the
  * subject, ranked by answers × engines × competitors. The subject's and competitors' own sites aren't
@@ -62,46 +101,13 @@ export function rankCitationGaps(runs: readonly GapRun[], citations: readonly Ga
 	for (const citation of citations) {
 		const run = runById.get(citation.runId);
 		if (!run || OWNED.has(citation.category)) continue;
-		const tally: Tally = tallies.get(citation.domain) ?? {
-			subjectCited: false,
-			runs: new Set(),
-			engines: new Set(),
-			competitors: new Map(),
-			pages: new Map(),
-			categories: new Map(),
-		};
+		const tally = tallies.get(citation.domain) ?? newTally();
 		tallies.set(citation.domain, tally);
 		if (run.subjectCounted) tally.subjectCited = true;
-		if (run.competitors.length === 0) continue;
-		tally.runs.add(run.runId);
-		tally.engines.add(run.model);
-		for (const name of run.competitors) {
-			const named = tally.competitors.get(name) ?? new Set<string>();
-			named.add(run.runId);
-			tally.competitors.set(name, named);
-		}
-		const page = tally.pages.get(citation.url) ?? { title: null, runs: new Set<string>() };
-		page.title ??= citation.title;
-		page.runs.add(run.runId);
-		tally.pages.set(citation.url, page);
-		tally.categories.set(citation.category, (tally.categories.get(citation.category) ?? 0) + 1);
+		if (run.competitors.length > 0) addCompetitorCitation(tally, run, citation);
 	}
-
-	const gaps: CitationGap[] = [];
-	for (const [domain, tally] of tallies) {
-		if (tally.subjectCited || tally.runs.size === 0) continue;
-		const competitors = byCount([...tally.competitors].map(([name, named]) => [name, named.size] as [string, number]));
-		gaps.push({
-			domain,
-			category: byCount(tally.categories)[0][0],
-			runs: tally.runs.size,
-			engines: [...tally.engines].sort(),
-			competitors: competitors.map(([name, count]) => ({ name, runs: count })),
-			pages: byCount([...tally.pages].map(([url, page]) => [url, page.runs.size] as [string, number]))
-				.slice(0, PAGES_SHOWN)
-				.map(([url, count]) => ({ url, title: tally.pages.get(url)?.title ?? null, runs: count })),
-			score: tally.runs.size * tally.engines.size * competitors.length,
-		});
-	}
-	return gaps.sort((a, b) => b.score - a.score || b.runs - a.runs || a.domain.localeCompare(b.domain));
+	return [...tallies]
+		.filter(([, tally]) => !tally.subjectCited && tally.runs.size > 0)
+		.map(([domain, tally]) => toGap(domain, tally))
+		.sort((a, b) => b.score - a.score || b.runs - a.runs || a.domain.localeCompare(b.domain));
 }
