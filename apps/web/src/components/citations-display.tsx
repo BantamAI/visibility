@@ -6,7 +6,7 @@ import {
 	type CitationPageType,
 	PAGE_TYPE_CONFIG,
 } from "@workspace/lib/citations/domain-categories";
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { CITATION_FLOW_ID } from "@/components/citations/citation-flow-card";
 import { CitationFlowSection, type CitationFlowSource } from "@/components/citations/citation-flow-section";
 import {
@@ -39,6 +39,8 @@ interface CitationsDisplayProps {
 	onCompetitorAdded?: () => void;
 	listSource?: RemoteListSource;
 	flowSource?: CitationFlowSource;
+	/** Shown after Recent Changes and Content Gaps. */
+	localGaps?: ReactNode;
 }
 
 /**
@@ -179,6 +181,7 @@ export function CitationsDisplay({
 	onCompetitorAdded,
 	listSource,
 	flowSource,
+	localGaps,
 }: CitationsDisplayProps) {
 	const { brandShare, chartSourceCategories, chartPageTypes, urlSourceTabs, urlPageTypeTabs, whatsChanged } =
 		useCitationSections(citationData);
@@ -233,6 +236,8 @@ export function CitationsDisplay({
 			/>
 
 			<ChangesAndGapsRow whatsChanged={whatsChanged} contentGaps={contentGaps} days={days} />
+
+			{localGaps}
 
 			{citationData.domainDistribution
 				? citationData.domainDistribution.length > 0 && (
