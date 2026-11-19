@@ -75,6 +75,7 @@ export async function loadMetricRuns(subjectId: string, scope: LocalMetricsScope
 		db
 			.select({
 				runId: runLocations.runId,
+				promptId: promptRuns.promptId,
 				model: promptRuns.model,
 				areaId: samplePoints.areaId,
 				tags: prompts.tags,
@@ -119,6 +120,7 @@ export async function loadMetricRuns(subjectId: string, scope: LocalMetricsScope
 		const areaTracked = trackedByArea.get(run.areaId);
 		return {
 			runId: run.runId,
+			promptId: run.promptId,
 			model: run.model,
 			areaId: run.areaId,
 			phrasing: phrasingOf(run.tags),

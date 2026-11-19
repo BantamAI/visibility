@@ -35,7 +35,7 @@ const inScope = <T extends PgSelect>(query: T, where: SQL | undefined) =>
 		.innerJoin(promptRuns, eq(promptRuns.id, localMentions.runId))
 		.where(where);
 
-async function ownedDomains(subjectId: string, trackedWebsites: (string | null)[]) {
+export async function ownedDomains(subjectId: string, trackedWebsites: (string | null)[]) {
 	const [brand] = await db
 		.select({ website: brands.website, additionalDomains: brands.additionalDomains })
 		.from(brands)
