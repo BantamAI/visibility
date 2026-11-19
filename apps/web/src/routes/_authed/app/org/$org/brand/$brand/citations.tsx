@@ -4,6 +4,7 @@ import { extractDomain } from "@workspace/lib/citations/domain-categories";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card";
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useMemo } from "react";
+import { LocalCitationGapsCard } from "@/components/citations/local-citation-gaps-card";
 import { CitationsDisplay } from "@/components/citations-display";
 import { ALL_MODELS_VALUE } from "@/components/filter-bar";
 import { FilteredListShell } from "@/components/filtered-list-shell";
@@ -130,6 +131,7 @@ function CitationsPage() {
 						days={citationData.days}
 						listSource={{ brandId, filters: citationFilters }}
 						flowSource={flowSource}
+						localGaps={<LocalCitationGapsCard brandId={brandId} filters={citationFilters} />}
 						onCompetitorAdded={() => {
 							queryClient.invalidateQueries({ queryKey: citationKeys.all });
 							queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
